@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — Обновление README (03.06.2026, v1.4.11)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .changelog-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .metadata {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .meta-item:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-2px); }
+
+        .content { padding: 50px; }
+
+        .section {
+            margin-bottom: 50px;
+            border-left: 5px solid #2196F3;
+            padding-left: 25px;
+            background: linear-gradient(to right, rgba(33, 150, 243, 0.05), transparent);
+            border-radius: 0 10px 10px 0;
+            padding: 25px;
+        }
+
+        .section h2 {
+            color: #1565C0;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E3F2FD;
+        }
+
+        .section h2 i {
+            font-size: 1.8rem;
+            background: #2196F3;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .change-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #E3F2FD;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .change-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #2196F3;
+        }
+
+        .change-card h3 {
+            color: #0D47A1;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #E0F7FA, #B2EBF2);
+            color: #006064;
+        }
+
+        .change-list { list-style: none; }
+
+        .change-list li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            border-bottom: 1px solid #E3F2FD;
+        }
+
+        .change-list li:last-child { border-bottom: none; }
+
+        .change-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #2196F3;
+            font-weight: 800;
+        }
+
+        .test-results {
+            background: #F5F9FF;
+            border: 3px solid #E3F2FD;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+
+        .test-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #E3F2FD;
+        }
+
+        .test-item.passed::before { content: "✅"; font-size: 1.2rem; }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+        }
+
+        .footer p { margin-bottom: 15px; font-size: 1.1rem; }
+
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .content { padding: 25px; }
+            .header { padding: 30px 20px; }
+            .header h1 { font-size: 2.2rem; }
+            .section h2 { font-size: 1.6rem; }
+            .section h2 i { width: 40px; height: 40px; font-size: 1.4rem; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Документация: переработка README (описание, стек, установка/запуск, .env, бейдж CI)</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 03.06.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.11</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> Этап: Документация</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-book-open"></i> Обзор</h2>
+                    <p>Файл <code>README.md</code> полностью переработан и приведён в актуальное состояние. Это изменение касается только документации — код приложения не затронут, все 156 тестов остаются зелёными.</p>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-pen-fancy"></i> Что изменилось в README</h2>
+                    <div class="change-card">
+                        <span class="status">DOCS</span>
+                        <ul class="change-list">
+                            <li>Исправлен сломанный markdown — корректно закрытые блоки кода</li>
+                            <li>Добавлены бейджи: Tests (CI), Python 3.13, License MIT</li>
+                            <li>Актуализирован стек: Python 3.9 → 3.13, pydantic-settings, pytest-qt</li>
+                            <li>Исправлено дерево архитектуры: убрана несуществующая ports/, реальная структура shared/ (+ logging_config.py) и application/</li>
+                            <li>Точные инструкции запуска: RunDesktopApp.pyw / DebugDesktopApp.bat / RunBot.bat</li>
+                            <li>Быстрый старт с созданием .venv и реальным URL клонирования</li>
+                            <li>Новый раздел «Конфигурация (.env)» — таблица переменных + предупреждение о секретах</li>
+                            <li>Разделы: тесты + CI, разработка (black/isort/mypy/flake8, Alembic), Docker</li>
+                            <li>Удалён устаревший дублирующийся блок в конце файла</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-check-double"></i> Гарантии качества</h2>
+                    <div class="test-results">
+                        <div class="test-row">
+                            <div class="test-item passed">Код приложения не затронут</div>
+                            <div class="test-item passed">156 тестов остаются зелёными</div>
+                            <div class="test-item passed">Бейдж CI отрисуется после push</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Обновление документации | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Понятная точка входа для новых пользователей</p>
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">README</div>
+                    <div class="tech-item">CI badge</div>
+                    <div class="tech-item">Quick start</div>
+                    <div class="tech-item">.env guide</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.11 |
+                    <i class="fas fa-check-circle"></i> Статус: Готово |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 03.06.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

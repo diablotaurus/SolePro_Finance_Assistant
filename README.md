@@ -1,228 +1,245 @@
 # SolePro Finance Assistant 🚀
 
-Современная система учета финансов для индивидуальных предпринимателей, построенная на принципах Clean Architecture.
+[![Tests](https://github.com/diablotaurus/SolePro_Finance_Assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/diablotaurus/SolePro_Finance_Assistant/actions/workflows/tests.yml)
+[![Python](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## 🌟 Особенности
+Система учёта доходов и расходов от предпринимательской деятельности для индивидуальных предпринимателей (ИП). Включает **десктопное приложение** (PyQt6) и **Telegram-бота**, построена на принципах **Clean Architecture**, **OOP**, **DRY** и **SOLID**.
 
-- **Clean Architecture** - четкое разделение ответственности между слоями
-- **Dependency Injection** - управление зависимостями через контейнер
-- **SQLAlchemy + PostgreSQL** - промышленная база данных с миграциями
-- **PyQt6 Desktop App** - полнофункциональное десктопное приложение
-- **Telegram Bot** - удобный бот для быстрого учета
-- **Docker Support** - готовность к контейнеризации
-- **Полностью типизированный** - type hints везде
-- **Тестируемый код** - модульные и интеграционные тесты
+---
+
+## ✨ Возможности
+
+- 🧾 Учёт транзакций: доход, расход, налог, прибыль, контрагент, примечание
+- 👥 Справочник контрагентов с агрегатами по доходу
+- 📊 Статистика: помесячная разбивка, сравнение периодов, топ контрагентов
+- 🔎 Фильтрация и поиск (по датам, типу, налогу, сумме, тексту)
+- 📤 Экспорт транзакций в Excel
+- 🖥️ Десктопное приложение на PyQt6
+- 🤖 Telegram-бот для быстрого учёта
+- 🗄️ SQLite (по умолчанию) и PostgreSQL, миграции через Alembic
+- 🧪 156 автотестов, CI на GitHub Actions
+
+---
+
+## 🛠️ Технологический стек
+
+| Технология | Назначение |
+|---|---|
+| **Python 3.13** | Основной язык |
+| **SQLAlchemy 2.0** | ORM |
+| **Alembic** | Миграции БД |
+| **SQLite / PostgreSQL** | Базы данных (dev / prod) |
+| **Pydantic 2 / pydantic-settings** | Валидация DTO |
+| **PyQt6** | Десктопное приложение |
+| **python-telegram-bot** | Telegram-бот |
+| **dependency-injector** | Внедрение зависимостей (DI) |
+| **pandas / openpyxl** | Экспорт в Excel |
+| **pytest / pytest-qt** | Тестирование |
+
+---
 
 ## 🏗️ Архитектура
 
-SolePro_Finance_Assistant/
-├── src/solepro/
-│ ├── core/ # ЯДРО (не зависит ни от чего)
-│ │ ├── domain/ # Сущности и бизнес-правила
-│ │ ├── application/ # Use Cases и DTO
-│ │ └── ports/ # Интерфейсы (абстракции)
-│ │
-│ ├── infrastructure/ # ИНФРАСТРУКТУРА
-│ │ ├── database/ # SQLAlchemy модели и репозитории
-│ │ ├── config/ # Конфигурация приложения
-│ │ └── di/ # Dependency Injection
-│ │
-│ ├── presentation/ # ПРЕДСТАВЛЕНИЕ
-│ │ ├── desktop/ # PyQt6 приложение
-│ │ └── telegram/ # Telegram бот
-│ │
-│ └── shared/ # ОБЩИЕ УТИЛИТЫ
-│ ├── utils/ # Утилиты
-│ ├── validators/ # Валидаторы данных
-│ ├── formatters/ # Форматтеры
-│ └── exceptions/ # Исключения
-│
-├── alembic/ # МИГРАЦИИ БАЗЫ ДАННЫХ
-├── docker/ # КОНТЕЙНЕРИЗАЦИЯ
-├── docs/ # ДОКУМЕНТАЦИЯ
-├── scripts/ # СКРИПТЫ
-└── tests/ # ТЕСТЫ
+Проект следует **Clean Architecture**: зависимости направлены внутрь, доменный слой не зависит ни от чего внешнего.
 
+```
+src/solepro/
+├── core/                       # ЯДРО (бизнес-логика)
+│   ├── domain/                 # Сущности, value objects, перечисления,
+│   │                           #   исключения, интерфейсы репозиториев
+│   └── application/            # Use Cases, DTO, mappers,
+│                               #   specifications, unit_of_work
+│
+├── infrastructure/             # ИНФРАСТРУКТУРА
+│   ├── config/                 # Конфигурация из переменных окружения
+│   ├── database/               # SQLAlchemy: модели, репозитории,
+│   │                           #   session_manager, unit_of_work, миграции
+│   └── di/                     # Контейнер зависимостей
+│
+├── presentation/               # ПРЕДСТАВЛЕНИЕ
+│   ├── desktop/                # PyQt6 приложение
+│   └── telegram/               # Telegram-бот
+│
+└── shared/                     # ОБЩИЕ УТИЛИТЫ
+    ├── exceptions.py           # Исключения
+    ├── formatters.py           # Форматтеры
+    ├── utils.py                # Утилиты
+    ├── validators.py           # Валидаторы
+    └── logging_config.py       # Единая настройка логирования
+
+alembic/        # Миграции базы данных
+docker/         # Контейнеризация
+docs/           # Документация и changelog
+scripts/        # Скрипты (init_db, migrate_data, run_desktop)
+src/tests/      # Тесты
+```
+
+---
 
 ## 🚀 Быстрый старт
 
-### 1. Установка зависимостей
+> Требуется **Python 3.13**.
+
+### 1. Клонировать репозиторий
 
 ```bash
-# Клонировать репозиторий
-git clone <repository-url>
+git clone https://github.com/diablotaurus/SolePro_Finance_Assistant.git
 cd SolePro_Finance_Assistant
+```
 
-# Установить зависимости
+### 2. Создать виртуальное окружение
+
+```bash
+python -m venv .venv
+# Windows
+.\.venv\Scripts\activate
+# Linux / macOS
+source .venv/bin/activate
+```
+
+### 3. Установить зависимости
+
+```bash
 pip install -r requirements.txt
-pip install -r requirements-dev.txt  # Для разработки
+pip install -r requirements-dev.txt   # для разработки и тестов
+```
 
-2. Настройка окружения
+> На Windows можно просто запустить `setup.bat`.
 
-# Скопировать шаблон .env файла
+### 4. Настроить окружение
+
+```bash
+# Windows
+copy .env.example .env
+# Linux / macOS
 cp .env.example .env
+```
 
-# Отредактировать .env файл (указать токен бота, настройки БД и т.д.)
+Откройте `.env` и заполните значения (минимум — `TELEGRAM_BOT_TOKEN`, если нужен бот). См. раздел **«Конфигурация (.env)»** ниже.
 
-3. Инициализация базы данных
+### 5. Инициализировать базу данных
 
-# Создать таблицы в базе данных
+```bash
 python scripts/init_db.py
-
-# Или через Alembic миграции
+# или через миграции Alembic
 alembic upgrade head
+```
 
-4. Запуск приложений
+### 6. Запуск
 
-# Десктопное приложение
+См. раздел **«Запуск»** ниже.
+
+---
+
+## ⚙️ Конфигурация (.env)
+
+Конфигурация читается из файла `.env` (шаблон — `.env.example`). Ключевые переменные:
+
+| Переменная | Описание | Пример |
+|---|---|---|
+| `APP_ENV` | Окружение | `development` |
+| `APP_SECRET_KEY` | Секретный ключ приложения | `change-me` |
+| `DATABASE_URL` | Строка подключения к БД | `sqlite:///./data/finances.db` |
+| `TELEGRAM_BOT_TOKEN` | Токен Telegram-бота (от @BotFather) | `123456:ABC...` |
+| `TELEGRAM_ALLOWED_USERS` | Разрешённые user ID (через запятую) | `123456789,987654321` |
+| `TELEGRAM_ADMIN_CHAT_ID` | ID администратора | `123456789` |
+| `LOG_LEVEL` | Уровень логирования | `INFO` |
+| `LOG_FILE` | Файл лога (desktop) | `logs/app.log` |
+| `CURRENCY` | Валюта | `RUB` |
+
+Для PostgreSQL укажите, например:
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/solepro_finance
+```
+
+> ⚠️ **Безопасность:** файл `.env` содержит секреты (токен бота, ключи) и **не должен попадать в git** — он уже добавлен в `.gitignore`. Публикуйте только `.env.example` без реальных значений.
+
+---
+
+## 🖥️ Запуск
+
+### Десктопное приложение
+
+```bash
 python -m solepro.presentation.desktop.application
+```
+На Windows удобнее:
+- **`RunDesktopApp.pyw`** — двойной клик, запуск без консоли;
+- **`DebugDesktopApp.bat`** — запуск с консолью (для отладки).
 
-# Telegram бот
+### Telegram-бот
+
+```bash
 python -m solepro.presentation.telegram.bot
+```
+На Windows — двойной клик по **`RunBot.bat`**.
 
-# Или через скрипты
-python RunDesktopApp.pyw
-python RunBot.bat
+---
 
-🐳 Docker
+## 🧪 Тесты
 
-# Запустить PostgreSQL и PgAdmin
-docker-compose up -d postgres pgadmin
-
-# Собрать и запустить приложение
-docker-compose up --build app
-
-🧪 Тестирование
-
-# Запустить все тесты
+```bash
+# Все тесты
 pytest
 
-# Запустить тесты с покрытием
+# С покрытием
 pytest --cov=src/solepro --cov-report=html
 
-# Запустить определенные тесты
+# Конкретный файл
 pytest src/tests/test_domain.py -v
+```
 
-🔧 Разработка
-Code Style
+Тесты автоматически запускаются в **GitHub Actions** на каждый `push` в `main` и на каждый pull request (см. бейдж **Tests** вверху).
 
-# Форматирование кода
-black src/
-isort src/
+---
 
-# Проверка типов
-mypy src/
+## 🧑‍💻 Разработка
 
-# Проверка стиля
-flake8 src/
+### Качество кода
 
-Миграции базы данных
+```bash
+black src/        # форматирование
+isort src/        # сортировка импортов
+mypy src/         # проверка типов
+flake8 src/       # стиль
+```
 
+### Миграции базы данных
+
+```bash
 # Создать новую миграцию
 alembic revision --autogenerate -m "Описание изменений"
 
 # Применить миграции
 alembic upgrade head
 
-# Откатить миграцию
+# Откатить последнюю
 alembic downgrade -1
-
-📚 Документация
-Архитектура - описание архитектуры проекта
-
-API - документация API (если будет REST API)
-
-Развертывание - руководство по развертыванию
-
-🛠️ Технологический стек
-Python 3.9+ - основной язык
-
-SQLAlchemy 2.0 - ORM для работы с БД
-
-Alembic - миграции базы данных
-
-PostgreSQL - основная база данных (SQLite для разработки)
-
-PyQt6 - десктопное приложение
-
-python-telegram-bot - Telegram бот
-
-Pydantic - валидация данных
-
-Dependency Injector - dependency injection
-
-Docker - контейнеризация
-
-Pytest - тестирование
-
-🤝 Вклад в проект
-Форкните репозиторий
-
-Создайте ветку для вашей функции (git checkout -b feature/amazing-feature)
-
-Зафиксируйте изменения (git commit -m 'Add amazing feature')
-
-Запушьте ветку (git push origin feature/amazing-feature)
-
-Откройте Pull Request
-
-📄 Лицензия
-Этот проект распространяется под лицензией MIT. Подробнее см. в файле LICENSE.
-
-👨‍💻 Автор
-Diablotaurus - GitHub
-
-🙏 Благодарности
-Сообществу Python за потрясающие инструменты
-
-Разработчикам PyQt6 за отличный фреймворк
-
-Всем контрибьюторам проекта
-
-⭐ Если этот проект был полезен, поставьте звезду на GitHub!
-
-
-
+```
 
 ---
 
-Этот пакет завершает **полную новую архитектуру проекта**. Теперь у вас есть:
+## 🐳 Docker
 
-## ✅ ЧТО БЫЛО СОЗДАНО:
+```bash
+# Запустить PostgreSQL (и сопутствующие сервисы)
+docker-compose up -d postgres
 
-1. **Core слой** - доменные сущности, value objects, use cases
-2. **Infrastructure слой** - SQLAlchemy модели, репозитории, DI контейнер
-3. **Presentation слой** - Desktop приложение (PyQt6) и Telegram бот
-4. **Shared утилиты** - валидаторы, форматтеры, исключения
-5. **Тесты** - unit и integration тесты
-6. **Миграции** - Alembic миграции для базы данных
-7. **Скрипты** - инициализация БД и миграция данных
-8. **Docker** - полная конфигурация для контейнеризации
-9. **Документация** - README и структура документации
+# Собрать и запустить приложение
+docker-compose up --build app
+```
 
-## 🚀 КАК ЗАПУСТИТЬ НОВУЮ АРХИТЕКТУРУ:
+---
 
-1. **Настройте окружение:**
-   ```bash
-   cp .env.example .env
-   # Отредактируйте .env файл
-   
-2. Установите зависимости:
+## 📄 Лицензия
 
-bash
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+Проект распространяется под лицензией **MIT** — подробнее в файле [LICENSE](LICENSE).
 
-3. Инициализируйте БД:
+## 👤 Автор
 
-bash
-python scripts/init_db.py
+**Diablotaurus** — [GitHub](https://github.com/diablotaurus)
 
-4. Запустите приложения:
+---
 
-bash
-# Desktop приложение
-python -m solepro.presentation.desktop.application
-
-# Или Telegram бот
-python -m solepro.presentation.telegram.bot
+⭐ Если проект оказался полезен — поставьте звезду на GitHub!
