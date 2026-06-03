@@ -101,6 +101,9 @@ class TelegramBot:
             get_transaction_statistics_use_case=container.get_transaction_statistics_use_case,
             list_counterparties_use_case=container.list_counterparties_use_case,
             add_transaction_use_case=container.add_transaction_use_case,
+            list_transactions_use_case=container.list_transactions_use_case,
+            search_transactions_use_case=container.search_transactions_use_case,
+            get_counterparty_statistics_use_case=container.get_counterparty_statistics_use_case,
         )
         setup_handlers(self.application, dependencies=dependencies)
         

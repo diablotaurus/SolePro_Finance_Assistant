@@ -33,6 +33,9 @@ class HandlerDependencies:
     get_transaction_statistics_use_case: Callable[[], Any]
     list_counterparties_use_case: Callable[[], Any]
     add_transaction_use_case: Callable[[], Any]
+    list_transactions_use_case: Optional[Callable[[], Any]] = None
+    search_transactions_use_case: Optional[Callable[[], Any]] = None
+    get_counterparty_statistics_use_case: Optional[Callable[[], Any]] = None
 
 
 def _default_dependencies() -> HandlerDependencies:
@@ -42,6 +45,9 @@ def _default_dependencies() -> HandlerDependencies:
         get_transaction_statistics_use_case=container.get_transaction_statistics_use_case,
         list_counterparties_use_case=container.list_counterparties_use_case,
         add_transaction_use_case=container.add_transaction_use_case,
+        list_transactions_use_case=container.list_transactions_use_case,
+        search_transactions_use_case=container.search_transactions_use_case,
+        get_counterparty_statistics_use_case=container.get_counterparty_statistics_use_case,
     )
 
 
@@ -82,7 +88,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             "━━━━━━━━━━━━━━━━\n"
             "/add - добавить операцию\n"
             "/stats - показать статистику\n"
-            "/counterparties - список контрагентов"
+            "/counterparties - список контрагентов\n"
+            "/transactions - последние транзакции\n"
+            "/search <текст> - поиск транзакций\n"
+            "/topcounterparties - топ контрагентов"
             ,
             reply_markup=MAIN_MENU
         )
@@ -308,6 +317,105 @@ async def add_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
+def _format_transaction_line(transaction: Any) -> str:
+    date_str = transaction.date.strftime(get_app_config().date_format)
+    counterparty = transaction.counterparty_name or "—"
+    line = (
+        f"🗓 {date_str} | "
+        f"Дох: {transaction.income} Расх: {transaction.expense} Налог: {transaction.tax} | "
+        f"Приб: {transaction.profit} | {counterparty}"
+    )
+    note = (transaction.note or "").strip()
+    if note:
+        line += f" | {note}"
+    return line
+
+
+async def transactions_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.message:
+        return
+    try:
+        use_case = _get_dependencies().list_transactions_use_case()
+        result = use_case.execute(skip=0, limit=10, order_by="date_desc")
+        if not result.transactions:
+            await update.message.reply_text("Транзакции не найдены.", reply_markup=MAIN_MENU)
+            return
+        lines = [_format_transaction_line(tx) for tx in result.transactions]
+        header = f"📋 Последние транзакции ({len(result.transactions)} из {result.total_count}):"
+        await update.message.reply_text(
+            header + "\n" + "\n".join(lines),
+            reply_markup=MAIN_MENU
+        )
+    except Exception as exc:
+        await update.message.reply_text(
+            f"❌ Ошибка получения транзакций: {exc}",
+            reply_markup=MAIN_MENU
+        )
+
+
+async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.message:
+        return
+    args = getattr(context, "args", None) or []
+    query = " ".join(args).strip()
+    if not query:
+        await update.message.reply_text(
+            "Использование: /search <текст>\nНапример: /search аренда",
+            reply_markup=MAIN_MENU
+        )
+        return
+    try:
+        use_case = _get_dependencies().search_transactions_use_case()
+        result = use_case.execute(query=query, limit=10)
+        if not result.transactions:
+            await update.message.reply_text(
+                f"По запросу «{query}» ничего не найдено.",
+                reply_markup=MAIN_MENU
+            )
+            return
+        lines = [_format_transaction_line(tx) for tx in result.transactions]
+        header = f"🔎 Результаты поиска «{query}» ({len(result.transactions)} из {result.total_count}):"
+        await update.message.reply_text(
+            header + "\n" + "\n".join(lines),
+            reply_markup=MAIN_MENU
+        )
+    except Exception as exc:
+        await update.message.reply_text(
+            f"❌ Ошибка поиска: {exc}",
+            reply_markup=MAIN_MENU
+        )
+
+
+async def topcounterparties_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.message:
+        return
+    try:
+        use_case = _get_dependencies().get_counterparty_statistics_use_case()
+        stats = use_case.execute()
+        if not stats:
+            await update.message.reply_text(
+                "Статистика по контрагентам недоступна.",
+                reply_markup=MAIN_MENU
+            )
+            return
+        lines = []
+        for index, item in enumerate(stats[:10], start=1):
+            lines.append(
+                f"{index}. {item.counterparty_name} — "
+                f"доход {item.total_income}, прибыль {item.total_profit}, "
+                f"операций {item.transaction_count} ({item.percentage_of_total:.1f}%)"
+            )
+        await update.message.reply_text(
+            "🏆 Топ контрагентов:\n" + "\n".join(lines),
+            reply_markup=MAIN_MENU
+        )
+    except Exception as exc:
+        await update.message.reply_text(
+            f"❌ Ошибка получения статистики по контрагентам: {exc}",
+            reply_markup=MAIN_MENU
+        )
+
+
 async def unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message:
         await update.message.reply_text("Unknown command. Use /help.")
@@ -341,6 +449,9 @@ def setup_handlers(
     application.add_handler(CommandHandler("stats", stats_command))
     application.add_handler(CommandHandler("stat", stats_command))
     application.add_handler(CommandHandler("counterparties", counterparties_command))
+    application.add_handler(CommandHandler("transactions", transactions_command))
+    application.add_handler(CommandHandler("search", search_command))
+    application.add_handler(CommandHandler("topcounterparties", topcounterparties_command))
     application.add_handler(MessageHandler(filters.Regex("^Статистика$"), stats_command))
     application.add_handler(add_conv)
     application.add_handler(MessageHandler(filters.COMMAND, unknown_command))
