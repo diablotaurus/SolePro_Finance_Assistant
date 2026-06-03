@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — GitHub Actions CI (03.06.2026, v1.4.10)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .changelog-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .metadata {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .meta-item:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-2px); }
+
+        .content { padding: 50px; }
+
+        .section {
+            margin-bottom: 50px;
+            border-left: 5px solid #2196F3;
+            padding-left: 25px;
+            background: linear-gradient(to right, rgba(33, 150, 243, 0.05), transparent);
+            border-radius: 0 10px 10px 0;
+            padding: 25px;
+        }
+
+        .section h2 {
+            color: #1565C0;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E3F2FD;
+        }
+
+        .section h2 i {
+            font-size: 1.8rem;
+            background: #2196F3;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .changes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .change-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #E3F2FD;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .change-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #2196F3;
+        }
+
+        .change-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.2);
+            border-color: #2196F3;
+        }
+
+        .change-card h3 {
+            color: #0D47A1;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .change-card .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .status.ci { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .status.deps { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: #E65100; }
+        .status.docs { background: linear-gradient(135deg, #E0F7FA, #B2EBF2); color: #006064; }
+
+        .file-list {
+            background: #F5F9FF;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #E3F2FD;
+        }
+
+        .file-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #E3F2FD;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            color: #2D3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover { background: #E3F2FD; padding-left: 20px; }
+        .file-item:last-child { border-bottom: none; }
+        .file-item.new::before { content: "🚀"; font-size: 1.1rem; }
+        .file-item.modified::before { content: "⚡"; font-size: 1.1rem; }
+
+        .code-snippet {
+            background: #1E1E1E;
+            color: #D4D4D4;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            border-left: 5px solid #2196F3;
+            white-space: pre;
+        }
+
+        .code-snippet .keyword { color: #569CD6; }
+        .code-snippet .string { color: #CE9178; }
+        .code-snippet .comment { color: #6A9955; }
+
+        .test-results {
+            background: #F5F9FF;
+            border: 3px solid #E3F2FD;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+
+        .test-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #E3F2FD;
+        }
+
+        .test-item.passed::before { content: "✅"; font-size: 1.2rem; }
+
+        .warning-box {
+            background: linear-gradient(135deg, #FFF3E0, #FFECB3);
+            border: 2px solid #FFB300;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .warning-box::before {
+            content: "ℹ️";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        .warning-box h3 {
+            color: #E65100;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer p { margin-bottom: 15px; font-size: 1.1rem; position: relative; z-index: 1; }
+
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .content { padding: 25px; }
+            .header { padding: 30px 20px; }
+            .header h1 { font-size: 2.2rem; }
+            .changes-grid { grid-template-columns: 1fr; }
+            .section h2 { font-size: 1.6rem; }
+            .section h2 i { width: 40px; height: 40px; font-size: 1.4rem; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Непрерывная интеграция: автозапуск тестов на GitHub Actions</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 03.06.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.10</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> Этап: Инфраструктура</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-infinity"></i> Обзор релиза</h2>
+                    <p>После публикации проекта на GitHub добавлена непрерывная интеграция (CI): на каждый <code>push</code> в <code>main</code> и на каждый pull request автоматически запускаются все 156 тестов. Это защищает зелёный набор тестов от случайных регрессий. Попутно синхронизированы зависимости и зафиксировано правило разделения коммита и публикации.</p>
+                    <div class="test-results">
+                        <div class="test-row">
+                            <div class="test-item passed">156 тестов проходят локально</div>
+                            <div class="test-item passed">CI запускает их автоматически</div>
+                            <div class="test-item passed">Python 3.13, headless Qt (offscreen)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-robot"></i> GitHub Actions workflow</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3><i class="fas fa-vial"></i> Автозапуск тестов</h3>
+                            <span class="status ci">CI</span>
+                            <p>Workflow на Ubuntu + Python 3.13: установка системных библиотек Qt для headless-режима, зависимостей и запуск <code>pytest</code> с <code>QT_QPA_PLATFORM=offscreen</code> (UI-тесты создают реальные Qt-виджеты).</p>
+                            <div class="code-snippet"><span class="keyword">on</span>:
+  <span class="keyword">push</span>:
+    branches: [ main ]
+  <span class="keyword">pull_request</span>:
+
+<span class="comment"># Python 3.13 + offscreen Qt + pytest</span></div>
+                            <div class="file-list">
+                                <div class="file-item new">.github/workflows/tests.yml</div>
+                            </div>
+                        </div>
+
+                        <div class="change-card">
+                            <h3><i class="fas fa-sync-alt"></i> Синхронизация зависимостей</h3>
+                            <span class="status deps">DEPS</span>
+                            <p>Файл <code>requirements.txt</code> приведён в соответствие с <code>pyproject.toml</code>: убран неиспользуемый <code>loguru</code>, добавлен <code>pydantic-settings</code> (используется dependency-injector в связке с pydantic v2).</p>
+                            <div class="file-list">
+                                <div class="file-item modified">requirements.txt — −loguru, +pydantic-settings</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h3><i class="fas fa-flask"></i> Проверка после публикации</h3>
+                        <p>GitHub Actions нельзя запустить локально — статус прогона CI будет виден только после push в репозиторий. Если headless-Qt в CI потребует дополнительных системных библиотек, конфигурация будет уточнена по результатам первого запуска.</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-book"></i> Правила проекта</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3><i class="fas fa-code-commit"></i> Правило 9: коммит ≠ push</h3>
+                            <span class="status docs">DOCS</span>
+                            <p>В <code>AGENTS.md</code> зафиксировано: по умолчанию выполняется только локальный <code>git commit</code>; <code>git push</code> на GitHub — лишь по явной отдельной просьбе. Ветка <code>master</code> (старая история с <code>.env</code>) никогда не публикуется.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">AGENTS.md — правило 9</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-check-double"></i> Гарантии качества</h2>
+                    <div class="test-results">
+                        <div class="test-row">
+                            <div class="test-item passed">Полный прогон локально: 156 passed</div>
+                            <div class="test-item passed">Кода приложения изменения не касались</div>
+                            <div class="test-item passed">Зависимости синхронизированы</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Непрерывная интеграция | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Каждый push проверяется автоматически</p>
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">GitHub Actions</div>
+                    <div class="tech-item">Python 3.13</div>
+                    <div class="tech-item">pytest</div>
+                    <div class="tech-item">Qt offscreen</div>
+                    <div class="tech-item">156 tests</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.10 |
+                    <i class="fas fa-check-circle"></i> Статус: Готово (CI проверяется после push) |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 03.06.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
