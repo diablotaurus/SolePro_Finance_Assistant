@@ -1,0 +1,185 @@
+"""
+Основной класс Telegram бота.
+"""
+import logging
+from typing import Optional
+
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    CallbackQueryHandler,
+    ConversationHandler,
+)
+
+from ...infrastructure.di import container
+from ...infrastructure.config import get_telegram_config
+from ...shared.logging_config import setup_logging as configure_logging
+from .handlers import setup_handlers, HandlerDependencies
+from .middlewares import AccessMiddleware
+
+
+class TelegramBot:
+    """
+    Telegram бот для учета финансов.
+    
+    Отвечает за:
+    - Инициализацию бота
+    - Настройку обработчиков
+    - Управление жизненным циклом бота
+    """
+    
+    def __init__(self):
+        """Инициализировать бота."""
+        self.config = get_telegram_config()
+        self.application: Optional[Application] = None
+        self.logger = logging.getLogger(__name__)
+        
+        # Проверяем конфигурацию
+        if not self.config.bot_token:
+            raise ValueError("Токен бота не указан в конфигурации")
+        
+        self.setup_logging()
+    
+    def setup_logging(self) -> None:
+        """Настроить логирование."""
+        configure_logging(level=self.config.log_level)
+    
+    async def post_init(self, application: Application) -> None:
+        """
+        Функция, вызываемая после инициализации бота.
+        
+        Args:
+            application: Приложение бота
+        """
+        self.logger.info("✅ Бот запущен и готов к работе!")
+        
+        # Выводим информацию о настройках
+        self.logger.info("=" * 50)
+        self.logger.info("SolePro Finance Assistant (Telegram Bot) запущен!")
+        self.logger.info("👤 Разрешенные пользователи: %s", self.config.allowed_users)
+
+        if self.config.admin_chat_id:
+            self.logger.info("👑 Администратор: %s", self.config.admin_chat_id)
+
+        self.logger.info("=" * 50)
+        
+        # Отправляем сообщение администратору
+        keyboard = ReplyKeyboardMarkup([["Добавить", "Статистика"]], resize_keyboard=True)
+        recipients = []
+        if self.config.admin_chat_id:
+            recipients.append(self.config.admin_chat_id)
+        recipients.extend(self.config.allowed_users or [])
+
+        for chat_id in set(recipients):
+            try:
+                await application.bot.send_message(
+                    chat_id=chat_id,
+                    text="✅ Бот запущен и готов к работе!",
+                    reply_markup=keyboard
+                )
+            except Exception as e:
+                self.logger.error(f"Не удалось отправить сообщение пользователю {chat_id}: {e}")
+    
+    def setup_application(self) -> None:
+        """Настроить приложение бота."""
+        # Создаем приложение
+        self.application = (
+            Application.builder()
+            .token(self.config.bot_token)
+            .post_init(self.post_init)
+            .build()
+        )
+        
+        # Добавляем middleware для проверки доступа
+        self.application.add_handler(AccessMiddleware(allowed_users=self.config.allowed_users))
+        
+        # Настраиваем обработчики
+        dependencies = HandlerDependencies(
+            get_transaction_statistics_use_case=container.get_transaction_statistics_use_case,
+            list_counterparties_use_case=container.list_counterparties_use_case,
+            add_transaction_use_case=container.add_transaction_use_case,
+        )
+        setup_handlers(self.application, dependencies=dependencies)
+        
+        # Обработчик ошибок
+        self.application.add_error_handler(self.error_handler)
+    
+    async def error_handler(self, update: Update, context) -> None:
+        """
+        Обработчик ошибок бота.
+        
+        Args:
+            update: Обновление
+            context: Контекст
+        """
+        self.logger.error(f"Ошибка при обработке обновления: {context.error}")
+        
+        # Отправляем сообщение об ошибке пользователю
+        if update and update.effective_chat:
+            try:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text="❌ Произошла ошибка при обработке вашего запроса. "
+                         "Попробуйте позже или обратитесь к администратору."
+                )
+            except Exception as e:
+                self.logger.error(f"Не удалось отправить сообщение об ошибке: {e}")
+        
+        # Отправляем сообщение администратору
+        if self.config.admin_chat_id:
+            try:
+                error_message = (
+                    f"🚨 Ошибка в боте:\n\n"
+                    f"Ошибка: {context.error}\n"
+                )
+                
+                if update and update.effective_user:
+                    error_message += f"Пользователь: {update.effective_user.username} ({update.effective_user.id})\n"
+                
+                if update and update.effective_message:
+                    error_message += f"Сообщение: {update.effective_message.text}\n"
+                
+                await context.bot.send_message(
+                    chat_id=self.config.admin_chat_id,
+                    text=error_message[:4000]  # Ограничение Telegram
+                )
+            except Exception as e:
+                self.logger.error(f"Не удалось отправить сообщение администратору об ошибке: {e}")
+    
+    def run(self) -> None:
+        """Запустить бота."""
+        try:
+            self.logger.info("Запуск бота...")
+            
+            # Настраиваем приложение
+            self.setup_application()
+            
+            # Запускаем бота
+            self.application.run_polling(
+                allowed_updates=['message', 'callback_query', 'inline_query'],
+                drop_pending_updates=True,
+                timeout=30,
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Ошибка запуска бота: {e}")
+            raise
+    
+    def stop(self) -> None:
+        """Остановить бота."""
+        if self.application:
+            self.application.stop()
+            self.logger.info("Бот остановлен")
+
+
+def main() -> None:
+    """Точка входа для Telegram бота."""
+    bot = TelegramBot()
+    bot.run()
+
+
+if __name__ == '__main__':
+    main()

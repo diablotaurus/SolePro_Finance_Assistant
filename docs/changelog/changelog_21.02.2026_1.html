@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Компоновка окна Настройки (21.02.2026)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2b2b2b;
+            background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+            color: #fff;
+            padding: 42px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.6rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            font-size: 1.15rem;
+            opacity: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .content {
+            padding: 36px;
+        }
+
+        .section {
+            margin-bottom: 26px;
+            border-left: 5px solid #1976D2;
+            background: #F7FBFF;
+            padding: 22px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .section h2 {
+            color: #0D47A1;
+            font-size: 1.5rem;
+            margin-bottom: 14px;
+        }
+
+        .section h3 {
+            color: #1565C0;
+            font-size: 1.15rem;
+            margin: 16px 0 8px;
+        }
+
+        .section p {
+            margin-bottom: 10px;
+        }
+
+        ul {
+            padding-left: 22px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .tile {
+            background: #fff;
+            border: 1px solid #D9EBFF;
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .file-list {
+            background: #fff;
+            border: 1px solid #D9EBFF;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 10px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.92rem;
+        }
+
+        .code {
+            background: #1E1E1E;
+            color: #D4D4D4;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 10px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            background: #0D47A1;
+            color: #fff;
+            text-align: center;
+            padding: 24px;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h1>SolePro Finance Assistant</h1>
+            <div class="subtitle">Подробный отчет: переработка компоновки окна "Настройки" и устранение переполнения вкладки</div>
+            <div class="meta">
+                <div class="meta-item">Дата: 21.02.2026</div>
+                <div class="meta-item">Версия: 1.4.1</div>
+                <div class="meta-item">Область: Desktop UI / Settings</div>
+                <div class="meta-item">Автор: Diablotaurus</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>1. Цель изменений</h2>
+                <p>Изменить компоновку настроек в desktop-окне "Настройки", чтобы структура стала более логичной по экранным зонам приложения, и устранить проблему, при которой на вкладке "Главное окно" переставали помещаться кнопки <strong>Save</strong> и <strong>Cancel</strong>.</p>
+                <p>Изменения выполнены без изменения бизнес-логики и без изменения ключей в <code>settings/settings.ini</code>.</p>
+            </div>
+
+            <div class="section">
+                <h2>2. Что было сделано</h2>
+                <h3>2.1 Новая структура вкладок</h3>
+                <div class="grid">
+                    <div class="tile">
+                        <strong>Главное окно</strong>
+                        <ul>
+                            <li>Поведение приложения и геометрия главного окна</li>
+                            <li>Карточки итогов: компоновка</li>
+                            <li>Карточки итогов: цвета</li>
+                        </ul>
+                    </div>
+                    <div class="tile">
+                        <strong>Транзакции и таблицы</strong>
+                        <ul>
+                            <li>Шрифты таблиц</li>
+                            <li>Размеры и отступы таблиц</li>
+                        </ul>
+                    </div>
+                    <div class="tile">
+                        <strong>Статистика</strong>
+                        <ul>
+                            <li>Семантическая цветовая палитра</li>
+                            <li>Минимальные размеры графиков</li>
+                        </ul>
+                    </div>
+                    <div class="tile">
+                        <strong>Диалоги</strong>
+                        <ul>
+                            <li>Минимальные размеры диалоговых окон</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2.2 Исправление проблемы с переполнением</h3>
+                <p>Во вкладку "Главное окно" добавлен <code>QScrollArea</code>. Это гарантирует доступ к полям большой высоты и одновременно сохраняет фиксированную видимость кнопок <code>Save/Cancel</code> в нижней части диалога.</p>
+
+                <div class="code">general_scroll = QScrollArea()
+general_scroll.setWidgetResizable(True)
+general_scroll.setWidget(general_content)
+general_tab_layout.addWidget(general_scroll)</div>
+            </div>
+
+            <div class="section">
+                <h2>3. Затронутые файлы</h2>
+                <div class="file-list">
+                    src/solepro/presentation/desktop/views/dialogs/settings_dialog.py (modified)<br>
+                    pyproject.toml (modified: version = "1.4.1")<br>
+                    docs/changelog/changelog_21.02.2026_1.html (new)
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>4. Совместимость и стабильность</h2>
+                <ul>
+                    <li>Логика загрузки настроек (<code>_load_values</code>) не изменена.</li>
+                    <li>Логика сохранения настроек (<code>_on_save</code>) не изменена.</li>
+                    <li>Валидация HEX-цветов не изменена.</li>
+                    <li>Ключи и формат <code>settings/settings.ini</code> не изменены.</li>
+                    <li>Интеграции с <code>MainWindow</code>, <code>StatisticsDialog</code>, <code>TransactionDialog</code>, <code>CounterpartyManagerDialog</code> не затронуты.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>5. Контроль точек входа</h2>
+                <p>Проверены и сохранены корректными точки вызова, требуемые правилами проекта:</p>
+                <ul>
+                    <li><code>RunDesktopApp.pyw</code> - запуск desktop-приложения через <code>solepro.presentation.desktop.application</code>.</li>
+                    <li><code>src/solepro/presentation/desktop/application.py</code> - цикл запуска desktop-приложения без изменений.</li>
+                    <li><code>src/solepro/presentation/telegram/bot.py</code> - telegram-часть не затронута.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>6. Итог</h2>
+                <p>Компоновка окна "Настройки" приведена к более понятной структуре по областям приложения. Проблема невидимых кнопок на длинной вкладке устранена. Изменения ограничены уровнем представления (UI layout), без риска регрессий в доменной и прикладной логике.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 SolePro Finance Assistant | Версия 1.4.1 | Changelog от 21.02.2026
+        </div>
+    </div>
+</div>
+</body>
+</html>

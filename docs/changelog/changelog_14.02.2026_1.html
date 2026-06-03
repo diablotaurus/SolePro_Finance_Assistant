@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Итоговый отчет по коммитам (14.02.2026)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #263238;
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1360px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+        .header {
+            background: linear-gradient(135deg, #1E88E5 0%, #0D47A1 100%);
+            color: #fff;
+            padding: 42px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.4rem; margin-bottom: 10px; }
+        .header .subtitle { font-size: 1.15rem; opacity: 0.95; }
+        .meta {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .meta-item {
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.28);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .content { padding: 34px; }
+        .section {
+            margin-bottom: 26px;
+            background: #F7FBFF;
+            border-left: 4px solid #2196F3;
+            border-radius: 10px;
+            padding: 18px;
+        }
+        .section h2 {
+            color: #0D47A1;
+            font-size: 1.35rem;
+            margin-bottom: 10px;
+        }
+        .section p { margin-bottom: 8px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 14px;
+            margin-top: 12px;
+        }
+        .item {
+            background: #fff;
+            border: 1px solid #DCEFFF;
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .item h3 {
+            color: #1565C0;
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+        }
+        ul { padding-left: 18px; }
+        li { margin-bottom: 6px; }
+        .commit {
+            background: #FFFFFF;
+            border: 1px solid #DCEFFF;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .commit h3 {
+            color: #0D47A1;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            border-radius: 999px;
+            padding: 4px 10px;
+            margin-bottom: 10px;
+            background: #E3F2FD;
+            color: #0D47A1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            background: #fff;
+            border: 1px solid #DCEFFF;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            border-bottom: 1px solid #EAF4FF;
+            text-align: left;
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+        th {
+            background: #E3F2FD;
+            color: #0D47A1;
+            font-weight: 700;
+        }
+        .footer {
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: #fff;
+            text-align: center;
+            padding: 24px;
+        }
+        @media (max-width: 768px) {
+            .header { padding: 28px 18px; }
+            .header h1 { font-size: 1.8rem; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Подробный отчет о проделанной работе и выполненных коммитах</div>
+                <div class="meta">
+                    <div class="meta-item">Дата отчета: 14.02.2026</div>
+                    <div class="meta-item">Формат: Итоговый changelog</div>
+                    <div class="meta-item">Период: Этапы 2-4 разработки</div>
+                    <div class="meta-item">Текущее состояние: стабильное</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2>1. Общий итог выполненной работы</h2>
+                    <p>В рамках этапного развития проекта были последовательно закрыты ключевые задачи по надежности хранения денежных данных, bootstrap-инициализации БД, снятию TODO в use-cases и усилению тестового контура.</p>
+                    <p>Изменения внесены с сохранением MVC-слоев, разделением ответственности между presentation/application/infrastructure, и с обязательной фиксацией версии приложения в каждом коммите.</p>
+                    <div class="grid">
+                        <div class="item">
+                            <h3>Технический фокус</h3>
+                            <ul>
+                                <li>Переход money-полей на Decimal/Numeric.</li>
+                                <li>Согласование entrypoints desktop/telegram.</li>
+                                <li>Seed-инициализация данных и DI wiring.</li>
+                                <li>Покрытие bootstrap тестами качества.</li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <h3>Контроль качества</h3>
+                            <ul>
+                                <li>Добавлены и усилены тесты use-cases.</li>
+                                <li>Добавлены проверки для init_db bootstrap.</li>
+                                <li>Снижен риск регрессий при запуске приложения.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>2. Все выполненные коммиты</h2>
+
+                    <div class="commit">
+                        <span class="badge">commit</span>
+                        <h3>a6f7d84 - fix: align entrypoints and migrate money storage to Decimal/Numeric</h3>
+                        <p><strong>Дата:</strong> 14.02.2026 19:26:13 (+0300)</p>
+                        <p><strong>Версия приложения:</strong> 1.3.1 RC</p>
+                        <p><strong>Статистика:</strong> 7 files changed, 190 insertions(+), 69 deletions(-)</p>
+                        <ul>
+                            <li>Добавлена миграция Alembic для денежной точности: <code>alembic/versions/20260214_0002_money_numeric_precision.py</code>.</li>
+                            <li>Модели и репозитории переведены на точную работу с суммами через Decimal/Numeric.</li>
+                            <li>Синхронизированы desktop entrypoints: <code>RunDesktopApp.pyw</code> / <code>src/solepro/presentation/desktop/application.py</code>.</li>
+                            <li>Обновлен Docker-образ приложения и тесты инфраструктуры.</li>
+                        </ul>
+                    </div>
+
+                    <div class="commit">
+                        <span class="badge">commit</span>
+                        <h3>72b2247 - feat: add initial seed data and finalize use-case TODOs</h3>
+                        <p><strong>Дата:</strong> 14.02.2026 22:18:49 (+0300)</p>
+                        <p><strong>Версия приложения:</strong> 1.3.2 RC</p>
+                        <p><strong>Статистика:</strong> 8 files changed, 86 insertions(+), 23 deletions(-)</p>
+                        <ul>
+                            <li>Добавлен начальный seed инициализации в <code>scripts/init_db.py</code>.</li>
+                            <li>Закрыты TODO в use-cases контрагентов и транзакций.</li>
+                            <li>Уточнена DI-сборка и интеграция в desktop controller.</li>
+                            <li>Добавлены тесты на поведение use-cases.</li>
+                        </ul>
+                    </div>
+
+                    <div class="commit">
+                        <span class="badge">commit</span>
+                        <h3>823148e - test: add init_db bootstrap and seed quality gates</h3>
+                        <p><strong>Дата:</strong> 14.02.2026 22:28:30 (+0300)</p>
+                        <p><strong>Версия приложения:</strong> 1.3.3 RC</p>
+                        <p><strong>Статистика:</strong> 2 files changed, 122 insertions(+), 1 deletion(-)</p>
+                        <ul>
+                            <li>Создан тестовый набор для bootstrap/seed сценариев: <code>src/tests/test_scripts_init_db.py</code>.</li>
+                            <li>Введены quality-gates для первичной инициализации данных.</li>
+                            <li>Зафиксирована очередная версия проекта в <code>pyproject.toml</code>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>3. Эволюция версий приложения из коммитов</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Порядок</th>
+                                <th>Commit</th>
+                                <th>Дата/время</th>
+                                <th>Версия в pyproject.toml</th>
+                                <th>Тип изменения</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><code>a6f7d84</code></td>
+                                <td>14.02.2026 19:26:13 (+0300)</td>
+                                <td><strong>1.3.1 RC</strong></td>
+                                <td>Fix / Data precision / Entrypoints</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><code>72b2247</code></td>
+                                <td>14.02.2026 22:18:49 (+0300)</td>
+                                <td><strong>1.3.2 RC</strong></td>
+                                <td>Feature / Seed / Use-cases</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td><code>823148e</code></td>
+                                <td>14.02.2026 22:28:30 (+0300)</td>
+                                <td><strong>1.3.3 RC</strong></td>
+                                <td>Tests / Bootstrap quality gates</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2>4. Измененные файлы по этапам</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <h3>Этап 2 (a6f7d84)</h3>
+                            <ul>
+                                <li><code>alembic/versions/20260214_0002_money_numeric_precision.py</code></li>
+                                <li><code>docker/app/Dockerfile</code></li>
+                                <li><code>src/solepro/infrastructure/database/models.py</code></li>
+                                <li><code>src/solepro/infrastructure/database/repositories/transaction_repository.py</code></li>
+                                <li><code>src/solepro/presentation/desktop/application.py</code></li>
+                                <li><code>src/tests/test_infrastructure.py</code></li>
+                                <li><code>pyproject.toml</code></li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <h3>Этап 3 (72b2247)</h3>
+                            <ul>
+                                <li><code>scripts/init_db.py</code></li>
+                                <li><code>src/solepro/core/application/use_cases/counterparty_use_cases.py</code></li>
+                                <li><code>src/solepro/core/application/use_cases/transaction_use_cases.py</code></li>
+                                <li><code>src/solepro/infrastructure/di/__init__.py</code></li>
+                                <li><code>src/solepro/presentation/desktop/controllers/main_controller.py</code></li>
+                                <li><code>src/tests/test_use_cases_counterparties.py</code></li>
+                                <li><code>src/tests/test_use_cases_transactions.py</code></li>
+                                <li><code>pyproject.toml</code></li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <h3>Этап 4 (823148e)</h3>
+                            <ul>
+                                <li><code>src/tests/test_scripts_init_db.py</code></li>
+                                <li><code>pyproject.toml</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>5. Статус и результат</h2>
+                    <p><strong>Результат:</strong> этапы реализованы последовательно и зафиксированы коммитами с корректным повышением версии на каждом шаге.</p>
+                    <p><strong>Финальная версия после всех коммитов:</strong> <code>1.3.3 RC</code>.</p>
+                    <p><strong>Файл отчета:</strong> <code>docs/changelog/changelog_14.02.2026_1.html</code>.</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Detailed Changelog Report</p>
+                <p>Коммиты: a6f7d84, 72b2247, 823148e | Версии: 1.3.1 RC -> 1.3.2 RC -> 1.3.3 RC</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

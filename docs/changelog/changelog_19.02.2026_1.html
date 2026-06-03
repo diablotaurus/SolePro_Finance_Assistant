@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Этапный рефакторинг архитектуры и стабилизация (19.02.2026)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #263238;
+            background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+        .header {
+            background: linear-gradient(135deg, #1E88E5 0%, #0D47A1 100%);
+            color: #fff;
+            padding: 44px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.8rem; margin-bottom: 10px; }
+        .header .subtitle { font-size: 1.25rem; opacity: 0.95; margin-bottom: 20px; }
+        .meta {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .content { padding: 38px; }
+        .section {
+            margin-bottom: 34px;
+            border-left: 4px solid #1E88E5;
+            background: linear-gradient(to right, rgba(30,136,229,0.07), transparent);
+            border-radius: 0 10px 10px 0;
+            padding: 22px;
+        }
+        .section h2 {
+            color: #0D47A1;
+            margin-bottom: 14px;
+            font-size: 1.6rem;
+        }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        .box {
+            border: 1px solid #E3F2FD;
+            border-radius: 10px;
+            padding: 16px;
+            background: #FAFDFF;
+        }
+        .box h3 { color: #1565C0; margin-bottom: 10px; font-size: 1.1rem; }
+        .code {
+            background: #111827;
+            color: #E5E7EB;
+            border-radius: 10px;
+            padding: 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .footer {
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: #fff;
+            text-align: center;
+            padding: 26px;
+            font-size: 0.98rem;
+        }
+        .tag {
+            display: inline-block;
+            background: #E3F2FD;
+            border: 1px solid #BBDEFB;
+            color: #0D47A1;
+            border-radius: 999px;
+            padding: 4px 10px;
+            margin: 4px 6px 0 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h1>SolePro Finance Assistant</h1>
+            <div class="subtitle">Этапный рефакторинг desktop-архитектуры, усиление DIP/SOLID и стабилизация тестового контура</div>
+            <div class="meta">
+                <div class="meta-item">Дата: 19.02.2026</div>
+                <div class="meta-item">Версия: 1.3.11rc1</div>
+                <div class="meta-item">Статус: Stable Refactor</div>
+                <div class="meta-item">Фокус: MVC / OOP / DRY / SOLID</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>1. Резюме релиза</h2>
+                <p>Выполнен крупный последовательный рефакторинг с минимальным риском поломок: ответственность DesktopController разложена по координаторам и сервисам, bootstrap desktop-приложения декомпозирован на builder-методы и контракты, расширен и стабилизирован тестовый контур. Дополнительно выполнена очистка проблемного mojibake в desktop-контроллере.</p>
+                <div style="margin-top:12px;">
+                    <span class="tag">Controller -> Coordinators</span>
+                    <span class="tag">Export Service Extraction</span>
+                    <span class="tag">Protocol-based DIP</span>
+                    <span class="tag">Bootstrap SRP</span>
+                    <span class="tag">Tests Hardening</span>
+                    <span class="tag">UTF-8 Cleanup</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>2. Ключевые архитектурные изменения</h2>
+                <div class="grid">
+                    <div class="box">
+                        <h3>Desktop Controller</h3>
+                        <ul>
+                            <li>Переведен на координаторы транзакций/контрагентов.</li>
+                            <li>Экспорт выделен в отдельный сервис и инъецируется извне.</li>
+                            <li>Убраны лишние use-case зависимости из конструктора.</li>
+                            <li>Введены единые helper-механизмы обработки ошибок и перезагрузки.</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h3>Desktop Bootstrap</h3>
+                        <ul>
+                            <li>Введены протоколы контрактов и вынесены в отдельный модуль <code>contracts.py</code>.</li>
+                            <li>Создание controller/coordinator/export/app/window вынесено в отдельные builder-методы.</li>
+                            <li>Выполнена стандартизация сообщений/кодов выхода и логирования.</li>
+                            <li>Добавлена инъекция <code>log_writer</code> для тестируемости и гибкости.</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h3>Качество и стабильность</h3>
+                        <ul>
+                            <li>Добавлены и расширены unit/smoke тесты контроллеров, координаторов и entrypoints.</li>
+                            <li>Хрупкие ассерты ошибок заменены на устойчивые проверки причин.</li>
+                            <li>Сохранено обратимо-предсказуемое поведение для UI-сценариев.</li>
+                            <li>По каждому подэтапу выполнялся <code>py_compile</code> и регрессионный <code>pytest</code>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>3. Финальные шаги (последний цикл)</h2>
+                <div class="box">
+                    <h3>3.1 Вынос контрактов</h3>
+                    <p>Протоколы DesktopBootstrap вынесены из <code>application.py</code> в <code>src/solepro/presentation/desktop/contracts.py</code>, что снизило связанность и упростило сопровождение.</p>
+                </div>
+                <div class="box" style="margin-top:12px;">
+                    <h3>3.2 Typed stubs в entrypoints-тестах</h3>
+                    <p><code>SimpleNamespace</code> заменены на явные typed stubs (<code>_SessionManagerStub</code>, <code>_SentinelContainerStub</code>, <code>_QtAppSpy</code>, <code>_MainWindowSpy</code> и др.).</p>
+                </div>
+                <div class="box" style="margin-top:12px;">
+                    <h3>3.3 Очистка mojibake в MainController</h3>
+                    <p>Файл <code>main_controller.py</code> переписан в корректном UTF-8 с сохранением поведения. Исправлены сообщения ошибок и локальная структурная документация.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>4. Измененные файлы (включены в коммит)</h2>
+                <div class="code">docs/changelog/changelog_19.02.2026_1.html
+pyproject.toml
+src/solepro/presentation/desktop/contracts.py
+src/solepro/presentation/desktop/application.py
+src/solepro/presentation/desktop/controllers/__init__.py
+src/solepro/presentation/desktop/controllers/main_controller.py
+src/solepro/presentation/desktop/controllers/coordinators.py
+src/solepro/presentation/desktop/services/...
+src/tests/test_entrypoints.py
+src/tests/test_main_controller.py
+src/tests/test_desktop_coordinators.py
+src/tests/test_ui_smoke.py
++ все остальные изменения рабочего дерева, присутствующие на момент коммита</div>
+            </div>
+
+            <div class="section">
+                <h2>5. Верификация</h2>
+                <ul>
+                    <li>Синтаксис: <code>python -m py_compile</code> для затронутых модулей.</li>
+                    <li>Целевые проверки: <code>pytest src/tests/test_entrypoints.py -q</code>, <code>pytest src/tests/test_main_controller.py -q</code>.</li>
+                    <li>Полный регресс: <code>pytest src/tests -q</code> (зелёный прогон).</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>6. Итог</h2>
+                <p>Рефакторинг завершен с сохранением функциональности и усилением архитектурной целостности. Desktop-слой приведен к более строгому MVC/OOP/DIP стилю, тестовый контур расширен и стабилизирован, база для дальнейшего развития подготовлена.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div>SolePro Finance Assistant • Changelog 19.02.2026 • Версия 1.3.11rc1</div>
+            <div style="margin-top:8px; opacity:0.9;">Подробный отчет по этапному рефакторингу и стабилизации desktop-архитектуры</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - SolePro Finance Assistant (19.02.2026)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: #1f2937;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+        .header {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: #fff;
+            padding: 42px;
+        }
+        .header h1 { font-size: 2.6rem; margin-bottom: 8px; }
+        .header p { font-size: 1.05rem; opacity: 0.95; }
+        .meta {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .meta span {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+        .content { padding: 36px; }
+        .section {
+            margin-bottom: 26px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 6px solid #2e7d32;
+            border-radius: 10px;
+            padding: 18px 20px;
+        }
+        .section h2 {
+            color: #14532d;
+            font-size: 1.38rem;
+            margin-bottom: 12px;
+        }
+        .section p { margin-bottom: 10px; }
+        .list { padding-left: 20px; }
+        .list li { margin-bottom: 7px; }
+        .code {
+            font-family: Consolas, "Courier New", monospace;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 14px;
+            overflow-x: auto;
+            font-size: 0.92rem;
+            margin-top: 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+            margin-top: 12px;
+        }
+        .item {
+            border: 1px solid #dbeafe;
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .item h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #1d4ed8;
+        }
+        .file {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9rem;
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 7px 8px;
+            margin-bottom: 6px;
+        }
+        .footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            text-align: center;
+            padding: 22px;
+            font-size: 0.92rem;
+        }
+        @media (max-width: 760px) {
+            .header { padding: 28px 20px; }
+            .header h1 { font-size: 1.9rem; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <p>Подробный отчет об изменениях интерфейса, настроек и интеграции параметров UI</p>
+                <div class="meta">
+                    <span>Дата: 19.02.2026</span>
+                    <span>Версия: 1.4.0</span>
+                    <span>Формат: Подробный changelog</span>
+                    <span>Область: Desktop UI / Settings / Styling</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2>1. Краткое резюме</h2>
+                    <p>Выполнен крупный пакет изменений UI-настроек и визуального поведения десктопного клиента. Основные результаты:</p>
+                    <ul class="list">
+                        <li>Исправлена заливка пустой области вертикального заголовка таблиц.</li>
+                        <li>Окно <strong>Настройки</strong> переработано и переведено на вкладки для устранения проблемы переполнения по высоте.</li>
+                        <li>Добавлен новый набор параметров в <code>settings.ini</code> (поведение окна, автообновление, цвета, размеры диалогов, размеры графиков).</li>
+                        <li>Новые параметры интегрированы в MainWindow, StatisticsDialog, TransactionDialog, CounterpartyManagerDialog и таблицы.</li>
+                        <li>Удалена устаревшая настройка <code>totals_panel_height</code>.</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h2>2. Исправления и рефакторинг UI</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <h3>2.1 Вертикальные заголовки таблиц</h3>
+                            <p>Исправлен визуальный дефект: пустая область слева больше не заливается зеленым цветом. Цвет сохраняется только у реальных секций (строк с данными).</p>
+                            <div class="file">src/solepro/presentation/desktop/ui_settings.py</div>
+                        </div>
+                        <div class="item">
+                            <h3>2.2 Окно Настройки: новая компоновка</h3>
+                            <p>Настройки сначала сгруппированы по тематическим блокам, затем окно переведено на вкладки:</p>
+                            <ul class="list">
+                                <li><strong>Общие</strong></li>
+                                <li><strong>Таблицы</strong></li>
+                                <li><strong>Итоги</strong></li>
+                                <li><strong>Расширенные</strong></li>
+                            </ul>
+                            <p>Добавлены поясняющие подписи в группах.</p>
+                            <div class="file">src/solepro/presentation/desktop/views/dialogs/settings_dialog.py</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>3. Новые настройки в settings.ini</h2>
+                    <p>Добавлены и подключены следующие ключи:</p>
+                    <div class="code">[ui]
+auto_refresh_enabled = 1
+auto_refresh_interval_ms = 30000
+main_window_pos_x = 100
+main_window_pos_y = 100
+main_window_width = 1400
+main_window_height = 800
+
+totals_income_color = #2e7d32
+totals_expense_color = #c62828
+totals_tax_color = #1565c0
+totals_profit_positive_color = #2e7d32
+totals_profit_negative_color = #c62828
+totals_count_color = #666666
+totals_card_border_color = #e0e0e0
+
+dialog_transaction_min_width = 500
+dialog_counterparty_manager_min_width = 900
+dialog_counterparty_manager_min_height = 500
+dialog_statistics_min_width = 800
+dialog_statistics_min_height = 600
+
+color_income = #2e7d32
+color_expense = #c62828
+color_tax = #1565c0
+color_profit_positive = #2e7d32
+color_profit_negative = #c62828
+color_neutral = #666666
+
+chart_monthly_min_height = 280
+chart_concentration_min_height = 260
+chart_tax_min_height = 250</div>
+                    <p>Из конфигов удален legacy-ключ:</p>
+                    <div class="code">totals_panel_height</div>
+                </div>
+
+                <div class="section">
+                    <h2>4. Интеграция новых настроек в код</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <h3>MainWindow</h3>
+                            <ul class="list">
+                                <li>Автообновление по флагу и интервалу из настроек.</li>
+                                <li>Геометрия главного окна из настроек.</li>
+                                <li>Цвета карточек итогов и цвет границы из настроек.</li>
+                            </ul>
+                            <div class="file">src/solepro/presentation/desktop/main_window.py</div>
+                        </div>
+                        <div class="item">
+                            <h3>TransactionDialog</h3>
+                            <ul class="list">
+                                <li>Минимальная ширина диалога из настроек.</li>
+                                <li>Семантические цвета прибыли (+/-) из настроек.</li>
+                            </ul>
+                            <div class="file">src/solepro/presentation/desktop/views/dialogs/transaction_dialog.py</div>
+                        </div>
+                        <div class="item">
+                            <h3>CounterpartyManagerDialog</h3>
+                            <ul class="list">
+                                <li>Минимальные ширина/высота диалога из настроек.</li>
+                            </ul>
+                            <div class="file">src/solepro/presentation/desktop/views/dialogs/counterparty_manager_dialog.py</div>
+                        </div>
+                        <div class="item">
+                            <h3>StatisticsDialog и графики</h3>
+                            <ul class="list">
+                                <li>Размер окна статистики из настроек.</li>
+                                <li>Минимальные высоты графиков из настроек.</li>
+                                <li>Семантические цвета для таблиц/лейблов/дельт и части графиков.</li>
+                            </ul>
+                            <div class="file">src/solepro/presentation/desktop/views/dialogs/statistics_dialog.py</div>
+                        </div>
+                        <div class="item">
+                            <h3>TransactionTableView</h3>
+                            <ul class="list">
+                                <li>Семантические цвета доход/расход/налог/прибыль из настроек.</li>
+                            </ul>
+                            <div class="file">src/solepro/presentation/desktop/views/widgets/transaction_table.py</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>5. Полный список измененных файлов</h2>
+                    <div class="file">docs/changelog/changelog_19.02.2026_1.html</div>
+                    <div class="file">pyproject.toml</div>
+                    <div class="file">settings/settings.ini</div>
+                    <div class="file">settings/nppBackup/settings.ini</div>
+                    <div class="file">src/solepro/presentation/desktop/ui_settings.py</div>
+                    <div class="file">src/solepro/presentation/desktop/main_window.py</div>
+                    <div class="file">src/solepro/presentation/desktop/views/dialogs/settings_dialog.py</div>
+                    <div class="file">src/solepro/presentation/desktop/views/dialogs/transaction_dialog.py</div>
+                    <div class="file">src/solepro/presentation/desktop/views/dialogs/counterparty_manager_dialog.py</div>
+                    <div class="file">src/solepro/presentation/desktop/views/dialogs/statistics_dialog.py</div>
+                    <div class="file">src/solepro/presentation/desktop/views/widgets/transaction_table.py</div>
+                </div>
+
+                <div class="section">
+                    <h2>6. Проверки и контроль качества</h2>
+                    <ul class="list">
+                        <li>Проверена валидность Python-синтаксиса измененных файлов через AST-парсинг.</li>
+                        <li>Проверены диффы и факт подключения новых ключей через поиск по проекту.</li>
+                        <li>Соблюдено требование UTF-8 для новых и измененных текстовых файлов.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>SolePro Finance Assistant | Changelog от 19.02.2026</p>
+                <p>Версия релиза: 1.4.0</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

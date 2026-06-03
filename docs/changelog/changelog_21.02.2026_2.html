@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - UI/Tests Update (21.02.2026)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2a2a2a;
+            background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1360px; margin: 0 auto; }
+        .changelog-card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.32);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .header {
+            background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
+            color: #fff;
+            padding: 44px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.8rem; margin-bottom: 10px; font-weight: 800; }
+        .header .subtitle { font-size: 1.2rem; opacity: 0.95; margin-bottom: 20px; }
+        .metadata {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 0.93rem;
+        }
+        .content { padding: 36px; }
+        .section {
+            margin-bottom: 24px;
+            border-left: 5px solid #1e88e5;
+            padding: 20px 22px;
+            border-radius: 0 12px 12px 0;
+            background: linear-gradient(to right, rgba(30, 136, 229, 0.07), rgba(30, 136, 229, 0.01));
+        }
+        .section h2 { color: #0d47a1; font-size: 1.55rem; margin-bottom: 14px; }
+        .section h3 { color: #1565c0; font-size: 1.1rem; margin: 14px 0 8px; }
+        .section p { margin-bottom: 10px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .card {
+            background: #fff;
+            border: 1px solid #dbeafc;
+            border-radius: 12px;
+            padding: 14px;
+        }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 6px; }
+        .file-list {
+            background: #fff;
+            border: 1px solid #dbeafc;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.9rem;
+        }
+        .code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.88rem;
+            overflow-x: auto;
+        }
+        .footer {
+            background: #0d47a1;
+            color: #fff;
+            padding: 24px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 768px) {
+            .header { padding: 28px 18px; }
+            .header h1 { font-size: 2.1rem; }
+            .content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="changelog-card">
+        <div class="header">
+            <h1>SolePro Finance Assistant</h1>
+            <div class="subtitle">Подробный отчет по переработке Desktop UI, расширению тестового покрытия и стабилизации статистических вкладок</div>
+            <div class="metadata">
+                <div class="meta-item">Дата: 21.02.2026</div>
+                <div class="meta-item">Версия: 1.4.5</div>
+                <div class="meta-item">Область: Desktop UI / Statistics / QA</div>
+                <div class="meta-item">Автор: Diablotaurus</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>1. Краткое резюме релиза</h2>
+                <p>Выполнена последовательная серия улучшений интерфейса и качества кода: переработано окно <strong>Настройки</strong>, исправлено непреднамеренное изменение числовых полей колесиком мыши, расширено тестовое покрытие по слоям presentation/infrastructure, обновлена аналитика окна <strong>Статистика</strong> с объединением вкладок контрагентов и добавлением сортировки по заголовкам таблицы.</p>
+            </div>
+
+            <div class="section">
+                <h2>2. Desktop UI: окно Настройки</h2>
+                <h3>2.1 Новая компоновка вкладок</h3>
+                <div class="grid">
+                    <div class="card">
+                        <strong>Главное окно</strong>
+                        <ul>
+                            <li>поведение приложения и геометрия окна;</li>
+                            <li>компоновка карточек итогов;</li>
+                            <li>цвета карточек итогов.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <strong>Транзакции и таблицы</strong>
+                        <ul>
+                            <li>шрифты таблиц;</li>
+                            <li>размеры/отступы вертикальных заголовков и колонок.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <strong>Статистика</strong>
+                        <ul>
+                            <li>семантическая цветовая палитра;</li>
+                            <li>размеры графиков.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <strong>Диалоги</strong>
+                        <ul>
+                            <li>минимальные размеры диалоговых окон.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2.2 Исправление переполнения вкладки</h3>
+                <p>Для длинной вкладки добавлен <code>QScrollArea</code>, благодаря чему кнопки <code>Save/Cancel</code> стабильно остаются видимыми внизу диалога.</p>
+
+                <h3>2.3 Исправление wheel-поведения для QSpinBox</h3>
+                <p>Добавлен специализированный spinbox-контрол, исключающий случайное изменение числовых параметров при простом наведении курсора и вращении колеса мыши.</p>
+                <div class="code">- отключен wheel-focus (StrongFocus)
+- блокировка wheelEvent без фокуса
+- фильтр wheel-событий на внутреннем lineEdit</div>
+            </div>
+
+            <div class="section">
+                <h2>3. Окно Статистика: контрагенты</h2>
+                <h3>3.1 Переработка аналитики</h3>
+                <p>Вкладки <strong>Топ контрагентов</strong> и <strong>Портфель контрагентов</strong> объединены в одну вкладку <strong>Топ контрагентов</strong>.</p>
+                <ul>
+                    <li>Добавлен блок <strong>Метрики портфеля</strong> (активные контрагенты, средняя маржа, лучший по прибыли, медианная прибыль).</li>
+                    <li>Сохранена расширенная информативность таблицы: доход/расход/налог/прибыль/маржа/транзакции.</li>
+                    <li>Сохранено ранжирование контрагентов как в классическом топе (исходный порядок набора статистики).</li>
+                </ul>
+
+                <h3>3.2 Сортировка по заголовку таблицы</h3>
+                <p>Для таблицы на вкладке <strong>Топ контрагентов</strong> включена сортировка по клику на заголовок. Для денежных и процентных столбцов реализована корректная числовая сортировка через специализированный item-класс.</p>
+            </div>
+
+            <div class="section">
+                <h2>4. Тестовое покрытие</h2>
+                <h3>4.1 P0 тесты (критическое UI/поведение)</h3>
+                <ul>
+                    <li><code>test_settings_dialog_behavior.py</code> — wheel/focus/скролл и видимость кнопок в настройках;</li>
+                    <li><code>test_desktop_ui_settings.py</code> — DesktopUiSettings и TableUiConfigurator;</li>
+                    <li><code>test_access_middleware.py</code> — ветки Telegram AccessMiddleware.</li>
+                </ul>
+
+                <h3>4.2 P1 тесты (инфраструктура и сервисы)</h3>
+                <ul>
+                    <li><code>test_transaction_export_service.py</code> — экспорт Excel, формат данных, ширины колонок;</li>
+                    <li><code>test_config_parsing.py</code> — env-парсинг и нормализация конфигурации;</li>
+                    <li><code>test_migrations_module.py</code> — ветки миграций и fallback stamp;</li>
+                    <li><code>test_session_manager.py</code> — commit/rollback/close/session lifecycle.</li>
+                </ul>
+
+                <h3>4.3 P2 тесты (presentation wiring)</h3>
+                <ul>
+                    <li><code>test_filter_panel.py</code> — сбор фильтра, show_all/clear, маппинг типов и сумм;</li>
+                    <li><code>test_telegram_setup_handlers.py</code> — регистрация Command/Message/Conversation handler-ов.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>5. Обновления зависимостей и стабильность</h2>
+                <ul>
+                    <li>Обновлен baseline зависимости <code>openpyxl</code> до <code>&gt;=3.1.5</code> в <code>pyproject.toml</code> и <code>requirements.txt</code>.</li>
+                    <li>Проведены таргетные и полные прогоны тестов (<code>pytest src/tests -q</code>) с успешным завершением.</li>
+                    <li>Оставшиеся предупреждения связаны с внутренним кодом <code>openpyxl</code> (DeprecationWarning), не с кодом проекта.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>6. Затронутые файлы</h2>
+                <div class="file-list">
+                    src/solepro/presentation/desktop/views/dialogs/settings_dialog.py (modified)<br>
+                    src/solepro/presentation/desktop/views/dialogs/statistics_dialog.py (modified)<br>
+                    src/tests/test_settings_dialog_behavior.py (new)<br>
+                    src/tests/test_desktop_ui_settings.py (new)<br>
+                    src/tests/test_access_middleware.py (new)<br>
+                    src/tests/test_transaction_export_service.py (new)<br>
+                    src/tests/test_config_parsing.py (new)<br>
+                    src/tests/test_migrations_module.py (new)<br>
+                    src/tests/test_session_manager.py (new)<br>
+                    src/tests/test_filter_panel.py (new)<br>
+                    src/tests/test_telegram_setup_handlers.py (new)<br>
+                    requirements.txt (modified)<br>
+                    pyproject.toml (modified, version 1.4.5)<br>
+                    docs/changelog/changelog_21.02.2026_2.html (new)
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>7. Итог</h2>
+                <p>Релиз концентрируется на практичности UI для ежедневной работы, предотвращении пользовательских ошибок ввода, улучшении аналитики по контрагентам и системном расширении автоматических тестов. Изменения выполнены с сохранением совместимости существующих настроек и текущих точек входа приложения.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 SolePro Finance Assistant | Версия 1.4.5 | Changelog: 21.02.2026
+        </div>
+    </div>
+</div>
+</body>
+</html>

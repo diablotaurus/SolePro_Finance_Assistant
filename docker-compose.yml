@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: solepro-postgres
+    environment:
+      POSTGRES_DB: solepro_finance
+      POSTGRES_USER: solepro_user
+      POSTGRES_PASSWORD: solepro_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - solepro-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U solepro_user -d solepro_finance"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # PgAdmin (Optional - for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: solepro-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@solepro.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - solepro-network
+    depends_on:
+      - postgres
+
+  # Application (for production deployment)
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: solepro-app
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql://solepro_user:solepro_password@postgres:5432/solepro_finance
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+    ports:
+      - "8000:8000"  # For future web interface
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./exports:/app/exports
+      - ./backups:/app/backups
+    networks:
+      - solepro-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis (for caching and job queue in future)
+  redis:
+    image: redis:7-alpine
+    container_name: solepro-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - solepro-network
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  solepro-network:
+    driver: bridge

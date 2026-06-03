@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - SolePro Finance Assistant 2.1.0 (08.02.2026)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .changelog-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+        }
+        
+        @keyframes moveBackground {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+        
+        .metadata {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .meta-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .meta-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+            border-left: 5px solid #2196F3;
+            padding-left: 25px;
+            background: linear-gradient(to right, rgba(33, 150, 243, 0.05), transparent);
+            border-radius: 0 10px 10px 0;
+            padding: 25px;
+        }
+        
+        .section h2 {
+            color: #1565C0;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E3F2FD;
+        }
+        
+        .section h2 i {
+            font-size: 1.8rem;
+            background: #2196F3;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .changes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 25px;
+        }
+        
+        .change-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #E3F2FD;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .change-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #2196F3;
+        }
+        
+        .change-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.2);
+            border-color: #2196F3;
+        }
+        
+        .change-card h3 {
+            color: #0D47A1;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .change-card .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .status.desktop { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); color: #0D47A1; }
+        .status.telegram { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .status.infrastructure { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: #E65100; }
+        .status.ux { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); color: #4A148C; }
+        .status.testing { background: linear-gradient(135deg, #FFF8E1, #FFECB3); color: #FF6F00; }
+        
+        .file-list {
+            background: #F5F9FF;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #E3F2FD;
+        }
+        
+        .file-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #E3F2FD;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            color: #2D3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-item:hover {
+            background: #E3F2FD;
+            padding-left: 20px;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-item.new::before { content: "🚀"; font-size: 1.1rem; }
+        .file-item.modified::before { content: "⚡"; font-size: 1.1rem; }
+        .file-item.deleted::before { content: "🗑️"; font-size: 1.1rem; }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #FFF3E0, #FFECB3);
+            border: 2px solid #FFB300;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .warning-box::before {
+            content: "⚠️";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+        
+        .warning-box h3 {
+            color: #E65100;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-results {
+            background: #F5F9FF;
+            border: 3px solid #E3F2FD;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+        
+        .test-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #E3F2FD;
+        }
+        
+        .test-item.passed::before { content: "✅"; font-size: 1.2rem; }
+        .test-item.in-progress::before { content: "⏳"; font-size: 1.2rem; }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .footer p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .content { padding: 25px; }
+            .header { padding: 30px 20px; }
+            .header h1 { font-size: 2.2rem; }
+            .changes-grid { grid-template-columns: 1fr; }
+            .section h2 { font-size: 1.6rem; }
+            .section h2 i { width: 40px; height: 40px; font-size: 1.4rem; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Стабилизация Desktop и Telegram, улучшение UX, настройка конфигурации и надежности хранения</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 08.02.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 2.1.0</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> Этап: Stabilization & UX</div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-list"></i> Краткое резюме релиза</h2>
+                    <p>Версия 2.1.0 фокусируется на практическом использовании: исправлены ошибки запуска Desktop и Telegram, стабилизирована работа с SQLite, улучшены сценарии добавления операций, введены пользовательские настройки UI, переработаны фильтры и отображение итогов. Релиз ориентирован на повседневную работу без технических обходов и ручных вмешательств.</p>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-star"></i> Ключевые изменения</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <span class="status desktop">Desktop</span>
+                            <h3><i class="fas fa-desktop"></i> Интерфейс и навигация</h3>
+                            <ul style="padding-left: 20px;">
+                                <li>Переработан блок фильтров: логика по умолчанию, сброс и «Показать все записи»</li>
+                                <li>Панель фильтров скрывается по умолчанию, добавлен переключатель в меню</li>
+                                <li>Добавлена верхняя строка итогов «Текущий период»</li>
+                                <li>Исправлено отображение контрагентов и примечаний</li>
+                                <li>Улучшена ширина и выравнивание карточек итогов</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <span class="status telegram">Telegram</span>
+                            <h3><i class="fab fa-telegram"></i> Бот и диалоги</h3>
+                            <ul style="padding-left: 20px;">
+                                <li>/help оформлен в виде полной инструкции</li>
+                                <li>/add реализован как диалог с кнопками «Сегодня», контрагенты, «Да/Нет»</li>
+                                <li>Постоянное меню: «Добавить» и «Статистика»</li>
+                                <li>Исправлены импорты и подключения конфигов</li>
+                                <li>Подготовлены запуск и вывод ошибок через bat/py</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <span class="status infrastructure">Инфраструктура</span>
+                            <h3><i class="fas fa-database"></i> База и конфигурация</h3>
+                            <ul style="padding-left: 20px;">
+                                <li>Корректная работа с относительным DATABASE_URL</li>
+                                <li>SQLite: WAL + timeout для устойчивости</li>
+                                <li>Репозитории делают commit при сохранении/удалении</li>
+                                <li>Добавлен единый settings.ini для UI-настроек</li>
+                                <li>Упорядочены импорты и init-пакеты</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <span class="status ux">UX</span>
+                            <h3><i class="fas fa-sliders-h"></i> Настройки и визуальный контроль</h3>
+                            <ul style="padding-left: 20px;">
+                                <li>Регулировка шрифта номеров строк</li>
+                                <li>Регулировка отступа высоты строки</li>
+                                <li>Регулировка высоты панели итогов</li>
+                                <li>Перекрытие глобального QSS для заголовка</li>
+                                <li>Оптимизация запуска приложения</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-desktop"></i> Desktop приложение: улучшения</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">Фильтры: новый порядок, дефолтный период = текущий год, быстрый сброс</div>
+                        <div class="file-item modified">Панель фильтров скрыта по умолчанию, меню «Данные → Показать/Скрыть фильтры»</div>
+                        <div class="file-item modified">Два ряда итогов: текущий период и общий итог</div>
+                        <div class="file-item modified">Менеджер контрагентов с добавлением/редактированием/удалением</div>
+                        <div class="file-item modified">Исправлены падения при редактировании транзакций</div>
+                        <div class="file-item modified">Корректное отображение контрагентов и примечаний в таблице</div>
+                        <div class="file-item modified">Настраиваемая высота строк и панелей через settings.ini</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fab fa-telegram"></i> Telegram бот: улучшения</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">/help: подробная инструкция и список команд</div>
+                        <div class="file-item modified">/add: кнопка «Сегодня», выбор контрагентов из БД</div>
+                        <div class="file-item modified">Подтверждение «Да/Нет» через кнопки</div>
+                        <div class="file-item modified">Постоянные кнопки меню: «Добавить» и «Статистика»</div>
+                        <div class="file-item modified">Исправлены ошибки middleware и импорта модулей</div>
+                        <div class="file-item modified">Запуск бота через RunBot.bat с корректным PYTHONPATH</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-database"></i> База данных и надежность</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">Автоматическое преобразование относительного DATABASE_URL в абсолютный путь</div>
+                        <div class="file-item modified">SQLite WAL + timeout для защиты от блокировок</div>
+                        <div class="file-item modified">Репозитории коммитят изменения (данные не пропадают)</div>
+                        <div class="file-item modified">init_db использует PYTHONPATH для стабильного запуска</div>
+                    </div>
+                    <div class="warning-box">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Важно</h3>
+                        <p>Для переносимости проекта DATABASE_URL хранится в относительном виде. Абсолютный путь формируется на старте приложения автоматически.</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-cogs"></i> Параметры настроек</h2>
+                    <div class="file-list">
+                        <div class="file-item new">settings/settings.ini</div>
+                        <div class="file-item modified">vertical_header_font_size — шрифт номеров строк</div>
+                        <div class="file-item modified">vertical_header_row_padding — дополнительная высота строки</div>
+                        <div class="file-item modified">totals_panel_height — высота панели итогов</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-bug"></i> Исправленные ошибки</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">Исправлены неверные относительные импорты и *-импорты</div>
+                        <div class="file-item modified">Ошибки запуска Desktop/Telegram через runpy устранены</div>
+                        <div class="file-item modified">Отображение старых данных и фильтров теперь корректно</div>
+                        <div class="file-item modified">Ошибка «function object has no attribute query» устранена</div>
+                        <div class="file-item modified">Устранены падения при редактировании транзакций</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-file-code"></i> Список измененных файлов</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">src/solepro/presentation/desktop/main_window.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/views/filter_panel.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/views/transaction_table.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/counterparty_manager.py</div>
+                        <div class="file-item modified">src/solepro/presentation/telegram/handlers.py</div>
+                        <div class="file-item modified">src/solepro/presentation/telegram/bot.py</div>
+                        <div class="file-item modified">src/solepro/infrastructure/config/__init__.py</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/session_manager.py</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/repositories/transaction_repository.py</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/repositories/counterparty_repository.py</div>
+                        <div class="file-item modified">src/solepro/core/application/use_cases/transaction_use_cases.py</div>
+                        <div class="file-item modified">scripts/init_db.py</div>
+                        <div class="file-item modified">scripts/run_desktop.py</div>
+                        <div class="file-item modified">RunDesktopApp.pyw</div>
+                        <div class="file-item modified">RunBot.bat</div>
+                        <div class="file-item new">settings/settings.ini</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-check-double"></i> Тестирование</h2>
+                    <div class="test-results">
+                        <div class="test-row">
+                            <div class="test-item passed">Desktop: добавление, редактирование, фильтры, статистика</div>
+                            <div class="test-item passed">Telegram: /add, /stats, /help, кнопки меню</div>
+                            <div class="test-item passed">SQLite: сохранение, перезапуск, отсутствие потерь</div>
+                        </div>
+                        <div class="test-row" style="margin-top: 15px;">
+                            <div class="test-item in-progress">Регрессионные тесты по всем командам бота</div>
+                            <div class="test-item in-progress">E2E тесты Desktop сценариев</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-triangle-exclamation"></i> Known Issues / Ограничения</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">Расширенная статистика (по месяцам, топ контрагентов) пока не реализована</div>
+                        <div class="file-item modified">Фильтрация выполняется в памяти после загрузки списка, на больших объемах это может влиять на скорость</div>
+                        <div class="file-item modified">Telegram бот работает в режиме polling (webhook не настроен)</div>
+                        <div class="file-item modified">Настройки UI из settings.ini применяются при запуске, требуется перезапуск</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-flag-checkered"></i> Итог</h2>
+                    <p><strong>Статус:</strong> Версия 2.1.0 стабилизирует ежедневные сценарии работы. Основные баги устранены, UX улучшен, конфигурация стала управляемой через единый файл настроек. Проект готов к дальнейшему развитию (аналитика, отчеты, экспорт, дополнительные интеграции).</p>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Стабилизация и UX-улучшения | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Релиз 2.1.0: улучшение стабильности и удобства работы</p>
+                
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">PyQt6 Desktop</div>
+                    <div class="tech-item">Telegram Bot</div>
+                    <div class="tech-item">SQLAlchemy</div>
+                    <div class="tech-item">SQLite WAL</div>
+                    <div class="tech-item">Settings.ini</div>
+                </div>
+                
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 2.1.0 | 
+                    <i class="fas fa-check-circle"></i> Статус: Стабилизировано | 
+                    <i class="fas fa-calendar"></i> Дата отчета: 08.02.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

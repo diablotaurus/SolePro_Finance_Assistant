@@ -1,0 +1,41 @@
+SolePro_Finance_Assistant/
+├── alembic/                    # Миграции БД
+├── src/
+│   ├── core/                  # ЯДРО (не зависит ни от чего)
+│   │   ├── domain/           # Бизнес-сущности и правила
+│   │   │   ├── entities/     # Transaction, Counterparty
+│   │   │   ├── value_objects/# Money, DateRange, etc
+│   │   │   ├── enums/        # TransactionType, etc
+│   │   │   └── exceptions/   # Бизнес-исключения
+│   │   │
+│   │   ├── application/      # Use Cases (бизнес-сценарии)
+│   │   │   ├── use_cases/    # AddTransaction, GetStatistics
+│   │   │   ├── ports/        # Интерфейсы (абстракции)
+│   │   │   ├── dto/          # Data Transfer Objects
+│   │   │   └── services/     # Сервисы приложения
+│   │   │
+│   │   └── interfaces/       # Адаптеры (реализации)
+│   │       ├── persistence/  # SQLAlchemy репозитории
+│   │       ├── telegram/     # Telegram бот
+│   │       └── desktop/      # PyQt6 UI
+│   │
+│   ├── infrastructure/       # Внешние зависимости
+│   │   ├── database/        # Конфигурация БД, сессии
+│   │   ├── config/          # Конфигурация приложения
+│   │   └── logging/         # Логирование
+│   │
+│   ├── presentation/        # Презентационный слой
+│   │   ├── telegram/       # Telegram handlers
+│   │   └── desktop/        # PyQt6 views
+│   │
+│   └── main.py             # Точка входа (DI контейнер)
+│
+├── tests/                   # Тесты (все уровни)
+├── docker/                  # Docker конфигурация
+├── .env.example            # Шаблон переменных окружения
+├── alembic.ini            # Конфиг миграций
+├── pyproject.toml         # Зависимости и настройки
+└── requirements/
+    ├── base.txt           # Общие зависимости
+    ├── dev.txt           # Для разработки
+    └── prod.txt          # Для продакшена

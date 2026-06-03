@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - SolePro Finance Assistant (16.02.2026)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #243447;
+            background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1360px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        }
+        .header {
+            background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+            color: #fff;
+            padding: 44px 40px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.6rem; margin-bottom: 8px; font-weight: 800; }
+        .header .subtitle { font-size: 1.2rem; opacity: 0.95; }
+        .meta {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+        .content { padding: 34px; }
+        .section {
+            border-left: 5px solid #1976d2;
+            background: linear-gradient(90deg, rgba(25, 118, 210, 0.06), transparent);
+            border-radius: 0 12px 12px 0;
+            padding: 20px 22px;
+            margin-bottom: 24px;
+        }
+        .section h2 {
+            color: #0d47a1;
+            font-size: 1.55rem;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section p { margin-bottom: 10px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            margin-top: 14px;
+        }
+        .item {
+            border: 1px solid #e3f2fd;
+            border-radius: 12px;
+            background: #fff;
+            padding: 16px;
+        }
+        .item h3 {
+            color: #1565c0;
+            font-size: 1.08rem;
+            margin-bottom: 8px;
+        }
+        .badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #0d47a1;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        ul { padding-left: 18px; }
+        li { margin-bottom: 6px; }
+        .files {
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 1px solid #e3f2fd;
+            background: #f8fbff;
+            padding: 10px 12px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9rem;
+        }
+        .timeline {
+            margin-top: 8px;
+            border-left: 3px solid #1e88e5;
+            padding-left: 14px;
+        }
+        .t-item {
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border: 1px solid #e3f2fd;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .t-item .hash {
+            font-family: Consolas, Monaco, monospace;
+            color: #0d47a1;
+            font-weight: 700;
+        }
+        .status-ok {
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            color: #1b5e20;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        .footer {
+            padding: 22px;
+            text-align: center;
+            color: #fff;
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            font-size: 0.95rem;
+        }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .content { padding: 20px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Подробный отчёт по этапам улучшений Desktop-статистики и исправлений производительности/UX</div>
+                <div class="meta">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата отчёта: 16.02.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.3.8 RC</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus + Codex</div>
+                    <div class="meta-item"><i class="fas fa-layer-group"></i> Фокус: Desktop Statistics / Use Cases / UX</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-bullseye"></i> Контекст и цели</h2>
+                    <p>Выполнен комплекс работ по Desktop-приложению: устранены конфликты хоткеев, снижены риски узких мест при фильтрации/поиске, а также поэтапно расширен модуль статистики новыми визуальными дашбордами и аналитикой.</p>
+                    <p>Отдельно закрыт регресс по кодировке в окне статистики с полным восстановлением UTF-8 и повторной интеграцией налогового дашборда.</p>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-stream"></i> Хронология коммитов</h2>
+                    <div class="timeline">
+                        <div class="t-item">
+                            <div><span class="hash">8526a8c</span> — fix: optimize transaction filtering/search and update desktop hotkeys</div>
+                            <div>Исправлены горячие клавиши и переработана фильтрация/поиск use-case’ов для более экономной обработки данных.</div>
+                        </div>
+                        <div class="t-item">
+                            <div><span class="hash">2cd01ef</span> — feat: add period comparison dashboard and improve statistics flow</div>
+                            <div>Добавлено сравнение текущего и предыдущего периода, расширен DTO и обновлён поток данных в окне статистики.</div>
+                        </div>
+                        <div class="t-item">
+                            <div><span class="hash">41418df</span> — feat: add concentration dashboard in desktop statistics</div>
+                            <div>Новая вкладка концентрации контрагентов: Top-1/Top-3, HHI, оценка риска и визуальный бар-чарт.</div>
+                        </div>
+                        <div class="t-item">
+                            <div><span class="hash">4d0b64a</span> — feat: add tax analytics dashboard to desktop statistics</div>
+                            <div>Добавлена вкладка «Налоги»: KPI, динамика эффективной ставки, таблица налоговой нагрузки и прогноз.</div>
+                        </div>
+                        <div class="t-item">
+                            <div><span class="hash">0186c6c</span> — fix: restore utf-8 encoding in statistics dialog</div>
+                            <div>Восстановлена корректная кодировка окна статистики (UTF-8), устранены артефакты mojibake.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-keyboard"></i> Этап 1: UX и производительность</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <span class="badge">HOTKEYS</span>
+                            <h3>Нормализация сочетаний клавиш</h3>
+                            <ul>
+                                <li>Устранён конфликт между экспортом и редактированием.</li>
+                                <li><code>Ctrl+X</code> закреплён за экспортом.</li>
+                                <li>Добавлены: <code>Ctrl+C</code> (Контрагенты), <code>Ctrl+F</code> (Фильтры).</li>
+                            </ul>
+                            <div class="files">
+                                src/solepro/presentation/desktop/main_window.py
+                            </div>
+                        </div>
+                        <div class="item">
+                            <span class="badge">USE CASES</span>
+                            <h3>Снижение риска узкого места при росте данных</h3>
+                            <ul>
+                                <li>Переработаны сценарии фильтрации/поиска в транзакциях.</li>
+                                <li>Исключены подходы с избыточной загрузкой больших массивов в память там, где это критично.</li>
+                                <li>Обновлены тесты покрытия логики use-case’ов.</li>
+                            </ul>
+                            <div class="files">
+                                src/solepro/core/application/use_cases/transaction_use_cases.py<br>
+                                src/tests/test_use_cases_transactions.py
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-chart-line"></i> Этап 2-4: Развитие раздела «Статистика»</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <span class="badge">TRENDS</span>
+                            <h3>Тренды по месяцам</h3>
+                            <ul>
+                                <li>Добавлена вкладка «Тренды» с двумя режимами визуализации: линии/столбцы.</li>
+                                <li>Отображение дохода, расхода, налога и прибыли в одной динамике.</li>
+                                <li>Табличная детализация по месяцам.</li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <span class="badge">PERIOD COMPARISON</span>
+                            <h3>Сравнение периодов</h3>
+                            <ul>
+                                <li>Добавлен <code>PeriodComparisonDTO</code> и интеграция в <code>StatisticsDTO</code>.</li>
+                                <li>Авто-расчёт предыдущего периода той же длительности.</li>
+                                <li>В UI: дельты и проценты для дохода/расхода/налога/прибыли/транзакций.</li>
+                            </ul>
+                            <div class="files">
+                                src/solepro/core/application/dto/statistics_dto.py<br>
+                                src/solepro/core/application/use_cases/transaction_use_cases.py<br>
+                                src/solepro/presentation/desktop/main_window.py
+                            </div>
+                        </div>
+                        <div class="item">
+                            <span class="badge">CONCENTRATION</span>
+                            <h3>Дашборд концентрации контрагентов</h3>
+                            <ul>
+                                <li>Новая вкладка «Концентрация».</li>
+                                <li>KPI: доля топ-1, доля топ-3, HHI, уровень риска концентрации.</li>
+                                <li>Горизонтальный бар-чарт и детальная таблица.</li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <span class="badge">TAX ANALYTICS</span>
+                            <h3>Налоговая аналитика</h3>
+                            <ul>
+                                <li>Новая вкладка «Налоги» с KPI по нагрузке.</li>
+                                <li>График эффективной ставки налога по месяцам.</li>
+                                <li>Run-rate за 3 месяца и прогноз налога на следующий месяц.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="files">
+                        src/solepro/presentation/desktop/views/statistics_dialog.py
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-bug"></i> Внеплановый инцидент и исправление</h2>
+                    <p>После интеграции налогового дашборда в окне статистики проявилась проблема кодировки (симптомы: «сломанный» русский текст).</p>
+                    <ul>
+                        <li>Причина: файл был перезаписан с неподходящей кодировкой в процессе промежуточных операций.</li>
+                        <li>Исправление: восстановление корректной версии, повторная интеграция изменений, сохранение в UTF-8.</li>
+                        <li>Результат: окно статистики отображает текст корректно, функциональность сохранена.</li>
+                    </ul>
+                    <div class="files">
+                        src/solepro/presentation/desktop/views/statistics_dialog.py
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-vial"></i> Проверки качества</h2>
+                    <p>После каждого этапа выполнялись целевые и регрессионные проверки.</p>
+                    <div class="grid">
+                        <div class="item">
+                            <h3>Тесты</h3>
+                            <ul>
+                                <li><code>pytest -q src/tests/test_use_cases_transactions.py</code> — пройдено.</li>
+                                <li><code>pytest -q src/tests/test_ui_smoke.py</code> — пройдено.</li>
+                                <li><code>pytest -q</code> (полный набор) — пройдено.</li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <h3>Техническая валидация</h3>
+                            <ul>
+                                <li>Проверка компиляции изменённых модулей Python.</li>
+                                <li>Контроль чистоты рабочего дерева после коммитов.</li>
+                                <li>Соблюдение правила обновления версии в <code>pyproject.toml</code> на каждом коммите.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="status-ok">
+                        Статус: все изменения зафиксированы, тесты зелёные, кодировка восстановлена, версия проекта обновлена до 1.3.8 RC.
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-list-check"></i> Итоги релизного пакета</h2>
+                    <ul>
+                        <li>Закрыты UX-дефекты (конфликт хоткеев).</li>
+                        <li>Повышена устойчивость к росту данных в части фильтрации/поиска.</li>
+                        <li>Существенно расширена аналитика Desktop-статистики (тренды, сравнение периодов, концентрация, налоги).</li>
+                        <li>Устранён инцидент с кодировкой, подтверждена корректность через тесты.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer">
+                © 2026 SolePro Finance Assistant | Changelog 16.02.2026 | Версия: 1.3.8 RC
+            </div>
+        </div>
+    </div>
+</body>
+</html>

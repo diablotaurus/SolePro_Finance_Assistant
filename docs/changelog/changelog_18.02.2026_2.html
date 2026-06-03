@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - SolePro Finance Assistant (18.02.2026 #2)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            color: #1f2937;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+        }
+        .header {
+            background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%);
+            color: #fff;
+            padding: 36px;
+        }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header p { opacity: 0.95; }
+        .meta { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .meta span {
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.92rem;
+        }
+        .content { padding: 28px; display: grid; gap: 20px; }
+        .section {
+            border: 1px solid #d1fae5;
+            border-left: 6px solid #2E7D32;
+            border-radius: 10px;
+            padding: 18px;
+            background: #f8fffb;
+        }
+        .section h2 {
+            font-size: 1.2rem;
+            color: #166534;
+            margin-bottom: 12px;
+        }
+        .section p { margin-bottom: 8px; }
+        ul { padding-left: 18px; display: grid; gap: 6px; }
+        code {
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 1px 6px;
+            font-family: Consolas, monospace;
+            font-size: 0.92rem;
+        }
+        .grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+        .box {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 14px;
+        }
+        .box h3 {
+            color: #065f46;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        .footer {
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+            padding: 16px 28px;
+            color: #4b5563;
+            font-size: 0.92rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h1>SolePro Finance Assistant</h1>
+            <p>Подробный отчет по изменениям: реорганизация desktop UI-слоя, окно настроек и централизация табличных шрифтов.</p>
+            <div class="meta">
+                <span>Дата: 18.02.2026</span>
+                <span>Отчет: changelog_18.02.2026_2</span>
+                <span>Версия: 1.3.10 RC</span>
+                <span>Статус: Выполнено</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>1. Ключевой итог</h2>
+                <p>Выполнен структурный рефакторинг desktop presentation-слоя: диалоги и виджеты разведены по отдельным подпакетам.</p>
+                <p>Добавлено окно <code>Файл -> Настройки...</code> с сохранением в <code>settings/settings.ini</code>, включая настройку шрифта и кегля табличной части всех окон.</p>
+            </div>
+
+            <div class="section">
+                <h2>2. Архитектурные изменения структуры (MVC/OOP/DRY/SOLID)</h2>
+                <div class="grid">
+                    <div class="box">
+                        <h3>Новая структура UI</h3>
+                        <ul>
+                            <li><code>src/solepro/presentation/desktop/views/dialogs/</code> — все dialog-классы.</li>
+                            <li><code>src/solepro/presentation/desktop/views/widgets/</code> — переиспользуемые виджеты.</li>
+                            <li><code>src/solepro/presentation/desktop/main_window.py</code> — композиция UI и wiring.</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h3>Переносы файлов (логические группы)</h3>
+                        <ul>
+                            <li><code>counterparty_dialog.py</code> -> <code>views/dialogs/counterparty_dialog.py</code></li>
+                            <li><code>counterparty_manager.py</code> -> <code>views/dialogs/counterparty_manager_dialog.py</code></li>
+                            <li><code>settings_dialog.py</code> -> <code>views/dialogs/settings_dialog.py</code></li>
+                            <li><code>views/transaction_dialog.py</code> -> <code>views/dialogs/transaction_dialog.py</code></li>
+                            <li><code>views/statistics_dialog.py</code> -> <code>views/dialogs/statistics_dialog.py</code></li>
+                            <li><code>views/transaction_table.py</code> -> <code>views/widgets/transaction_table.py</code></li>
+                            <li><code>views/filter_panel.py</code> -> <code>views/widgets/filter_panel.py</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>3. Изменения по функционалу</h2>
+                <div class="grid">
+                    <div class="box">
+                        <h3>Окно настроек UI</h3>
+                        <ul>
+                            <li>Добавлено действие меню: <code>Файл -> Настройки...</code>.</li>
+                            <li>Создан диалог настройки параметров таблиц и UI-отступов.</li>
+                            <li>Настройки сохраняются в UTF-8 через единый сервис <code>DesktopUiSettings</code>.</li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h3>Табличные шрифты</h3>
+                        <ul>
+                            <li>Добавлены ключи: <code>table_font_family</code>, <code>table_font_size</code>, <code>table_header_font_family</code>, <code>table_header_font_size</code>.</li>
+                            <li>Стиль таблиц/заголовков теперь собирается из <code>settings/settings.ini</code>.</li>
+                            <li>Вертикальные заголовки таблиц тоже учитывают семейство шрифта.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>4. Измененные файлы (по типам)</h2>
+                <div class="grid">
+                    <div class="box">
+                        <h3>Новые файлы</h3>
+                        <ul>
+                            <li><code>src/solepro/presentation/desktop/views/dialogs/__init__.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/widgets/__init__.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/dialogs/counterparty_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/dialogs/counterparty_manager_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/dialogs/settings_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/dialogs/transaction_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/dialogs/statistics_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/widgets/transaction_table.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/widgets/filter_panel.py</code></li>
+                            <li><code>docs/changelog/changelog_18.02.2026_2.html</code></li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h3>Модифицированные файлы</h3>
+                        <ul>
+                            <li><code>src/solepro/presentation/desktop/main_window.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/styles.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/ui_settings.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/__init__.py</code></li>
+                            <li><code>src/tests/test_ui_smoke.py</code></li>
+                            <li><code>settings/settings.ini</code></li>
+                            <li><code>pyproject.toml</code></li>
+                        </ul>
+                    </div>
+                    <div class="box">
+                        <h3>Удаленные файлы (старые пути)</h3>
+                        <ul>
+                            <li><code>src/solepro/presentation/desktop/counterparty_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/counterparty_manager.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/settings_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/transaction_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/statistics_dialog.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/transaction_table.py</code></li>
+                            <li><code>src/solepro/presentation/desktop/views/filter_panel.py</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>5. Проверки и валидация</h2>
+                <ul>
+                    <li>Проверена компиляция desktop-пакета: <code>python -m compileall src/solepro/presentation/desktop</code>.</li>
+                    <li>Проверен smoke UI-тест: <code>pytest -q src/tests/test_ui_smoke.py</code> -> <code>2 passed</code>.</li>
+                    <li>Проверены и сохранены точки входа: <code>RunDesktopApp.pyw</code>, <code>src/solepro/presentation/desktop/application.py</code>, <code>src/solepro/presentation/telegram/bot.py</code>.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>6. Примечания по совместимости</h2>
+                <ul>
+                    <li>Shim-слой временной совместимости удален, проект использует только новую структуру импортов.</li>
+                    <li>Часть UI-настроек, включая шрифты таблиц, применяется полностью после перезапуска desktop-приложения.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div>© 2026 SolePro Finance Assistant</div>
+            <div>Релиз: 18.02.2026 | Версия: 1.3.10 RC | Фокус: структурная консистентность desktop-слоя и управляемость UI-настроек</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

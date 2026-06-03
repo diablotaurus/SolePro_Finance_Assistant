@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - SolePro Finance Assistant (10.02.2026)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .changelog-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+        }
+        
+        @keyframes moveBackground {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+        
+        .metadata {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .meta-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .meta-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+            border-left: 5px solid #2196F3;
+            padding-left: 25px;
+            background: linear-gradient(to right, rgba(33, 150, 243, 0.05), transparent);
+            border-radius: 0 10px 10px 0;
+            padding: 25px;
+        }
+        
+        .section h2 {
+            color: #1565C0;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E3F2FD;
+        }
+        
+        .section h2 i {
+            font-size: 1.8rem;
+            background: #2196F3;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .changes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 25px;
+        }
+        
+        .change-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #E3F2FD;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .change-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #2196F3;
+        }
+        
+        .change-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.2);
+            border-color: #2196F3;
+        }
+        
+        .change-card h3 {
+            color: #0D47A1;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .change-card .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .status.architecture { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); color: #0D47A1; }
+        .status.domain { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .status.infrastructure { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: #E65100; }
+        .status.application { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); color: #4A148C; }
+        .status.ui { background: linear-gradient(135deg, #E0F7FA, #B2EBF2); color: #006064; }
+        .status.testing { background: linear-gradient(135deg, #FFF8E1, #FFECB3); color: #FF6F00; }
+        
+        .file-list {
+            background: #F5F9FF;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #E3F2FD;
+        }
+        
+        .file-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #E3F2FD;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            color: #2D3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-item:hover {
+            background: #E3F2FD;
+            padding-left: 20px;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-item.new::before {
+            content: "📄";
+            font-size: 1.1rem;
+        }
+        
+        .file-item.modified::before {
+            content: "✏️";
+            font-size: 1.1rem;
+        }
+        
+        .file-item.deleted::before {
+            content: "🗑️";
+            font-size: 1.1rem;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #FFF3E0, #FFECB3);
+            border: 2px solid #FFB300;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .warning-box::before {
+            content: "⚠️";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+        
+        .warning-box h3 {
+            color: #E65100;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-results {
+            background: #F5F9FF;
+            border: 3px solid #E3F2FD;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+        
+        .test-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #E3F2FD;
+        }
+        
+        .test-item.passed::before {
+            content: "✅";
+            font-size: 1.2rem;
+        }
+        
+        .test-item.failed::before {
+            content: "❌";
+            font-size: 1.2rem;
+        }
+        
+        .test-item.in-progress::before {
+            content: "⏳";
+            font-size: 1.2rem;
+        }
+        
+        .footer {
+            background: #f5f5f5;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .changes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section h2 {
+                font-size: 1.6rem;
+            }
+            
+            .section h2 i {
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Обновление в версии 1.2.0: архитектура, UI и контрагенты, а также интеграция новых возможностей</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 10.02.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.2.0</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> Статус: Релиз в разработке</div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-clipboard-list"></i> Ключевые изменения</h2>
+                    <p>Значительное улучшение интерфейса пользователя и работы с контрагентами, добавление новых виджетов, рефакторинг основных модулей, перенос управления версиями в pyproject.toml, а также добавление автоматизированных тестов и документации.</p>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-desktop"></i> UI и интерфейсы</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <div class="status ui">UI</div>
+                            <h3><i class="fas fa-chart-bar"></i> Графики статистики</h3>
+                            <p>Добавлены новые графики и диаграммы, улучшена визуализация данных, реализованы фильтры и настройки отображения графиков.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">src/solepro/presentation /desktop/views /statistics_dialog.py</div>
+                                <div class="file-item modified">src/solepro/presentation /desktop/main_window.py</div>
+                            </div>
+                        </div>
+                        <div class="change-card">
+                            <div class="status ui">UI</div>
+                            <h3><i class="fas fa-table"></i> Управление транзакциями</h3>
+                            <p>Переработан интерфейс управления транзакциями с поддержкой группировки, фильтрации и массового редактирования.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">src/solepro/presentation /desktop/views /transaction_table_view.py</div>
+                                <div class="file-item modified">src/solepro/presentation /desktop/main_window.py</div>
+                            </div>
+                        </div>
+                        <div class="change-card">
+                            <div class="status ui">UI</div>
+                            <h3><i class="fas fa-users"></i> Форма контрагентов</h3>
+                            <p>Новая улучшенная форма, позволяющая быстро добавлять и редактировать контрагентов, загружать логотипы и подписывать.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">src/solepro/presentation /desktop/counterparty_ dialog.py</div>
+                                <div class="file-item modified">src/solepro/presentation /desktop/counterparty_ manager.py</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-cubes"></i> Доменный слой и инфраструктура</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <div class="status domain">Domain</div>
+                            <h3><i class="fas fa-user-shield"></i> Рефакторинг для контрагентов</h3>
+                            <p>Переработана структура сущностей, DTO и use cases; добавлены новые поля и расширена валидация.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">src/solepro/core/domain/entities/counterparty.py</div>
+                                <div class="file-item modified">src/solepro/core/application/dto/ counterparty_dto.py</div>
+                                <div class="file-item modified">src/solepro/core/application/ use_cases/counterparty_use_cases.py</div>
+                                <div class="file-item modified">src/solepro/core/domain/ repositories/counterparty_repository.py</div>
+                            </div>
+                        </div>
+                        <div class="change-card">
+                            <div class="status infrastructure">Infrastructure</div>
+                            <h3><i class="fas fa-database"></i> SQLAlchemy модели</h3>
+                            <p>Обновлены модели и репозитории для контрагентов, добавлены индексы и связи для оптимизации.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">src/solepro/infrastructure/database/models.py</div>
+                                <div class="file-item modified">src/solepro/infrastructure/database/ repositories/counterparty_repository.py</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-cog"></i> Сборка и конфигурация</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <div class="status architecture">Architecture</div>
+                            <h3><i class="fas fa-tag"></i> Управление версиями</h3>
+                            <p>Перенос управления версиями в pyproject.toml; удален version.txt; добавлена автоматизация сборки и публикации пакетов.</p>
+                            <div class="file-list">
+                                <div class="file-item deleted">version.txt</div>
+                                <div class="file-item modified">pyproject.toml</div>
+                                <div class="file-item modified">src/solepro/__init__.py</div>
+                                <div class="file-item modified">src/solepro/presentation/desktop/main_window.py</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-vial"></i> Тесты и документация</h2>
+                    <div class="test-results">
+                        <div class="test-row">
+                            <div class="test-item passed">Тесты домена: 24 passed (все стабильно)</div>
+                            <div class="test-item passed">Модульные тесты UUID / Money / SQLAlchemy моделей</div>
+                            <div class="test-item in-progress">Интеграционные UI тесты в процессе разработки</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Известные проблемы</h2>
+                    <div class="warning-box">
+                        <h3><i class="fas fa-bug"></i> Проблемы с отображением в темной теме</h3>
+                        <p>Некоторые элементы UI могут некорректно отображаться в темной теме, что приводит к ухудшению читаемости. Временное решение - использовать светлую тему. Полное исправление планируется в следующем обновлении.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Версия: 1.2.0 | Дата: 10.02.2026</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Данное обновление сосредоточено на UI, производительности и стабильности приложения</p>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.2.0 | 
+                    <i class="fas fa-calendar"></i> Дата релиза: 10.02.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

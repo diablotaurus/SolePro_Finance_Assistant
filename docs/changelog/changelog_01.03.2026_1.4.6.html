@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - SolePro Finance Assistant 1.4.6 (01.03.2026)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.55;
+            color: #1f2937;
+            background: linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%);
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+            color: #ffffff;
+            padding: 36px 32px;
+        }
+        .header h1 { font-size: 2.1rem; margin-bottom: 8px; }
+        .subtitle { opacity: 0.95; margin-bottom: 18px; }
+        .meta { display: flex; flex-wrap: wrap; gap: 10px; }
+        .meta-item {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+        .content { padding: 28px 32px 36px; }
+        .section {
+            border-left: 4px solid #2563eb;
+            padding-left: 16px;
+            margin-bottom: 24px;
+        }
+        .section h2 {
+            color: #1e3a8a;
+            font-size: 1.35rem;
+            margin-bottom: 12px;
+        }
+        .section p { margin-bottom: 10px; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        .files {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 10px;
+        }
+        .code {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .ok {
+            background: #ecfdf3;
+            border: 1px solid #86efac;
+            color: #14532d;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .footer {
+            border-top: 1px solid #dbeafe;
+            margin-top: 26px;
+            padding-top: 16px;
+            color: #475569;
+            font-size: 0.92rem;
+        }
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header, .content { padding: 20px 16px; }
+            .header h1 { font-size: 1.65rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="header">
+            <h1>SolePro Finance Assistant</h1>
+            <div class="subtitle">Подробный changelog по задаче: улучшение UX настройки цветовых параметров Desktop UI</div>
+            <div class="meta">
+                <div class="meta-item">Дата: 01.03.2026</div>
+                <div class="meta-item">Версия: 1.4.6</div>
+                <div class="meta-item">Компонент: Desktop (PyQt6)</div>
+                <div class="meta-item">Статус: Выполнено и проверено</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>1. Цель изменений</h2>
+                <p>Повысить удобство и наглядность редактирования HEX-цветов в окне "Настройки", не меняя бизнес-логику и формат хранения данных.</p>
+                <ul>
+                    <li>Сделать поля ввода цветов более компактными.</li>
+                    <li>Добавить визуальный live-preview выбранного цвета рядом с полем ввода.</li>
+                    <li>Унифицировать размеры полей между блоками "Карточки итогов: цвета" и "Цветовая палитра: семантика".</li>
+                    <li>Сохранить текущую архитектуру MVC/OOP/DRY/SOLID и существующие ключи в settings.ini.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>2. Что изменено в интерфейсе</h2>
+                <ul>
+                    <li>В блоке "Карточки итогов: цвета" поля ввода стали компактными (единая узкая ширина для HEX).</li>
+                    <li>В блоке "Карточки итогов: цвета" рядом с каждым полем добавлен квадрат превью цвета.</li>
+                    <li>В блоке "Цветовая палитра: семантика" реализован такой же механизм превью.</li>
+                    <li>Размер всех квадратов превью установлен: <strong>30x30</strong>.</li>
+                    <li>Размер полей ввода в обоих цветовых блоках выровнен для единообразного визуального оформления.</li>
+                    <li>Минимальная ширина окна "Настройки" подтверждена на значении <strong>600</strong>.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>3. Техническая реализация</h2>
+                <ul>
+                    <li>Добавлен универсальный хелпер для строки цвета: поле ввода + preview-квадрат.</li>
+                    <li>Добавлен словарь соответствия поля и preview-виджета для централизованного обновления.</li>
+                    <li>Обновление preview привязано к событию <code>textChanged</code>, работает в реальном времени.</li>
+                    <li>При невалидном HEX в preview используется нейтральный fallback (<code>#ffffff</code>), при этом текущая валидация на сохранении сохранена без изменений.</li>
+                    <li>Существующая логика чтения/сохранения настроек не изменялась.</li>
+                </ul>
+                <div class="files">
+                    <div><strong>Измененные файлы:</strong></div>
+                    <ul>
+                        <li>src/solepro/presentation/desktop/views/dialogs/settings_dialog.py</li>
+                        <li>src/tests/test_settings_dialog_behavior.py</li>
+                        <li>pyproject.toml (обновление версии до 1.4.6)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>4. Тестирование и проверка</h2>
+                <p>Выполнен профильный UI-набор тестов для диалога настроек, включая новые сценарии для color preview.</p>
+                <div class="code">pytest -q src/tests/test_settings_dialog_behavior.py</div>
+                <div class="ok">Результат: 5 passed</div>
+                <ul style="margin-top: 12px;">
+                    <li>Проверено обновление preview при валидном HEX.</li>
+                    <li>Проверен fallback preview при невалидном значении.</li>
+                    <li>Проверено создание preview в блоке семантической палитры.</li>
+                    <li>Проверен размер preview: 30x30.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>5. Совместимость и риски</h2>
+                <ul>
+                    <li>Точки входа не затронуты: RunDesktopApp.pyw, desktop/application.py, telegram/bot.py.</li>
+                    <li>Ключи конфигурации в settings.ini и формат HEX не изменены.</li>
+                    <li>Изменения локализованы в presentation-слое Desktop и тестах UI.</li>
+                    <li>Риск регрессии низкий, покрытие ключевого поведения подтверждено тестами.</li>
+                </ul>
+            </div>
+
+            <div class="footer">
+                <div>Автор изменений: Codex (GPT-5) совместно с владельцем проекта.</div>
+                <div>Дата отчета: 01.03.2026 | Версия релиза: 1.4.6</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

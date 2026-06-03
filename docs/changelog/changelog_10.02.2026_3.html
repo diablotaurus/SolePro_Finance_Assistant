@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Улучшения Desktop интерфейса SolePro Finance Assistant (10.02.2026)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .changelog-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+        }
+        
+        @keyframes moveBackground {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+        
+        .metadata {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .meta-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .meta-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+            border-left: 5px solid #2196F3;
+            padding-left: 25px;
+            background: linear-gradient(to right, rgba(33, 150, 243, 0.05), transparent);
+            border-radius: 0 10px 10px 0;
+            padding: 25px;
+        }
+        
+        .section h2 {
+            color: #1565C0;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E3F2FD;
+        }
+        
+        .section h2 i {
+            font-size: 1.8rem;
+            background: #2196F3;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .changes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 25px;
+        }
+        
+        .change-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #E3F2FD;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .change-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #2196F3;
+        }
+        
+        .change-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.2);
+            border-color: #2196F3;
+        }
+        
+        .change-card h3 {
+            color: #0D47A1;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .change-card .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .status.ui { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); color: #0D47A1; }
+        .status.logic { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .status.ux { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: #E65100; }
+        
+        .file-list {
+            background: #F5F9FF;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #E3F2FD;
+        }
+        
+        .file-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #E3F2FD;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            color: #2D3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-item:hover {
+            background: #E3F2FD;
+            padding-left: 20px;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-item.new::before {
+            content: "🚀";
+            font-size: 1.1rem;
+        }
+        
+        .file-item.modified::before {
+            content: "⚡";
+            font-size: 1.1rem;
+        }
+        
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .principle-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #E3F2FD;
+            transition: all 0.3s ease;
+        }
+        
+        .principle-card:hover {
+            transform: translateY(-5px);
+            border-color: #2196F3;
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.1);
+        }
+        
+        .principle-card h4 {
+            color: #1565C0;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .principle-card .principle-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #2196F3;
+        }
+        
+        .test-results {
+            background: #F5F9FF;
+            border: 3px solid #E3F2FD;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+        
+        .test-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #E3F2FD;
+        }
+        
+        .test-item.passed::before {
+            content: "✅";
+            font-size: 1.2rem;
+        }
+        
+        .test-item.in-progress::before {
+            content: "⏳";
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+        
+        .footer p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .changes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section h2 {
+                font-size: 1.6rem;
+            }
+            
+            .section h2 i {
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Качество UI и удобство ввода: контрагенты, таблицы, сортировки и иконки</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 10.02.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.3.0 RC</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Архитектор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> Этап: Улучшения UX</div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <!-- Раздел 1: Краткое описание -->
+                <div class="section">
+                    <h2><i class="fas fa-sitemap"></i> Ключевые улучшения релиза</h2>
+                    <p>Выполнена серия точечных улучшений Desktop интерфейса, направленных на удобство ввода данных, единый визуальный стиль и корректность сортировки. Подключена глобальная иконка приложения, внедрена логика добавления контрагентов из окна транзакции, выровнены таблицы и заголовки, исправлена статистика.</p>
+                </div>
+                
+                <!-- Раздел 2: Изменения UI -->
+                <div class="section">
+                    <h2><i class="fas fa-paint-brush"></i> Интерфейс и стиль</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3><i class="fas fa-border-style"></i> Единая обводка полей</h3>
+                            <span class="status ui">UI</span>
+                            <p>Добавлена корректная обводка для многострочных полей ввода в диалогах транзакций и контрагентов. Стиль приведен к единому виду с однострочными полями.</p>
+                        </div>
+                        <div class="change-card">
+                            <h3><i class="fas fa-list-ol"></i> Нумерация строк</h3>
+                            <span class="status ui">UI</span>
+                            <p>В таблицах статистики, транзакций и контрагентов активирован вертикальный заголовок с нумерацией строк. Центрирование номеров и управляемая ширина задаются через settings.ini.</p>
+                        </div>
+                        <div class="change-card">
+                            <h3><i class="fas fa-table"></i> Визуальная гармония</h3>
+                            <span class="status ux">UX</span>
+                            <p>Вертикальные заголовки унифицированы по высоте строк и шрифту. Таблицы стали визуально ровными и единообразными.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Раздел 3: Логика и функциональность -->
+                <div class="section">
+                    <h2><i class="fas fa-cogs"></i> Логика и функциональность</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3><i class="fas fa-user-plus"></i> Добавление контрагента из транзакции</h3>
+                            <span class="status logic">LOGIC</span>
+                            <p>Из окна «Добавить транзакцию» теперь можно создать контрагента напрямую. Новый контрагент автоматически выбирается после сохранения.</p>
+                        </div>
+                        <div class="change-card">
+                            <h3><i class="fas fa-sort-amount-down"></i> Корректная сортировка</h3>
+                            <span class="status logic">LOGIC</span>
+                            <p>Сортировка по датам и суммам в таблице транзакций исправлена. Используется числовой и временной ключ, а не строковый текст.</p>
+                        </div>
+                        <div class="change-card">
+                            <h3><i class="fas fa-chart-line"></i> Средний налог в статистике</h3>
+                            <span class="status logic">LOGIC</span>
+                            <p>Добавлен расчет среднего налога и корректное отображение нулевых значений без прочерков.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Раздел 4: Иконка приложения -->
+                <div class="section">
+                    <h2><i class="fas fa-icons"></i> Иконка приложения</h2>
+                    <p>Иконка устанавливается глобально на уровне QApplication. Приоритет загрузки: <strong>solepro.ico → solepro.png → solepro.svg</strong>. Все окна получают иконку по умолчанию, при необходимости могут переопределять ее локально.</p>
+                </div>
+                
+                <!-- Раздел 5: Измененные файлы -->
+                <div class="section">
+                    <h2><i class="fas fa-folder-open"></i> Измененные файлы</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">src/solepro/presentation/desktop/views/transaction_dialog.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/main_window.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/styles.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/counterparty_manager.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/views/transaction_table.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/views/statistics_dialog.py</div>
+                        <div class="file-item modified">src/solepro/core/application/use_cases/transaction_use_cases.py</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/application.py</div>
+                        <div class="file-item modified">settings/settings.ini</div>
+                    </div>
+                </div>
+                
+                <!-- Раздел 6: Принципы и качество -->
+                <div class="section">
+                    <h2><i class="fas fa-check-double"></i> Принципы и качество</h2>
+                    <div class="principles-grid">
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-sitemap"></i></div>
+                            <h4>MVC</h4>
+                            <p>UI-логика изолирована на уровне представления, бизнес-логика не затронута.</p>
+                        </div>
+                        
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-cube"></i></div>
+                            <h4>OOP</h4>
+                            <p>Инкапсуляция поведения сортировки и единые методы настройки таблиц.</p>
+                        </div>
+                        
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-boxes"></i></div>
+                            <h4>DRY & SOLID</h4>
+                            <p>Минимальные повторения и четкое разделение ответственности.</p>
+                        </div>
+                        
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-shield-alt"></i></div>
+                            <h4>Надежность</h4>
+                            <p>Проверки на отсутствие данных и корректная работа в нулевых значениях.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Раздел 7: Тестирование -->
+                <div class="section">
+                    <h2><i class="fas fa-vial"></i> Проверка изменений</h2>
+                    <div class="test-results">
+                        <div class="test-row">
+                            <div class="test-item passed">Диалог добавления транзакции с созданием контрагента</div>
+                            <div class="test-item passed">Сортировка дат и сумм в таблице транзакций</div>
+                            <div class="test-item passed">Отображение среднего налога</div>
+                        </div>
+                        <div class="test-row" style="margin-top: 15px;">
+                            <div class="test-item passed">Единый стиль таблиц и вертикальных заголовков</div>
+                            <div class="test-item passed">Глобальная иконка приложения</div>
+                            <div class="test-item in-progress">Финальная ручная проверка UI</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Раздел 8: Заключение -->
+                <div class="section">
+                    <h2><i class="fas fa-flag-checkered"></i> Итог</h2>
+                    <p><strong>Статус:</strong> Desktop интерфейс доведен до финального качества. Улучшены UX-сценарии, визуальная целостность и корректность расчетов/сортировок. Проект готов к следующему этапу оформления и выпуска.</p>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | UI/UX улучшения | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Единый стиль, корректные расчеты и быстрые сценарии ввода данных</p>
+                
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">PyQt6</div>
+                    <div class="tech-item">Clean Architecture</div>
+                    <div class="tech-item">MVC</div>
+                    <div class="tech-item">SOLID</div>
+                    <div class="tech-item">UI/UX polish</div>
+                </div>
+                
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.3.0 RC | 
+                    <i class="fas fa-check-circle"></i> Статус: Готово | 
+                    <i class="fas fa-calendar"></i> Дата отчета: 10.02.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Тестовая стабилизация SolePro Finance Assistant (13.02.2026)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #263238;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1280px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1E88E5 0%, #0D47A1 100%);
+            color: #fff;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .header .subtitle { font-size: 1.2rem; opacity: 0.95; }
+        .meta {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .meta-item {
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.28);
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .content { padding: 36px; }
+        .section {
+            margin-bottom: 28px;
+            border-left: 4px solid #2196F3;
+            background: #F7FBFF;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .section h2 {
+            color: #1565C0;
+            font-size: 1.45rem;
+            margin-bottom: 12px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+        .item {
+            background: #fff;
+            border: 1px solid #DCEFFF;
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .item h3 {
+            color: #0D47A1;
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+        }
+        ul { padding-left: 18px; }
+        li { margin-bottom: 6px; }
+        .status-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .status {
+            background: #fff;
+            border: 1px solid #DCEFFF;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+        .status .num { font-size: 2rem; color: #1565C0; font-weight: 800; }
+        .status .lbl { color: #546E7A; font-size: 0.9rem; text-transform: uppercase; }
+        .tag {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .tag.test { background: #FFF3E0; color: #E65100; }
+        .tag.fix { background: #E8F5E9; color: #1B5E20; }
+        .tag.config { background: #E3F2FD; color: #0D47A1; }
+        .footer {
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: #fff;
+            text-align: center;
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Подробный отчет по тестовой стабилизации и покрытию тестами</div>
+                <div class="meta">
+                    <div class="meta-item">Дата: 13.02.2026</div>
+                    <div class="meta-item">Версия: 1.3.0 RC</div>
+                    <div class="meta-item">Тип релиза: Freeze / Tests</div>
+                    <div class="meta-item">Фокус: Quality & Reliability</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2>1. Краткий итог</h2>
+                    <p>Проведен целевой этап стабилизации проекта перед заморозкой: расширено тестовое покрытие core/use-cases/infrastructure/presentation, устранены выявленные дефекты, включены UI smoke-тесты в регулярный прогон, добавлен marker для избирательного запуска UI-пакета.</p>
+                    <div class="status-box">
+                        <div class="status">
+                            <div class="num">81</div>
+                            <div class="lbl">Passed Tests</div>
+                        </div>
+                        <div class="status">
+                            <div class="num">0</div>
+                            <div class="lbl">Failed Tests</div>
+                        </div>
+                        <div class="status">
+                            <div class="num">0</div>
+                            <div class="lbl">Skipped Tests</div>
+                        </div>
+                        <div class="status">
+                            <div class="num">0.95s</div>
+                            <div class="lbl">Pytest Duration</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>2. Новые и усиленные тесты</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <span class="tag test">Test Suite</span>
+                            <h3>Use Cases: Transactions</h3>
+                            <ul>
+                                <li>Добавлены сценарии для delete/get/list/search.</li>
+                                <li>Покрыты пагинация, сортировка и фильтры.</li>
+                                <li>Проверены ветки has_tax/no_tax и диапазоны сумм.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_use_cases_transactions.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag test">Test Suite</span>
+                            <h3>Use Cases: Counterparties</h3>
+                            <ul>
+                                <li>Добавлены сценарии delete/get/list/search.</li>
+                                <li>Проверены агрегаты transaction_count/total_income.</li>
+                                <li>Проверена пагинация для поиска.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_use_cases_counterparties.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag test">Test Suite</span>
+                            <h3>Infrastructure Repositories</h3>
+                            <ul>
+                                <li>Усилены проверки исключений и точность assert.</li>
+                                <li>Добавлены проверки find_by_*/statistics/exists.</li>
+                                <li>Покрыты сортировки и агрегатные методы.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_infrastructure.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag test">Test Suite</span>
+                            <h3>Telegram Handlers</h3>
+                            <ul>
+                                <li>Усилены проверки контента ответов.</li>
+                                <li>Добавлен полный диалоговый сценарий /add.</li>
+                                <li>Добавлены error-path и unknown command ветки.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_telegram_handlers.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag test">New File</span>
+                            <h3>Telegram Bot Lifecycle</h3>
+                            <ul>
+                                <li>Покрыты init/setup/post_init/error_handler/run/stop.</li>
+                                <li>Проверена валидация обязательного токена.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_telegram_bot.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag test">New File</span>
+                            <h3>Entrypoints & Bootstrap</h3>
+                            <ul>
+                                <li>Покрыт запуск <code>RunDesktopApp.pyw</code> (success/error).</li>
+                                <li>Покрыты критические ветки <code>DesktopApplication</code>.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_entrypoints.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag test">New File</span>
+                            <h3>MainController</h3>
+                            <ul>
+                                <li>Покрыты сигналы, поисковые ветки и error-path.</li>
+                                <li>Проверены ветки загрузки и удаления данных.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_main_controller.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag test">UI Smoke</span>
+                            <h3>Desktop UI Smoke Tests</h3>
+                            <ul>
+                                <li>Убран искусственный skip через env-gate.</li>
+                                <li>Исправлен setup через штатный <code>pytest-qt qapp</code>.</li>
+                                <li>Устранено зависание на модальном close confirm.</li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/tests/test_ui_smoke.py</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>3. Исправления в production-коде</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <span class="tag fix">Bug Fix</span>
+                            <h3>SQLAlchemy boolean condition</h3>
+                            <p>Устранен дефект в <code>find_by_type()</code>: некорректная проверка SQLAlchemy-условия вызывала <code>TypeError</code>.</p>
+                            <ul>
+                                <li><strong>Было:</strong> <code>if not condition</code></li>
+                                <li><strong>Стало:</strong> <code>if condition is None</code></li>
+                            </ul>
+                            <p><strong>Файл:</strong> <code>src/solepro/infrastructure/database/repositories/transaction_repository.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag fix">Deprecation</span>
+                            <h3>Pydantic v2 compatibility</h3>
+                            <p>Убран deprecation warning: заменен вызов <code>.dict()</code> на <code>.model_dump()</code>.</p>
+                            <p><strong>Файл:</strong> <code>src/solepro/presentation/desktop/controllers/main_controller.py</code></p>
+                        </div>
+                        <div class="item">
+                            <span class="tag fix">Deprecation</span>
+                            <h3>Datetime API update</h3>
+                            <p>Убран warning для <code>datetime.utcnow()</code>: выполнена замена на <code>datetime.now()</code> в обработчике Telegram-диалога.</p>
+                            <p><strong>Файл:</strong> <code>src/solepro/presentation/telegram/handlers.py</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>4. Конфигурация тестового запуска</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <span class="tag config">Pytest Config</span>
+                            <h3>Новый marker для UI</h3>
+                            <p>Добавлен marker <code>ui</code> для избирательного запуска UI-тестов.</p>
+                            <p><strong>Файл:</strong> <code>pyproject.toml</code></p>
+                            <ul>
+                                <li>Запуск только UI: <code>pytest -m ui</code></li>
+                                <li>Запуск без UI: <code>pytest -m "not ui"</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>5. Контрольные прогоны</h2>
+                    <ul>
+                        <li><code>pytest --disable-warnings</code> → <strong>81 passed in 0.95s</strong></li>
+                        <li><code>pytest -q -m ui</code> → <strong>2 passed</strong></li>
+                        <li><code>pytest -q</code> → <strong>полный набор тестов проходит</strong></li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h2>6. Список измененных файлов</h2>
+                    <div class="grid">
+                        <div class="item">
+                            <h3>Production</h3>
+                            <ul>
+                                <li><code>src/solepro/infrastructure/database/repositories/transaction_repository.py</code></li>
+                                <li><code>src/solepro/presentation/desktop/controllers/main_controller.py</code></li>
+                                <li><code>src/solepro/presentation/telegram/handlers.py</code></li>
+                                <li><code>pyproject.toml</code></li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <h3>Tests (updated)</h3>
+                            <ul>
+                                <li><code>src/tests/test_use_cases_transactions.py</code></li>
+                                <li><code>src/tests/test_use_cases_counterparties.py</code></li>
+                                <li><code>src/tests/test_infrastructure.py</code></li>
+                                <li><code>src/tests/test_telegram_handlers.py</code></li>
+                                <li><code>src/tests/test_ui_smoke.py</code></li>
+                            </ul>
+                        </div>
+                        <div class="item">
+                            <h3>Tests (new)</h3>
+                            <ul>
+                                <li><code>src/tests/test_telegram_bot.py</code></li>
+                                <li><code>src/tests/test_entrypoints.py</code></li>
+                                <li><code>src/tests/test_main_controller.py</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Test Stabilization Report</p>
+                <p>Версия: 1.3.0 RC | Дата отчета: 13.02.2026 | Статус: Ready for Freeze</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

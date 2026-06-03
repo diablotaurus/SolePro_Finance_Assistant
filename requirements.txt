@@ -1,0 +1,22 @@
+# Core
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+psycopg2-binary>=2.9.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Telegram
+python-telegram-bot[job-queue]>=20.3
+
+# Desktop
+PyQt6>=6.5.0
+pandas>=2.0.0
+openpyxl>=3.1.5
+
+# Utils
+dependency-injector>=4.41.0
+loguru>=0.7.0
+dateutils>=0.6.12
+
+# Dev dependencies (optional)
+# pip install -r requirements-dev.txt

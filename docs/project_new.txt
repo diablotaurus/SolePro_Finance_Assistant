@@ -1,0 +1,72 @@
+SolePro_Finance_Assistant/
+├── src/                              # Исходный код
+│   ├── solepro/                      # Основной пакет
+│   │   ├── core/                     # ЧИСТОЕ ЯДРО
+│   │   │   ├── domain/              # Бизнес-логика (не зависит ни от чего)
+│   │   │   │   ├── entities/        # Сущности
+│   │   │   │   ├── value_objects/   # Value Objects
+│   │   │   │   ├── enums/           # Перечисления
+│   │   │   │   ├── exceptions/      # Бизнес-исключения
+│   │   │   │   └── repositories/    # Интерфейсы репозиториев
+│   │   │   ├── application/         # Use Cases
+│   │   │   │   ├── use_cases/       # Бизнес-сценарии
+│   │   │   │   ├── dto/             # Data Transfer Objects
+│   │   │   │   └── services/        # Сервисы приложения
+│   │   │   └── ports/               # Порти/Адаптеры (интерфейсы)
+│   │   │       ├── repository.py    # Интерфейсы репозиториев
+│   │   │       └── services.py      # Интерфейсы сервисов
+│   │   │
+│   │   ├── infrastructure/          # ИНФРАСТРУКТУРА
+│   │   │   ├── database/            # Работа с БД
+│   │   │   │   ├── models/          # SQLAlchemy модели
+│   │   │   │   ├── repositories/    # Реализации репозиториев
+│   │   │   │   └── migrations/      # Миграции Alembic
+│   │   │   ├── config/              # Конфигурация
+│   │   │   ├── di/                  # Dependency Injection
+│   │   │   └── logging/             # Логирование
+│   │   │
+│   │   ├── presentation/            # ПРЕДСТАВЛЕНИЕ
+│   │   │   ├── desktop/             # Десктопное приложение
+│   │   │   │   ├── controllers/     # Контроллеры
+│   │   │   │   ├── views/           # Представления (UI)
+│   │   │   │   └── widgets/         # UI компоненты
+│   │   │   └── telegram/            # Телеграм бот
+│   │   │       ├── handlers/        # Обработчики
+│   │   │       └── keyboards/       # Клавиатуры
+│   │   │
+│   │   ├── shared/                  # ОБЩИЕ УТИЛИТЫ
+│   │   │   ├── utils/               # Утилиты
+│   │   │   └── exceptions/          # Общие исключения
+│   │   │
+│   │   └── main.py                  # DI контейнер и точка входа
+│   │
+│   ├── tests/                       # ТЕСТЫ
+│   │   ├── unit/                    # Модульные тесты
+│   │   ├── integration/             # Интеграционные тесты
+│   │   └── fixtures/                # Фикстуры для тестов
+│   │
+│   └── scripts/                     # СКРИПТЫ
+│       ├── init_db.py               # Инициализация БД
+│       └── migrate_data.py          # Миграция данных (если понадобится)
+│
+├── docker/                          # DOCKER
+│   ├── postgres/                    # PostgreSQL конфигурация
+│   └── app/                         # Конфигурация приложения
+│
+├── docs/                            # ДОКУМЕНТАЦИЯ
+│   ├── architecture/                # Архитектурная документация
+│   ├── api/                         # API документация
+│   └── deployment/                  # Деплоймент
+│
+├── alembic/                         # МИГРАЦИИ БД (Alembic)
+├── .env.example                     # Шаблон переменных окружения
+├── .env.test                        # Переменные для тестов
+├── docker-compose.yml               # Docker Compose
+├── docker-compose.test.yml          # Docker Compose для тестов
+├── pyproject.toml                   # Зависимости и настройки
+├── pytest.ini                       # Конфигурация pytest
+├── mypy.ini                         # Конфигурация mypy
+├── .pre-commit-config.yaml          # Pre-commit хуки
+├── Makefile                         # Команды для разработки
+├── requirements.txt                 # Основные зависимости
+└── README.md                        # Обновленная документация

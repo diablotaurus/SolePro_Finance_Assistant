@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — Оптимизация Application/Persistence слоёв SolePro Finance Assistant (03.06.2026)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .changelog-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 60s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+
+        .metadata {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .meta-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 50px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            border-left: 5px solid #2196F3;
+            padding-left: 25px;
+            background: linear-gradient(to right, rgba(33, 150, 243, 0.05), transparent);
+            border-radius: 0 10px 10px 0;
+            padding: 25px;
+        }
+
+        .section h2 {
+            color: #1565C0;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E3F2FD;
+        }
+
+        .section h2 i {
+            font-size: 1.8rem;
+            background: #2196F3;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .changes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .change-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #E3F2FD;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .change-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #2196F3;
+        }
+
+        .change-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(33, 150, 243, 0.2);
+            border-color: #2196F3;
+        }
+
+        .change-card h3 {
+            color: #0D47A1;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .change-card .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .status.architecture { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); color: #0D47A1; }
+        .status.domain { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .status.infrastructure { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: #E65100; }
+        .status.application { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); color: #4A148C; }
+        .status.performance { background: linear-gradient(135deg, #E0F7FA, #B2EBF2); color: #006064; }
+        .status.testing { background: linear-gradient(135deg, #FFF8E1, #FFECB3); color: #FF6F00; }
+
+        .file-list {
+            background: #F5F9FF;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #E3F2FD;
+        }
+
+        .file-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #E3F2FD;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            color: #2D3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #E3F2FD;
+            padding-left: 20px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item.new::before {
+            content: "🚀";
+            font-size: 1.1rem;
+        }
+
+        .file-item.modified::before {
+            content: "⚡";
+            font-size: 1.1rem;
+        }
+
+        .file-item.deleted::before {
+            content: "🗑️";
+            font-size: 1.1rem;
+        }
+
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .principle-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #E3F2FD;
+            transition: all 0.3s ease;
+        }
+
+        .principle-card:hover {
+            transform: translateY(-5px);
+            border-color: #2196F3;
+            box-shadow: 0 10px 25px rgba(33, 150, 243, 0.1);
+        }
+
+        .principle-card h4 {
+            color: #1565C0;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .principle-card .principle-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #2196F3;
+        }
+
+        .test-results {
+            background: #F5F9FF;
+            border: 3px solid #E3F2FD;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 25px;
+        }
+
+        .test-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #E3F2FD;
+        }
+
+        .test-item.passed::before {
+            content: "✅";
+            font-size: 1.2rem;
+        }
+
+        .test-item.failed::before {
+            content: "❌";
+            font-size: 1.2rem;
+        }
+
+        .test-item.in-progress::before {
+            content: "⏳";
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .code-snippet {
+            background: #1E1E1E;
+            color: #D4D4D4;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            border-left: 5px solid #2196F3;
+            white-space: pre;
+        }
+
+        .code-snippet .keyword { color: #569CD6; }
+        .code-snippet .string { color: #CE9178; }
+        .code-snippet .comment { color: #6A9955; }
+        .code-snippet .class { color: #4EC9B0; }
+        .code-snippet .function { color: #DCDCAA; }
+
+        .file-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid #E3F2FD;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .stat-label {
+            color: #546E7A;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E3F2FD;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid #E3F2FD;
+        }
+
+        .compare-table th {
+            background: linear-gradient(135deg, #2196F3, #1565C0);
+            color: white;
+            font-weight: 600;
+        }
+
+        .compare-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .compare-table .before { color: #C62828; font-weight: 600; }
+        .compare-table .after { color: #1B5E20; font-weight: 700; }
+
+        .warning-box {
+            background: linear-gradient(135deg, #FFF3E0, #FFECB3);
+            border: 2px solid #FFB300;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .warning-box::before {
+            content: "⚠️";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        .warning-box h3 {
+            color: #E65100;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+
+        .footer p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .changes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section h2 {
+                font-size: 1.6rem;
+            }
+
+            .section h2 i {
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Оптимизация слоёв Application и Persistence: паттерн Specification и read-модель против N+1</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 03.06.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.7</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> Этап: Рефакторинг и оптимизация</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Раздел 1: Обзор -->
+                <div class="section">
+                    <h2><i class="fas fa-clipboard-check"></i> Обзор релиза</h2>
+                    <p>Релиз посвящён двум целевым улучшениям слоёв <strong>Application</strong> и <strong>Persistence</strong> без изменения публичного API Use Cases и поведения приложения. Оба изменения подтверждены полным прогоном тестов (<strong>156 passed</strong>) и инструментальным замером количества SQL-запросов.</p>
+                    <div class="file-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">156</div>
+                            <div class="stat-label">Тестов проходят</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">−4 → 1</div>
+                            <div class="stat-label">Копий фильтрации</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">7 → 2</div>
+                            <div class="stat-label">SQL-запросов на список</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">0</div>
+                            <div class="stat-label">Изменений API Use Cases</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Раздел 2: Приоритет 1 -->
+                <div class="section">
+                    <h2><i class="fas fa-filter"></i> Приоритет 1 — Единая спецификация фильтрации (DRY/SOLID)</h2>
+                    <p>Логика фильтрации транзакций (даты, тип, налог, диапазон суммы, контрагент) и нормализации дат была продублирована <strong>в четырёх местах</strong>. Введён единый immutable-класс <strong>TransactionFilterSpecification</strong> (паттерн Specification) — единственный источник истины для правила фильтрации.</p>
+
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3><i class="fas fa-cube"></i> TransactionFilterSpecification</h3>
+                            <span class="status application">APPLICATION</span>
+                            <p>Инкапсулирует правило соответствия транзакции активным фильтрам (SRP), нормализацию начала/конца периода и порождение спецификации для соседнего периода (<code>for_period</code>) для сравнения периодов в статистике.</p>
+                            <div class="code-snippet"><span class="keyword">class</span> <span class="class">TransactionFilterSpecification</span>:
+    <span class="keyword">def</span> <span class="function">is_satisfied_by</span>(self, transaction: Transaction) -> bool:
+        <span class="keyword">if</span> self._start_dt <span class="keyword">and</span> transaction.date &lt; self._start_dt:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">if</span> self._end_dt <span class="keyword">and</span> transaction.date &gt; self._end_dt:
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="comment"># ... тип, налог, диапазон суммы, контрагент</span>
+        <span class="keyword">return</span> <span class="keyword">True</span>
+
+    <span class="keyword">@classmethod</span>
+    <span class="keyword">def</span> <span class="function">from_filter_dto</span>(cls, filter_dto): ...
+    <span class="keyword">def</span> <span class="function">for_period</span>(self, start, end): ...</div>
+                        </div>
+
+                        <div class="change-card">
+                            <h3><i class="fas fa-recycle"></i> Устранённое дублирование</h3>
+                            <span class="status application">DRY</span>
+                            <p>Четыре копии фильтрации и две копии нормализации дат заменены на единый вызов <code>spec.is_satisfied_by(...)</code>. Удалены приватные методы <code>_matches_filters</code>, <code>_matches_transaction_filters</code>, <code>_to_start_datetime</code>, <code>_to_end_datetime</code>.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">ListTransactionsUseCase — фильтрация через spec</div>
+                                <div class="file-item modified">SearchTransactionsUseCase — фильтрация через spec</div>
+                                <div class="file-item modified">GetTransactionStatisticsUseCase — spec + for_period</div>
+                                <div class="file-item modified">GetCounterpartyStatisticsUseCase — from_filter_dto</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Раздел 3: Приоритет 2 -->
+                <div class="section">
+                    <h2><i class="fas fa-bolt"></i> Приоритет 2 — Read-модель против N+1 запросов</h2>
+                    <p>Связь <code>TransactionModel.counterparty</code> уже загружается через <code>lazy="joined"</code>, однако доменная сущность хранит только <code>counterparty_id</code>, поэтому Use Cases повторно запрашивали имя контрагента (<code>get_by_id</code>) — по запросу на каждого уникального контрагента. Введена лёгкая read-модель <strong>TransactionView</strong>, отдающая имя из уже загруженного JOIN — <strong>без дополнительных запросов</strong>. Доменная сущность <code>Transaction</code> осталась «чистой».</p>
+
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3><i class="fas fa-table"></i> Read-модель TransactionView</h3>
+                            <span class="status domain">DOMAIN · CONTRACT</span>
+                            <p>Immutable read-модель в контракте репозитория. Реализация мапит имя из уже загруженной связи, не обращаясь к БД повторно.</p>
+                            <div class="code-snippet"><span class="keyword">@dataclass</span>(frozen=<span class="keyword">True</span>)
+<span class="keyword">class</span> <span class="class">TransactionView</span>:
+    <span class="function">transaction</span>: Transaction
+    <span class="function">counterparty_name</span>: Optional[str] = <span class="keyword">None</span>
+
+<span class="comment"># Реализация: имя берётся из уже загруженного JOIN</span>
+<span class="keyword">def</span> <span class="function">_to_view</span>(self, model):
+    name = model.counterparty.name <span class="keyword">if</span> model.counterparty <span class="keyword">else</span> <span class="keyword">None</span>
+    <span class="keyword">return</span> TransactionView(self._to_entity(model), name)</div>
+                        </div>
+
+                        <div class="change-card">
+                            <h3><i class="fas fa-database"></i> Новые read-методы + DRY в репозитории</h3>
+                            <span class="status infrastructure">INFRASTRUCTURE</span>
+                            <p>Добавлены <code>get_by_id_with_counterparty</code>, <code>find_all_with_counterparty</code>, <code>search_with_counterparty</code>. Построение запросов вынесено в общие хелперы <code>_query_all</code> / <code>_query_search</code> / <code>_query_by_id</code> — без дублирования между сущностным и read-вариантами.</p>
+                            <div class="file-list">
+                                <div class="file-item modified">ListTransactionsUseCase → find_all_with_counterparty</div>
+                                <div class="file-item modified">SearchTransactionsUseCase → search_with_counterparty</div>
+                                <div class="file-item modified">GetTransactionUseCase → get_by_id_with_counterparty</div>
+                                <div class="file-item modified">GetCounterpartyStatisticsUseCase → read-модель в цикле</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th>Сценарий: список из 10 транзакций (5 контрагентов)</th>
+                                <th>Было</th>
+                                <th>Стало</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Отдельных SELECT к counterparties (по одному на контрагента)</td>
+                                <td class="before">+5</td>
+                                <td class="after">0</td>
+                            </tr>
+                            <tr>
+                                <td>Всего SELECT за вызов ListTransactionsUseCase</td>
+                                <td class="before">~7</td>
+                                <td class="after">2</td>
+                            </tr>
+                            <tr>
+                                <td>Корректность имён контрагентов</td>
+                                <td class="before">OK</td>
+                                <td class="after">OK (через JOIN)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Раздел 4: Изменённые файлы -->
+                <div class="section">
+                    <h2><i class="fas fa-folder-open"></i> Затронутые файлы</h2>
+                    <div class="file-list">
+                        <div class="file-item new">src/solepro/core/application/specifications.py — TransactionFilterSpecification</div>
+                        <div class="file-item modified">src/solepro/core/application/__init__.py — экспорт спецификации</div>
+                        <div class="file-item modified">src/solepro/core/application/use_cases/transaction_use_cases.py</div>
+                        <div class="file-item modified">src/solepro/core/application/use_cases/counterparty_use_cases.py</div>
+                        <div class="file-item modified">src/solepro/core/domain/repositories/transaction_repository.py — TransactionView + 3 метода</div>
+                        <div class="file-item modified">src/solepro/core/domain/repositories/__init__.py — экспорт TransactionView</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/repositories/transaction_repository.py — read-методы + DRY-хелперы</div>
+                        <div class="file-item modified">pyproject.toml — версия 1.4.7</div>
+                    </div>
+                </div>
+
+                <!-- Раздел 5: Гарантии качества -->
+                <div class="section">
+                    <h2><i class="fas fa-check-double"></i> Гарантии качества</h2>
+                    <div class="test-results">
+                        <div class="test-row">
+                            <div class="test-item passed">Полный прогон: 156 passed</div>
+                            <div class="test-item passed">Поведение Use Cases не изменилось</div>
+                            <div class="test-item passed">Публичный API Use Cases без изменений</div>
+                        </div>
+                        <div class="test-row" style="margin-top: 15px;">
+                            <div class="test-item passed">Замер SQL: 2 запроса вместо 7</div>
+                            <div class="test-item passed">Доменная сущность Transaction осталась чистой</div>
+                            <div class="test-item passed">DI, application.py, bot.py, контроллеры не затронуты</div>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h3><i class="fas fa-info-circle"></i> Замечание на будущее</h3>
+                        <p>При импорте конфигурации зафиксировано предупреждение pydantic: <strong>BaseSettings</strong> перенесён в пакет <code>pydantic-settings</code> (pydantic v2). Сейчас не влияет на работу, но является кандидатом на отдельную правку в инфраструктурном слое.</p>
+                    </div>
+                </div>
+
+                <!-- Раздел 6: Принципы -->
+                <div class="section">
+                    <h2><i class="fas fa-shapes"></i> Соответствие принципам</h2>
+                    <div class="principles-grid">
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-recycle"></i></div>
+                            <h4>DRY</h4>
+                            <p>Единый источник истины для фильтрации и построения запросов</p>
+                        </div>
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-boxes"></i></div>
+                            <h4>SOLID</h4>
+                            <p>SRP: правило фильтрации и read-проекция вынесены в отдельные типы</p>
+                        </div>
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-cube"></i></div>
+                            <h4>DDD</h4>
+                            <p>Доменная сущность осталась чистой; read-модель — отдельная проекция</p>
+                        </div>
+                        <div class="principle-card">
+                            <div class="principle-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <h4>Performance</h4>
+                            <p>Устранение N+1 за счёт уже загруженного JOIN</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Оптимизация Application/Persistence | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Меньше дублирования, меньше запросов — то же поведение</p>
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">Specification Pattern</div>
+                    <div class="tech-item">Read Model</div>
+                    <div class="tech-item">Clean Architecture</div>
+                    <div class="tech-item">SOLID · DRY</div>
+                    <div class="tech-item">156 tests green</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.7 |
+                    <i class="fas fa-check-circle"></i> Статус: Готово, тесты зелёные |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 03.06.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
