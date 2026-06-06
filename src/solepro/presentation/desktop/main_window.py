@@ -676,11 +676,12 @@ class MainWindow(QMainWindow):
     
     def show_statistics(self) -> None:
         """Показать статистику."""
-        statistics = self.controller.get_transaction_statistics()
-        if not statistics:
+        all_time_statistics = self.controller.get_transaction_statistics()
+        if not all_time_statistics:
             QMessageBox.warning(self, "Внимание", "Не удалось загрузить статистику")
             return
 
+        statistics = all_time_statistics
         filtered_statistics = self.controller.get_transaction_statistics(
             self.filter_panel.get_current_filter()
         )
@@ -711,7 +712,12 @@ class MainWindow(QMainWindow):
             statistics = statistics.model_copy(update={"top_counterparties": counterparty_stats})
 
         period_text = self._build_statistics_period_text(statistics)
-        dialog = StatisticsDialog(statistics, self, period_text=period_text)
+        dialog = StatisticsDialog(
+            statistics,
+            self,
+            period_text=period_text,
+            all_time_statistics=all_time_statistics,
+        )
         dialog.exec()
 
     def _build_statistics_period_text(self, statistics) -> str:

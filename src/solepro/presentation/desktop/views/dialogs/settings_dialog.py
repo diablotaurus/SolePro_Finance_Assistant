@@ -133,6 +133,8 @@ class SettingsDialog(QDialog):
         self.chart_concentration_min_height = self._create_spinbox(120, 1200)
         self.chart_tax_min_height = self._create_spinbox(120, 1200)
 
+        self.statistics_key_value_font_size = self._create_spinbox(10, 36)
+
         behavior_group = QGroupBox("Приложение: поведение и окно")
         behavior_layout = QFormLayout(behavior_group)
         behavior_layout.setSpacing(8)
@@ -336,6 +338,19 @@ class SettingsDialog(QDialog):
         )
         charts_layout.addRow("Налоги: минимальная высота:", self.chart_tax_min_height)
 
+        statistics_fonts_group = QGroupBox("Статистика: шрифты")
+        statistics_fonts_layout = QFormLayout(statistics_fonts_group)
+        statistics_fonts_layout.setSpacing(8)
+        statistics_fonts_layout.addRow(
+            self._create_group_hint_label(
+                "Кегль значений в блоке 'Ключевые показатели' окна статистики."
+            )
+        )
+        statistics_fonts_layout.addRow(
+            "Кегль значений (Ключевые показатели):",
+            self.statistics_key_value_font_size,
+        )
+
         tab_widget = QTabWidget()
 
         general_tab = QWidget()
@@ -361,6 +376,7 @@ class SettingsDialog(QDialog):
 
         statistics_tab = QWidget()
         statistics_tab_layout = QVBoxLayout(statistics_tab)
+        statistics_tab_layout.addWidget(statistics_fonts_group)
         statistics_tab_layout.addWidget(palette_group)
         statistics_tab_layout.addWidget(charts_group)
         statistics_tab_layout.addStretch()
@@ -557,6 +573,9 @@ class SettingsDialog(QDialog):
         self.chart_tax_min_height.setValue(
             self.ui_settings.get_int("chart_tax_min_height", 250)
         )
+        self.statistics_key_value_font_size.setValue(
+            self.ui_settings.get_int("statistics_key_value_font_size", 14)
+        )
 
     def _on_save(self) -> None:
         table_font_family = self.table_font_family.text().strip() or "Segoe UI"
@@ -720,6 +739,10 @@ class SettingsDialog(QDialog):
         self.ui_settings.set_int(
             "chart_tax_min_height",
             self.chart_tax_min_height.value(),
+        )
+        self.ui_settings.set_int(
+            "statistics_key_value_font_size",
+            self.statistics_key_value_font_size.value(),
         )
         self.ui_settings.save()
 

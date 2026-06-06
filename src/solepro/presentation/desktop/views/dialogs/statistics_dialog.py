@@ -1,7 +1,7 @@
 """
 Диалог со статистикой.
 """
-from typing import Dict, Any, Optional
+from typing import Optional
 
 from PyQt6.QtWidgets import (
     QDialog,
@@ -18,10 +18,11 @@ from PyQt6.QtWidgets import (
     QHeaderView,
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor, QPainter, QPen, QPainterPath
+from PyQt6.QtGui import QColor, QFontMetrics, QPainter, QPen, QPainterPath
 
 from .....core.application.dto.statistics_dto import StatisticsDTO
 from ...ui_settings import DesktopUiSettings, TableUiConfigurator
+from .statistics_view_model import StatisticsViewModel
 
 
 class MonthlyTrendChart(QWidget):
@@ -33,6 +34,7 @@ class MonthlyTrendChart(QWidget):
         min_height: int = 280,
         colors: Optional[dict[str, QColor]] = None,
         neutral_color: QColor = QColor("#666666"),
+        series_labels: Optional[dict[str, str]] = None,
     ):
         super().__init__(parent)
         self.setMinimumHeight(min_height)
@@ -44,6 +46,12 @@ class MonthlyTrendChart(QWidget):
             "expense": QColor("#c62828"),
             "tax": QColor("#1565c0"),
             "profit": QColor("#6a1b9a"),
+        }
+        self._series_labels = series_labels or {
+            "income": "Доход",
+            "expense": "Расход",
+            "tax": "Налог",
+            "profit": "Прибыль",
         }
 
     def set_data(self, rows: list[dict]) -> None:
@@ -101,6 +109,19 @@ class MonthlyTrendChart(QWidget):
         for index, label in enumerate(labels):
             x = rect.left() + index * x_step
             painter.drawText(int(x - 18), rect.bottom() + 18, label)
+
+        self._paint_legend(painter, rect)
+
+    def _paint_legend(self, painter: QPainter, rect) -> None:
+        series = ("income", "expense", "tax", "profit")
+        x = rect.left()
+        y = 13
+        for key in series:
+            painter.fillRect(x, y - 9, 12, 10, self._colors[key])
+            painter.setPen(QPen(self._neutral_color, 1))
+            label = self._series_labels.get(key, key)
+            painter.drawText(x + 16, y, label)
+            x += 16 + painter.fontMetrics().horizontalAdvance(label) + 18
 
     def _paint_lines(self, painter: QPainter, rect, x_step: float, max_value: float) -> None:
         series = ("income", "expense", "tax", "profit")
@@ -218,12 +239,14 @@ class TaxBurdenChart(QWidget):
         min_height: int = 250,
         tax_color: QColor = QColor("#1565c0"),
         neutral_color: QColor = QColor("#666666"),
+        series_label: str = "Эффективная ставка, %",
     ):
         super().__init__(parent)
         self.setMinimumHeight(min_height)
         self._rows: list[dict] = []
         self._tax_color = tax_color
         self._neutral_color = neutral_color
+        self._series_label = series_label
 
     def set_data(self, rows: list[dict]) -> None:
         self._rows = rows
@@ -274,6 +297,11 @@ class TaxBurdenChart(QWidget):
             x = rect.left() + idx * x_step
             painter.drawText(int(x - 18), rect.bottom() + 18, label)
 
+        # Легенда
+        painter.fillRect(rect.left(), 4, 12, 10, self._tax_color)
+        painter.setPen(QPen(self._neutral_color, 1))
+        painter.drawText(rect.left() + 16, 13, self._series_label)
+
 
 class SortableNumericItem(QTableWidgetItem):
     """QTableWidgetItem with numeric-aware sorting."""
@@ -290,10 +318,19 @@ class SortableNumericItem(QTableWidgetItem):
 
 class StatisticsDialog(QDialog):
     """Диалог для отображения статистики."""
-    
-    def __init__(self, statistics: StatisticsDTO, parent=None, period_text: str = ""):
+
+    def __init__(
+        self,
+        statistics: StatisticsDTO,
+        parent=None,
+        period_text: str = "",
+        all_time_statistics: Optional[StatisticsDTO] = None,
+    ):
         super().__init__(parent)
         self.statistics = statistics
+        self.view_model = StatisticsViewModel(statistics)
+        # Вкладка "По годам" показывает все годы независимо от фильтра периода.
+        self.yearly_view_model = StatisticsViewModel(all_time_statistics or statistics)
         self.period_text = period_text
         self.ui_settings = DesktopUiSettings(__file__, project_root_parent_index=6)
         self.table_ui = TableUiConfigurator(self.ui_settings)
@@ -309,9 +346,10 @@ class StatisticsDialog(QDialog):
             260,
         )
         self.chart_tax_min_height = self.ui_settings.get_int("chart_tax_min_height", 250)
+        self.key_value_font_size = self.ui_settings.get_int("statistics_key_value_font_size", 14)
         self.setup_ui()
         self.load_data()
-    
+
     def setup_ui(self) -> None:
         """Настроить UI диалога."""
         self.setWindowTitle("Статистика")
@@ -319,17 +357,17 @@ class StatisticsDialog(QDialog):
             self.ui_settings.get_int("dialog_statistics_min_width", 800),
             self.ui_settings.get_int("dialog_statistics_min_height", 600),
         )
-        
+
         layout = QVBoxLayout(self)
-        
+
         # Вкладки
         self.tab_widget = QTabWidget()
-        
+
         # Общая статистика
         self.general_tab = QWidget()
         self.setup_general_tab()
         self.tab_widget.addTab(self.general_tab, "Общая")
-        
+
         # Статистика по годам
         self.yearly_tab = QWidget()
         self.setup_yearly_tab()
@@ -338,7 +376,7 @@ class StatisticsDialog(QDialog):
         self.trends_tab = QWidget()
         self.setup_trends_tab()
         self.tab_widget.addTab(self.trends_tab, "Тренды")
-        
+
         # Топ контрагентов
         self.counterparties_tab = QWidget()
         self.setup_counterparties_tab()
@@ -347,105 +385,111 @@ class StatisticsDialog(QDialog):
         self.tax_tab = QWidget()
         self.setup_tax_tab()
         self.tab_widget.addTab(self.tax_tab, "Налоги")
-        
+
         layout.addWidget(self.tab_widget)
-    
+
     def setup_general_tab(self) -> None:
         """Настроить вкладку общей статистики."""
         layout = QGridLayout(self.general_tab)
-        
+
         # Ключевые показатели
         key_indicators_group = QGroupBox("Ключевые показатели")
         key_layout = QGridLayout()
-        
+
         # Общее количество транзакций
         self.total_transactions_label = QLabel("0")
-        self.total_transactions_label.setStyleSheet("font-size: 18pt; font-weight: bold;")
+        self.total_transactions_label.setStyleSheet(self._key_value_style())
         key_layout.addWidget(QLabel("Всего транзакций:"), 0, 0)
         key_layout.addWidget(self.total_transactions_label, 0, 1)
-        
+
         # Общий доход
         self.total_income_label = QLabel("0.00 руб.")
-        self.total_income_label.setStyleSheet(
-            f"font-size: 18pt; font-weight: bold; color: {self.income_color};"
-        )
+        self.total_income_label.setStyleSheet(self._key_value_style(self.income_color))
         key_layout.addWidget(QLabel("Общий доход:"), 1, 0)
         key_layout.addWidget(self.total_income_label, 1, 1)
-        
+
         # Общий расход
         self.total_expense_label = QLabel("0.00 руб.")
-        self.total_expense_label.setStyleSheet(
-            f"font-size: 18pt; font-weight: bold; color: {self.expense_color};"
-        )
+        self.total_expense_label.setStyleSheet(self._key_value_style(self.expense_color))
         key_layout.addWidget(QLabel("Общий расход:"), 2, 0)
         key_layout.addWidget(self.total_expense_label, 2, 1)
-        
+
         # Общий налог
         self.total_tax_label = QLabel("0.00 руб.")
-        self.total_tax_label.setStyleSheet(
-            f"font-size: 18pt; font-weight: bold; color: {self.tax_color};"
-        )
+        self.total_tax_label.setStyleSheet(self._key_value_style(self.tax_color))
         key_layout.addWidget(QLabel("Общий налог:"), 3, 0)
         key_layout.addWidget(self.total_tax_label, 3, 1)
-        
+
         # Общая прибыль
         self.total_profit_label = QLabel("0.00 руб.")
-        self.total_profit_label.setStyleSheet("font-size: 18pt; font-weight: bold;")
+        self.total_profit_label.setStyleSheet(self._key_value_style())
         key_layout.addWidget(QLabel("Общая прибыль:"), 4, 0)
         key_layout.addWidget(self.total_profit_label, 4, 1)
-        
+
+        # Рентабельность (прибыль / доход)
+        self.profitability_label = QLabel("-")
+        self.profitability_label.setStyleSheet(self._key_value_style())
+        key_layout.addWidget(QLabel("Рентабельность (прибыль/доход):"), 5, 0)
+        key_layout.addWidget(self.profitability_label, 5, 1)
+
+        # Эффективная ставка налога (налог / доход)
+        self.effective_tax_rate_label = QLabel("-")
+        self.effective_tax_rate_label.setStyleSheet(self._key_value_style(self.tax_color))
+        key_layout.addWidget(QLabel("Эффективная ставка налога:"), 6, 0)
+        key_layout.addWidget(self.effective_tax_rate_label, 6, 1)
+
         key_indicators_group.setLayout(key_layout)
-        layout.addWidget(key_indicators_group, 2, 0, 1, 2)
-        
+        layout.addWidget(key_indicators_group, 1, 0, 1, 2)
+
         # Средние значения
         averages_group = QGroupBox("Средние значения")
         avg_layout = QGridLayout()
-        
+
         # Средний доход
         self.avg_income_label = QLabel("0.00 руб.")
         avg_layout.addWidget(QLabel("Средний доход:"), 0, 0)
         avg_layout.addWidget(self.avg_income_label, 0, 1)
-        
+
         # Средний расход
         self.avg_expense_label = QLabel("0.00 руб.")
         avg_layout.addWidget(QLabel("Средний расход:"), 1, 0)
         avg_layout.addWidget(self.avg_expense_label, 1, 1)
-        
+
         # Средний налог
         self.avg_tax_label = QLabel("0.00 руб.")
         avg_layout.addWidget(QLabel("Средний налог:"), 2, 0)
         avg_layout.addWidget(self.avg_tax_label, 2, 1)
-        
+
         # Средняя прибыль
         self.avg_profit_label = QLabel("0.00 руб.")
         avg_layout.addWidget(QLabel("Средняя прибыль:"), 3, 0)
         avg_layout.addWidget(self.avg_profit_label, 3, 1)
-        
+
         averages_group.setLayout(avg_layout)
-        layout.addWidget(averages_group, 1, 0)
-        
+        layout.addWidget(averages_group, 2, 0)
+
         # Статистика по типам транзакций
         types_group = QGroupBox("Статистика по типам транзакций")
         types_layout = QGridLayout()
-        
+
         # Количество доходных транзакций
         self.income_count_label = QLabel("0")
         types_layout.addWidget(QLabel("Доходных транзакций:"), 0, 0)
         types_layout.addWidget(self.income_count_label, 0, 1)
-        
+
         # Количество расходных транзакций
         self.expense_count_label = QLabel("0")
         types_layout.addWidget(QLabel("Расходных транзакций:"), 1, 0)
         types_layout.addWidget(self.expense_count_label, 1, 1)
-        
+
         # Количество смешанных транзакций
         self.mixed_count_label = QLabel("0")
         types_layout.addWidget(QLabel("Смешанных транзакций:"), 2, 0)
         types_layout.addWidget(self.mixed_count_label, 2, 1)
-        
+
         types_group.setLayout(types_layout)
-        layout.addWidget(types_group, 1, 1)
-        
+        layout.addWidget(types_group, 2, 1)
+
         # Период
         dates_group = QGroupBox("Период")
         dates_layout = QGridLayout()
@@ -456,7 +500,7 @@ class StatisticsDialog(QDialog):
             "padding-bottom: 8px; font-weight: bold;"
         )
         dates_layout.addWidget(self.period_description_label, 0, 0)
-        
+
         dates_group.setLayout(dates_layout)
         layout.addWidget(dates_group, 0, 0, 1, 2)
 
@@ -489,32 +533,40 @@ class StatisticsDialog(QDialog):
         comparison_group.setLayout(comparison_layout)
         layout.addWidget(comparison_group, 3, 0, 1, 2)
 
-        layout.setRowStretch(2, 1)
-    
+        layout.setRowStretch(3, 1)
+
     def setup_yearly_tab(self) -> None:
         """Настроить вкладку статистики по годам."""
         layout = QVBoxLayout(self.yearly_tab)
 
+        hint = QLabel("Данные за все годы (фильтр периода не применяется).")
+        hint.setStyleSheet(f"color: {self.neutral_color}; padding: 2px 0;")
+        layout.addWidget(hint)
+
         # Таблица
         self.yearly_table = QTableWidget()
-        self.yearly_table.setColumnCount(6)
+        self.yearly_table.setColumnCount(9)
         self.yearly_table.setHorizontalHeaderLabels([
             "Год",
             "Доход",
             "Расход",
             "Налог",
             "Прибыль",
-            "Транзакций"
+            "Маржа %",
+            "Доход г/г %",
+            "Прибыль г/г %",
+            "Транзакций",
         ])
 
-        # Настройки таблицы
+        # Настройки таблицы: ширину колонок можно менять мышкой (Interactive),
+        # начальная ширина авто-подгоняется под содержимое в load_yearly_statistics.
         header = self.yearly_table.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.table_ui.apply_vertical_header(self.yearly_table, "yearlyVerticalHeader")
         self.table_ui.apply_row_heights(self.yearly_table)
 
         layout.addWidget(self.yearly_table)
-    
+
     def setup_counterparties_tab(self) -> None:
         """Настроить объединенную вкладку топа и портфеля контрагентов."""
         layout = QVBoxLayout(self.counterparties_tab)
@@ -548,7 +600,7 @@ class StatisticsDialog(QDialog):
         layout.addWidget(self.concentration_chart)
 
         self.counterparties_table = QTableWidget()
-        self.counterparties_table.setColumnCount(7)
+        self.counterparties_table.setColumnCount(8)
         self.counterparties_table.setHorizontalHeaderLabels([
             "Контрагент",
             "Доход",
@@ -556,9 +608,10 @@ class StatisticsDialog(QDialog):
             "Налог",
             "Прибыль",
             "Маржа %",
+            "% дохода",
             "Транзакций",
         ])
-        
+
         # Настройки таблицы
         header = self.counterparties_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)  # Контрагент
@@ -567,67 +620,16 @@ class StatisticsDialog(QDialog):
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # Налог
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)  # Прибыль
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)  # Маржа %
-        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)  # Транзакций
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)  # % дохода
+        header.setSectionResizeMode(7, QHeaderView.ResizeMode.ResizeToContents)  # Транзакций
         self.table_ui.apply_vertical_header(
             self.counterparties_table,
             "counterpartiesVerticalHeader",
         )
         self.table_ui.apply_row_heights(self.counterparties_table)
         self.counterparties_table.setSortingEnabled(True)
-        
+
         layout.addWidget(self.counterparties_table)
-
-    def setup_concentration_tab(self) -> None:
-        """Настроить вкладку портфеля контрагентов."""
-        layout = QVBoxLayout(self.concentration_tab)
-
-        kpi_group = QGroupBox("Метрики портфеля")
-        kpi_layout = QGridLayout()
-
-        self.portfolio_active_counterparties_label = QLabel("-")
-        self.portfolio_avg_margin_label = QLabel("-")
-        self.portfolio_best_counterparty_label = QLabel("-")
-        self.portfolio_median_profit_label = QLabel("-")
-
-        kpi_layout.addWidget(QLabel("Активных контрагентов:"), 0, 0)
-        kpi_layout.addWidget(self.portfolio_active_counterparties_label, 0, 1)
-        kpi_layout.addWidget(QLabel("Средняя маржа по портфелю:"), 1, 0)
-        kpi_layout.addWidget(self.portfolio_avg_margin_label, 1, 1)
-        kpi_layout.addWidget(QLabel("Лучший по прибыли:"), 0, 2)
-        kpi_layout.addWidget(self.portfolio_best_counterparty_label, 0, 3)
-        kpi_layout.addWidget(QLabel("Медианная прибыль:"), 1, 2)
-        kpi_layout.addWidget(self.portfolio_median_profit_label, 1, 3)
-
-        kpi_group.setLayout(kpi_layout)
-        layout.addWidget(kpi_group)
-
-        self.concentration_chart = CounterpartyConcentrationChart(
-            min_height=self.chart_concentration_min_height,
-            profit_positive_color=QColor(self.profit_positive_color),
-            profit_negative_color=QColor(self.profit_negative_color),
-            neutral_color=QColor(self.neutral_color),
-        )
-        layout.addWidget(self.concentration_chart)
-
-        self.concentration_table = QTableWidget()
-        self.concentration_table.setColumnCount(7)
-        self.concentration_table.setHorizontalHeaderLabels(
-            ["Контрагент", "Доход", "Расход", "Налог", "Прибыль", "Маржа %", "Транзакций"]
-        )
-        header = self.concentration_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)
-        self.table_ui.apply_vertical_header(
-            self.concentration_table,
-            "concentrationVerticalHeader",
-        )
-        self.table_ui.apply_row_heights(self.concentration_table)
-        layout.addWidget(self.concentration_table)
 
     def setup_tax_tab(self) -> None:
         """Настроить вкладку налоговой аналитики."""
@@ -659,6 +661,7 @@ class StatisticsDialog(QDialog):
             min_height=self.chart_tax_min_height,
             tax_color=QColor(self.tax_color),
             neutral_color=QColor(self.neutral_color),
+            series_label="Эффективная ставка налога, %",
         )
         layout.addWidget(self.tax_chart)
 
@@ -712,7 +715,151 @@ class StatisticsDialog(QDialog):
         )
         self.table_ui.apply_row_heights(self.monthly_details_table)
         layout.addWidget(self.monthly_details_table)
-    
+
+    # ------------------------------------------------------------------
+    # Хелперы построения ячеек таблиц
+    # ------------------------------------------------------------------
+    def _profit_color(self, value: float) -> QColor:
+        """Цвет для значения прибыли (положительное/отрицательное)."""
+        return QColor(
+            self.profit_positive_color if value >= 0 else self.profit_negative_color
+        )
+
+    def _money_item(self, value: float, color=None) -> QTableWidgetItem:
+        """Денежная ячейка: формат :,.2f, выравнивание вправо, опц. цвет."""
+        item = QTableWidgetItem(f"{value:,.2f}")
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        if color is not None:
+            item.setForeground(QColor(color))
+        return item
+
+    def _money_item_sortable(self, value: float, color=None) -> SortableNumericItem:
+        """Денежная ячейка с числовой сортировкой."""
+        item = SortableNumericItem(f"{value:,.2f}", value)
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        if color is not None:
+            item.setForeground(QColor(color))
+        return item
+
+    def _percent_item(self, value: float) -> QTableWidgetItem:
+        """Процентная ячейка: формат :.2f%, выравнивание вправо."""
+        item = QTableWidgetItem(f"{value:.2f}%")
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        return item
+
+    def _margin_item_sortable(self, margin: Optional[float]) -> SortableNumericItem:
+        """Ячейка маржи (может быть None) с числовой сортировкой и цветом."""
+        text = f"{margin:.2f}%" if margin is not None else "-"
+        item = SortableNumericItem(text, margin if margin is not None else 0.0)
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        positive = margin is not None and margin >= 0
+        item.setForeground(
+            QColor(self.profit_positive_color if positive else self.profit_negative_color)
+        )
+        return item
+
+    def _count_item_sortable(self, count: int) -> SortableNumericItem:
+        """Ячейка количества с числовой сортировкой, выравнивание по центру."""
+        item = SortableNumericItem(str(count), float(count))
+        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        return item
+
+    def _centered_item(self, text: str) -> QTableWidgetItem:
+        """Текстовая ячейка с выравниванием по центру."""
+        item = QTableWidgetItem(text)
+        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        return item
+
+    def _autofit_columns(self, table: QTableWidget) -> None:
+        """Авто-подгонка ширины колонок под содержимое и заголовки (с запасом).
+
+        После этого колонки остаются перетаскиваемыми мышкой (режим Interactive).
+        """
+        table.resizeColumnsToContents()
+        header = table.horizontalHeader()
+        metrics = QFontMetrics(header.font())
+        for column in range(table.columnCount()):
+            header_item = table.horizontalHeaderItem(column)
+            if header_item is None:
+                continue
+            needed = metrics.horizontalAdvance(header_item.text()) + 24
+            if table.columnWidth(column) < needed:
+                table.setColumnWidth(column, needed)
+
+    def _show_empty_table(self, table: QTableWidget, columns: int) -> None:
+        """Показать в таблице единственную строку 'Нет данных' на всю ширину."""
+        table.clearSpans()
+        table.setRowCount(1)
+        item = QTableWidgetItem("Нет данных")
+        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        table.setItem(0, 0, item)
+        table.setSpan(0, 0, 1, columns)
+        self.table_ui.apply_row_heights(table)
+
+    def _tax_risk_presentation(self, risk_level: str) -> tuple[str, str]:
+        """Сопоставить символический уровень риска с текстом и цветом."""
+        if risk_level == "low":
+            return "Низкий", self.profit_positive_color
+        if risk_level == "medium":
+            return "Средний", "#ef6c00"
+        return "Высокий", self.profit_negative_color
+
+    def _key_value_style(self, color: Optional[str] = None) -> str:
+        """Единый стиль значений 'Ключевых показателей' (кегль — из настроек)."""
+        style = f"font-size: {self.key_value_font_size}pt; font-weight: bold;"
+        if color:
+            style += f" color: {color};"
+        return style
+
+    def _percent_item_sortable(self, value: float) -> SortableNumericItem:
+        """Процентная ячейка с числовой сортировкой."""
+        item = SortableNumericItem(f"{value:.1f}%", value)
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        return item
+
+    def _margin_item(self, margin: Optional[float]) -> QTableWidgetItem:
+        """Ячейка маржи (может быть None) с цветом."""
+        text = f"{margin:.2f}%" if margin is not None else "-"
+        item = QTableWidgetItem(text)
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        if margin is not None:
+            item.setForeground(self._profit_color(margin))
+        return item
+
+    def _growth_item(self, value: Optional[float]) -> QTableWidgetItem:
+        """Ячейка прироста год-к-году (+/-X.X% или '—' для первого года)."""
+        if value is None:
+            item = QTableWidgetItem("—")
+            item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            item.setForeground(QColor(self.neutral_color))
+            return item
+        item = QTableWidgetItem(f"{value:+.1f}%")
+        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        item.setForeground(self._profit_color(value))
+        return item
+
+    def _fill_yearly_totals_row(self, row_index: int, totals) -> None:
+        """Заполнить итоговую (жирную) строку 'Итого' в таблице по годам."""
+        bold = self.yearly_table.font()
+        bold.setBold(True)
+        cells = [
+            self._centered_item("Итого"),
+            self._money_item(totals.income, self.income_color),
+            self._money_item(totals.expense, self.expense_color),
+            self._money_item(totals.tax, self.tax_color),
+            self._money_item(totals.profit, self._profit_color(totals.profit)),
+            self._margin_item(totals.margin),
+            self._centered_item("—"),
+            self._centered_item("—"),
+            self._centered_item(str(totals.count)),
+        ]
+        for column, cell in enumerate(cells):
+            cell.setFont(bold)
+            self.yearly_table.setItem(row_index, column, cell)
+
+    # ------------------------------------------------------------------
+    # Загрузка данных
+    # ------------------------------------------------------------------
     def load_data(self) -> None:
         """Загрузить данные статистики."""
         # Общая статистика
@@ -720,46 +867,40 @@ class StatisticsDialog(QDialog):
         self.total_income_label.setText(f"{float(self.statistics.total_income):,.2f} руб.")
         self.total_expense_label.setText(f"{float(self.statistics.total_expense):,.2f} руб.")
         self.total_tax_label.setText(f"{float(self.statistics.total_tax):,.2f} руб.")
-        
+
         total_profit = float(self.statistics.total_profit)
         self.total_profit_label.setText(f"{total_profit:,.2f} руб.")
-        
+
         # Цвет прибыли
         if total_profit >= 0:
             self.total_profit_label.setStyleSheet(
-                (
-                    "font-size: 18pt; font-weight: bold; color: "
-                    f"{self.profit_positive_color};"
-                )
+                self._key_value_style(self.profit_positive_color)
             )
         else:
             self.total_profit_label.setStyleSheet(
-                (
-                    "font-size: 18pt; font-weight: bold; color: "
-                    f"{self.profit_negative_color};"
-                )
+                self._key_value_style(self.profit_negative_color)
             )
-        
+
         # Средние значения
         if self.statistics.avg_income is not None:
             self.avg_income_label.setText(f"{float(self.statistics.avg_income):,.2f} руб.")
         else:
             self.avg_income_label.setText("-")
-        
+
         if self.statistics.avg_expense is not None:
             self.avg_expense_label.setText(f"{float(self.statistics.avg_expense):,.2f} руб.")
         else:
             self.avg_expense_label.setText("-")
-        
+
         if self.statistics.avg_tax is not None:
             self.avg_tax_label.setText(f"{float(self.statistics.avg_tax):,.2f} руб.")
         else:
             self.avg_tax_label.setText("-")
-        
+
         if self.statistics.avg_profit is not None:
             avg_profit = float(self.statistics.avg_profit)
             self.avg_profit_label.setText(f"{avg_profit:,.2f} руб.")
-            
+
             # Цвет средней прибыли
             if avg_profit >= 0:
                 self.avg_profit_label.setStyleSheet(
@@ -771,451 +912,171 @@ class StatisticsDialog(QDialog):
                 )
         else:
             self.avg_profit_label.setText("-")
-        
+
         # Статистика по типам
         self.income_count_label.setText(str(self.statistics.income_transaction_count))
         self.expense_count_label.setText(str(self.statistics.expense_transaction_count))
         self.mixed_count_label.setText(str(self.statistics.mixed_transaction_count))
-        
+
+        # Рентабельность и эффективная ставка налога
+        overall_margin = self.view_model.overall_margin()
+        if overall_margin is not None:
+            margin_color = (
+                self.profit_positive_color
+                if overall_margin >= 0
+                else self.profit_negative_color
+            )
+            self.profitability_label.setText(f"{overall_margin:.2f}%")
+            self.profitability_label.setStyleSheet(self._key_value_style(margin_color))
+        else:
+            self.profitability_label.setText("-")
+            self.profitability_label.setStyleSheet(self._key_value_style())
+        self.effective_tax_rate_label.setText(
+            f"{self.view_model.tax_kpis().effective_rate:.2f}%"
+        )
+
         # Период
         if self.period_text:
             self.period_description_label.setText(self.period_text)
         self.load_period_comparison()
-        
+
         # Статистика по годам
         self.load_yearly_statistics()
 
         # Тренды по месяцам
         self.load_trends_statistics()
-        
+
         # Топ контрагентов
         self.load_counterparties_statistics()
 
         # Налоговая аналитика
         self.load_tax_statistics()
-    
+
     def load_yearly_statistics(self) -> None:
         """Загрузить статистику по годам."""
-        if not self.statistics.monthly_statistics:
-            self.yearly_table.setRowCount(1)
-            item = QTableWidgetItem("Нет данных")
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.yearly_table.setItem(0, 0, item)
-            self.yearly_table.setSpan(0, 0, 1, 6)
+        rows = self.yearly_view_model.yearly_rows()
+        if not rows:
+            self._show_empty_table(self.yearly_table, 9)
             return
 
-        yearly_stats = {}
-        for monthly in self.statistics.monthly_statistics:
-            stats = yearly_stats.setdefault(
-                monthly.year,
-                {"income": 0.0, "expense": 0.0, "tax": 0.0, "profit": 0.0, "count": 0},
-            )
-            stats["income"] += float(monthly.income)
-            stats["expense"] += float(monthly.expense)
-            stats["tax"] += float(monthly.tax)
-            stats["profit"] += float(monthly.profit)
-            stats["count"] += int(monthly.transaction_count)
+        totals = self.yearly_view_model.yearly_totals()
+        self.yearly_table.clearSpans()
+        self.yearly_table.setRowCount(len(rows) + (1 if totals else 0))
 
-        years = sorted(yearly_stats.keys())
-        self.yearly_table.setRowCount(len(years))
+        for row_index, row in enumerate(rows):
+            self.yearly_table.setItem(row_index, 0, self._centered_item(str(row.year)))
+            self.yearly_table.setItem(row_index, 1, self._money_item(row.income, self.income_color))
+            self.yearly_table.setItem(row_index, 2, self._money_item(row.expense, self.expense_color))
+            self.yearly_table.setItem(row_index, 3, self._money_item(row.tax, self.tax_color))
 
-        for row, year in enumerate(years):
-            stats = yearly_stats[year]
-            # Год
-            year_item = QTableWidgetItem(str(year))
-            year_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.yearly_table.setItem(row, 0, year_item)
-
-            # Доход
-            income_item = QTableWidgetItem(f"{stats['income']:,.2f}")
-            income_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            income_item.setForeground(QColor(self.income_color))
-            self.yearly_table.setItem(row, 1, income_item)
-
-            # Расход
-            expense_item = QTableWidgetItem(f"{stats['expense']:,.2f}")
-            expense_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            expense_item.setForeground(QColor(self.expense_color))
-            self.yearly_table.setItem(row, 2, expense_item)
-
-            # Налог
-            tax_item = QTableWidgetItem(f"{stats['tax']:,.2f}")
-            tax_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            tax_item.setForeground(QColor(self.tax_color))
-            self.yearly_table.setItem(row, 3, tax_item)
-
-            # Прибыль
-            profit = float(stats["profit"])
-            profit_item = QTableWidgetItem(f"{profit:,.2f}")
-            profit_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            
-            if profit >= 0:
-                profit_item.setForeground(QColor(self.profit_positive_color))
+            profit_item = self._money_item(row.profit, self._profit_color(row.profit))
+            if row.profit >= 0:
                 profit_item.setBackground(QColor("#e8f5e9"))
             else:
-                profit_item.setForeground(QColor(self.profit_negative_color))
                 profit_item.setBackground(QColor("#ffebee"))
-            
-            self.yearly_table.setItem(row, 4, profit_item)
+            self.yearly_table.setItem(row_index, 4, profit_item)
 
-            # Количество транзакций
-            count_item = QTableWidgetItem(str(stats["count"]))
-            count_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.yearly_table.setItem(row, 5, count_item)
+            self.yearly_table.setItem(row_index, 5, self._margin_item(row.margin))
+            self.yearly_table.setItem(row_index, 6, self._growth_item(row.income_growth))
+            self.yearly_table.setItem(row_index, 7, self._growth_item(row.profit_growth))
+            self.yearly_table.setItem(row_index, 8, self._centered_item(str(row.count)))
 
+        if totals:
+            self._fill_yearly_totals_row(len(rows), totals)
+
+        self._autofit_columns(self.yearly_table)
         self.table_ui.apply_row_heights(self.yearly_table)
-    
+
     def load_counterparties_statistics(self) -> None:
         """Загрузить статистику топа и метрики портфеля контрагентов."""
-        counterparties = list(self.statistics.top_counterparties or [])
+        rows = self.view_model.counterparty_rows()
         self.counterparties_table.setSortingEnabled(False)
-        if not counterparties:
+        if not rows:
             self.portfolio_active_counterparties_label.setText("-")
             self.portfolio_avg_margin_label.setText("-")
             self.portfolio_best_counterparty_label.setText("-")
             self.portfolio_median_profit_label.setText("-")
             self.concentration_chart.set_data([])
-            self.counterparties_table.setRowCount(1)
-            item = QTableWidgetItem("Нет данных")
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.counterparties_table.setItem(0, 0, item)
-            self.counterparties_table.setSpan(0, 0, 1, 7)
+            self._show_empty_table(self.counterparties_table, 8)
             self.counterparties_table.setSortingEnabled(True)
             return
 
-        rows = []
-        total_income = 0.0
-        total_profit = 0.0
-        for cp in counterparties:
-            income_value = float(cp.total_income)
-            expense_value = float(cp.total_expense)
-            tax_value = float(cp.total_tax)
-            profit_value = float(cp.total_profit)
-            margin = (profit_value / income_value * 100.0) if income_value > 0 else None
-            rows.append(
-                {
-                    "cp": cp,
-                    "income": income_value,
-                    "expense": expense_value,
-                    "tax": tax_value,
-                    "profit": profit_value,
-                    "margin": margin,
-                }
-            )
-            total_income += income_value
-            total_profit += profit_value
-
-        # Ранжирование как в старой вкладке "Топ контрагентов": сохраняем исходный порядок.
-        profits = sorted(row["profit"] for row in rows)
-        mid_index = len(profits) // 2
-        if len(profits) % 2 == 0:
-            median_profit = (profits[mid_index - 1] + profits[mid_index]) / 2
-        else:
-            median_profit = profits[mid_index]
-        avg_margin = (total_profit / total_income * 100.0) if total_income > 0 else 0.0
-
-        best_row = max(rows, key=lambda row: row["profit"])
-        best_name = best_row["cp"].counterparty_name
-        best_profit = best_row["profit"]
-
-        self.portfolio_active_counterparties_label.setText(str(len(rows)))
-        self.portfolio_avg_margin_label.setText(f"{avg_margin:.2f}%")
-        self.portfolio_best_counterparty_label.setText(f"{best_name} ({best_profit:,.2f})")
-        self.portfolio_median_profit_label.setText(f"{median_profit:,.2f}")
+        metrics = self.view_model.portfolio_metrics(rows)
+        self.portfolio_active_counterparties_label.setText(str(metrics.active_count))
+        self.portfolio_avg_margin_label.setText(f"{metrics.avg_margin:.2f}%")
+        self.portfolio_best_counterparty_label.setText(
+            f"{metrics.best_name} ({metrics.best_profit:,.2f})"
+        )
+        self.portfolio_median_profit_label.setText(f"{metrics.median_profit:,.2f}")
 
         self.concentration_chart.set_data(
-            [
-                {
-                    "name": row["cp"].counterparty_name,
-                    "profit": row["profit"],
-                }
-                for row in rows
-            ]
+            [{"name": row.name, "profit": row.profit} for row in rows]
         )
 
         self.counterparties_table.clearSpans()
         self.counterparties_table.setRowCount(len(rows))
 
-        for row, row_data in enumerate(rows):
-            counterparty = row_data["cp"]
-            income_value = row_data["income"]
-            expense_value = row_data["expense"]
-            tax_value = row_data["tax"]
-            profit = row_data["profit"]
-            margin = row_data["margin"]
-
-            # Контрагент
-            name_item = QTableWidgetItem(counterparty.counterparty_name)
-            self.counterparties_table.setItem(row, 0, name_item)
-
-            # Доход
-            income_item = SortableNumericItem(f"{income_value:,.2f}", income_value)
-            income_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            income_item.setForeground(QColor(self.income_color))
-            self.counterparties_table.setItem(row, 1, income_item)
-
-            # Расход
-            expense_item = SortableNumericItem(f"{expense_value:,.2f}", expense_value)
-            expense_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            expense_item.setForeground(QColor(self.expense_color))
-            self.counterparties_table.setItem(row, 2, expense_item)
-
-            # Налог
-            tax_item = SortableNumericItem(f"{tax_value:,.2f}", tax_value)
-            tax_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            tax_item.setForeground(QColor(self.tax_color))
-            self.counterparties_table.setItem(row, 3, tax_item)
-
-            # Прибыль
-            profit_item = SortableNumericItem(f"{profit:,.2f}", profit)
-            profit_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            if profit >= 0:
-                profit_item.setForeground(QColor(self.profit_positive_color))
-            else:
-                profit_item.setForeground(QColor(self.profit_negative_color))
-            self.counterparties_table.setItem(row, 4, profit_item)
-
-            # Маржа
-            margin_text = f"{margin:.2f}%" if margin is not None else "-"
-            margin_item = SortableNumericItem(margin_text, margin if margin is not None else 0.0)
-            margin_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            margin_item.setForeground(
-                QColor(self.profit_positive_color)
-                if (margin is not None and margin >= 0)
-                else QColor(self.profit_negative_color)
+        for row_index, row in enumerate(rows):
+            self.counterparties_table.setItem(row_index, 0, QTableWidgetItem(row.name))
+            self.counterparties_table.setItem(
+                row_index, 1, self._money_item_sortable(row.income, self.income_color)
             )
-            self.counterparties_table.setItem(row, 5, margin_item)
-
-            # Количество транзакций
-            count_item = SortableNumericItem(
-                str(counterparty.transaction_count),
-                float(counterparty.transaction_count),
+            self.counterparties_table.setItem(
+                row_index, 2, self._money_item_sortable(row.expense, self.expense_color)
             )
-            count_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.counterparties_table.setItem(row, 6, count_item)
+            self.counterparties_table.setItem(
+                row_index, 3, self._money_item_sortable(row.tax, self.tax_color)
+            )
+            self.counterparties_table.setItem(
+                row_index, 4, self._money_item_sortable(row.profit, self._profit_color(row.profit))
+            )
+            self.counterparties_table.setItem(row_index, 5, self._margin_item_sortable(row.margin))
+            self.counterparties_table.setItem(
+                row_index, 6, self._percent_item_sortable(row.percentage_of_total)
+            )
+            self.counterparties_table.setItem(
+                row_index, 7, self._count_item_sortable(row.transaction_count)
+            )
 
         self.table_ui.apply_row_heights(self.counterparties_table)
         self.counterparties_table.setSortingEnabled(True)
 
-    def load_concentration_statistics(self) -> None:
-        """Загрузить дашборд портфеля контрагентов."""
-        counterparties = list(self.statistics.top_counterparties or [])
-        if not counterparties:
-            self.portfolio_active_counterparties_label.setText("-")
-            self.portfolio_avg_margin_label.setText("-")
-            self.portfolio_best_counterparty_label.setText("-")
-            self.portfolio_median_profit_label.setText("-")
-            self.concentration_chart.set_data([])
-            self.concentration_table.setRowCount(1)
-            item = QTableWidgetItem("Нет данных")
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.concentration_table.setItem(0, 0, item)
-            self.concentration_table.setSpan(0, 0, 1, 7)
-            self.table_ui.apply_row_heights(self.concentration_table)
-            return
+    def load_tax_statistics(self) -> None:
+        """Загрузить налоговую аналитику по месяцам."""
+        kpis = self.view_model.tax_kpis()
+        rows = self.view_model.tax_monthly_rows()
 
-        rows = []
-        total_income = 0.0
-        total_profit = 0.0
-        for cp in counterparties:
-            income_value = float(cp.total_income)
-            expense_value = float(cp.total_expense)
-            tax_value = float(cp.total_tax)
-            profit_value = float(cp.total_profit)
-            margin = (profit_value / income_value * 100.0) if income_value > 0 else None
-            rows.append(
-                {
-                    "cp": cp,
-                    "income": income_value,
-                    "expense": expense_value,
-                    "tax": tax_value,
-                    "profit": profit_value,
-                    "margin": margin,
-                }
-            )
-            total_income += income_value
-            total_profit += profit_value
+        self.tax_effective_rate_label.setText(f"{kpis.effective_rate:.2f}%")
+        self.tax_burden_label.setText(f"{kpis.burden_rate:.2f}%")
+        self.tax_run_rate_label.setText(f"{kpis.run_rate:,.2f} руб.")
+        self.tax_forecast_label.setText(f"{kpis.forecast_next:,.2f} руб.")
 
-        rows.sort(key=lambda row: row["profit"], reverse=True)
-        profits = sorted(row["profit"] for row in rows)
-        mid_index = len(profits) // 2
-        if len(profits) % 2 == 0:
-            median_profit = (profits[mid_index - 1] + profits[mid_index]) / 2
-        else:
-            median_profit = profits[mid_index]
-        avg_margin = (total_profit / total_income * 100.0) if total_income > 0 else 0.0
+        risk_text, risk_color = self._tax_risk_presentation(kpis.risk_level)
+        self.tax_risk_label.setText(risk_text)
+        self.tax_risk_label.setStyleSheet(f"color: {risk_color}; font-weight: bold;")
 
-        best_row = rows[0]
-        best_name = best_row["cp"].counterparty_name
-        best_profit = best_row["profit"]
-
-        self.portfolio_active_counterparties_label.setText(str(len(rows)))
-        self.portfolio_avg_margin_label.setText(f"{avg_margin:.2f}%")
-        self.portfolio_best_counterparty_label.setText(f"{best_name} ({best_profit:,.2f})")
-        self.portfolio_median_profit_label.setText(f"{median_profit:,.2f}")
-
-        self.concentration_chart.set_data(
+        self.tax_chart.set_data(
             [
-                {
-                    "name": row["cp"].counterparty_name,
-                    "profit": row["profit"],
-                }
+                {"label": row.short_label, "effective_tax_rate": row.effective_rate}
                 for row in rows
             ]
         )
 
-        self.concentration_table.clearSpans()
-        self.concentration_table.setRowCount(len(rows))
-        for row_index, row in enumerate(rows):
-            cp = row["cp"]
-            income_value = row["income"]
-            expense_value = row["expense"]
-            tax_value = row["tax"]
-            profit_value = row["profit"]
-            margin = row["margin"]
-
-            self.concentration_table.setItem(row_index, 0, QTableWidgetItem(cp.counterparty_name))
-
-            income_item = QTableWidgetItem(f"{income_value:,.2f}")
-            income_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            income_item.setForeground(QColor(self.income_color))
-            self.concentration_table.setItem(row_index, 1, income_item)
-
-            expense_item = QTableWidgetItem(f"{expense_value:,.2f}")
-            expense_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            expense_item.setForeground(QColor(self.expense_color))
-            self.concentration_table.setItem(row_index, 2, expense_item)
-
-            tax_item = QTableWidgetItem(f"{tax_value:,.2f}")
-            tax_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            tax_item.setForeground(QColor(self.tax_color))
-            self.concentration_table.setItem(row_index, 3, tax_item)
-
-            profit_item = QTableWidgetItem(f"{profit_value:,.2f}")
-            profit_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            profit_item.setForeground(
-                QColor(self.profit_positive_color)
-                if profit_value >= 0
-                else QColor(self.profit_negative_color)
-            )
-            self.concentration_table.setItem(row_index, 4, profit_item)
-
-            margin_text = f"{margin:.2f}%" if margin is not None else "-"
-            margin_item = QTableWidgetItem(margin_text)
-            margin_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            margin_item.setForeground(
-                QColor(self.profit_positive_color)
-                if (margin is not None and margin >= 0)
-                else QColor(self.profit_negative_color)
-            )
-            self.concentration_table.setItem(row_index, 5, margin_item)
-
-            count_item = QTableWidgetItem(str(cp.transaction_count))
-            count_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.concentration_table.setItem(row_index, 6, count_item)
-        self.table_ui.apply_row_heights(self.concentration_table)
-
-    def load_tax_statistics(self) -> None:
-        """Загрузить налоговую аналитику по месяцам."""
-        monthly_stats = sorted(
-            self.statistics.monthly_statistics,
-            key=lambda item: (item.year, item.month)
-        )
-
-        total_income = float(self.statistics.total_income or 0)
-        total_tax = float(self.statistics.total_tax or 0)
-        total_profit = float(self.statistics.total_profit or 0)
-
-        effective_rate = (total_tax / total_income * 100.0) if total_income > 0 else 0.0
-        burden_rate = (total_tax / total_profit * 100.0) if total_profit > 0 else 0.0
-
-        recent_months = monthly_stats[-3:] if monthly_stats else []
-        run_rate = (
-            sum(float(item.tax) for item in recent_months) / len(recent_months)
-            if recent_months
-            else 0.0
-        )
-        forecast_next = run_rate
-
-        if burden_rate < 10:
-            risk_text = "Низкий"
-            risk_color = self.profit_positive_color
-        elif burden_rate < 20:
-            risk_text = "Средний"
-            risk_color = "#ef6c00"
-        else:
-            risk_text = "Высокий"
-            risk_color = self.profit_negative_color
-
-        self.tax_effective_rate_label.setText(f"{effective_rate:.2f}%")
-        self.tax_burden_label.setText(f"{burden_rate:.2f}%")
-        self.tax_run_rate_label.setText(f"{run_rate:,.2f} руб.")
-        self.tax_forecast_label.setText(f"{forecast_next:,.2f} руб.")
-        self.tax_risk_label.setText(risk_text)
-        self.tax_risk_label.setStyleSheet(f"color: {risk_color}; font-weight: bold;")
-
-        chart_rows = []
-        for item in monthly_stats:
-            income = float(item.income)
-            tax = float(item.tax)
-            row_rate = (tax / income * 100.0) if income > 0 else 0.0
-            chart_rows.append(
-                {
-                    "label": f"{item.month:02d}.{str(item.year)[-2:]}",
-                    "effective_tax_rate": row_rate,
-                }
-            )
-        self.tax_chart.set_data(chart_rows)
-
-        if not monthly_stats:
-            self.tax_table.setRowCount(1)
-            item = QTableWidgetItem("Нет данных")
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.tax_table.setItem(0, 0, item)
-            self.tax_table.setSpan(0, 0, 1, 6)
-            self.table_ui.apply_row_heights(self.tax_table)
+        if not rows:
+            self._show_empty_table(self.tax_table, 6)
             return
 
         self.tax_table.clearSpans()
-        self.tax_table.setRowCount(len(monthly_stats))
-        for row_idx, month_item in enumerate(monthly_stats):
-            month_label = f"{month_item.month:02d}.{month_item.year}"
-            income = float(month_item.income)
-            tax = float(month_item.tax)
-            profit = float(month_item.profit)
-            month_effective_rate = (tax / income * 100.0) if income > 0 else 0.0
-            month_burden_rate = (tax / profit * 100.0) if profit > 0 else 0.0
-
-            month_cell = QTableWidgetItem(month_label)
-            month_cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.tax_table.setItem(row_idx, 0, month_cell)
-
-            income_cell = QTableWidgetItem(f"{income:,.2f}")
-            income_cell.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            income_cell.setForeground(QColor(self.income_color))
-            self.tax_table.setItem(row_idx, 1, income_cell)
-
-            tax_cell = QTableWidgetItem(f"{tax:,.2f}")
-            tax_cell.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            tax_cell.setForeground(QColor(self.tax_color))
-            self.tax_table.setItem(row_idx, 2, tax_cell)
-
-            profit_cell = QTableWidgetItem(f"{profit:,.2f}")
-            profit_cell.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            profit_cell.setForeground(
-                QColor(self.profit_positive_color)
-                if profit >= 0
-                else QColor(self.profit_negative_color)
+        self.tax_table.setRowCount(len(rows))
+        for row_index, row in enumerate(rows):
+            self.tax_table.setItem(row_index, 0, self._centered_item(row.label))
+            self.tax_table.setItem(row_index, 1, self._money_item(row.income, self.income_color))
+            self.tax_table.setItem(row_index, 2, self._money_item(row.tax, self.tax_color))
+            self.tax_table.setItem(
+                row_index, 3, self._money_item(row.profit, self._profit_color(row.profit))
             )
-            self.tax_table.setItem(row_idx, 3, profit_cell)
-
-            effective_cell = QTableWidgetItem(f"{month_effective_rate:.2f}%")
-            effective_cell.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            self.tax_table.setItem(row_idx, 4, effective_cell)
-
-            burden_cell = QTableWidgetItem(f"{month_burden_rate:.2f}%")
-            burden_cell.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            self.tax_table.setItem(row_idx, 5, burden_cell)
+            self.tax_table.setItem(row_index, 4, self._percent_item(row.effective_rate))
+            self.tax_table.setItem(row_index, 5, self._percent_item(row.burden_rate))
         self.table_ui.apply_row_heights(self.tax_table)
 
     def on_trend_mode_changed(self, *_args) -> None:
@@ -1225,64 +1086,42 @@ class StatisticsDialog(QDialog):
 
     def load_trends_statistics(self) -> None:
         """Загрузить дашборд трендов по месяцам."""
-        monthly_stats = sorted(
-            self.statistics.monthly_statistics,
-            key=lambda item: (item.year, item.month)
-        )
-        rows = []
-        for monthly in monthly_stats:
-            label = f"{monthly.month:02d}.{str(monthly.year)[-2:]}"
-            rows.append(
-                {
-                    "label": label,
-                    "income": float(monthly.income),
-                    "expense": float(monthly.expense),
-                    "tax": float(monthly.tax),
-                    "profit": float(monthly.profit),
-                }
-            )
+        rows = self.view_model.monthly_rows()
 
-        self.trend_chart.set_data(rows)
+        self.trend_chart.set_data(
+            [
+                {
+                    "label": row.label,
+                    "income": row.income,
+                    "expense": row.expense,
+                    "tax": row.tax,
+                    "profit": row.profit,
+                }
+                for row in rows
+            ]
+        )
         self.trend_chart.set_mode(self.trend_mode_combo.currentData())
 
         if not rows:
-            self.monthly_details_table.setRowCount(1)
-            item = QTableWidgetItem("Нет данных")
-            item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.monthly_details_table.setItem(0, 0, item)
-            self.monthly_details_table.setSpan(0, 0, 1, 5)
-            self.table_ui.apply_row_heights(self.monthly_details_table)
+            self._show_empty_table(self.monthly_details_table, 5)
             return
 
         self.monthly_details_table.clearSpans()
         self.monthly_details_table.setRowCount(len(rows))
-        for row_index, row_data in enumerate(rows):
-            month_item = QTableWidgetItem(row_data["label"])
-            month_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.monthly_details_table.setItem(row_index, 0, month_item)
-
-            income_item = QTableWidgetItem(f"{row_data['income']:,.2f}")
-            income_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            income_item.setForeground(QColor(self.income_color))
-            self.monthly_details_table.setItem(row_index, 1, income_item)
-
-            expense_item = QTableWidgetItem(f"{row_data['expense']:,.2f}")
-            expense_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            expense_item.setForeground(QColor(self.expense_color))
-            self.monthly_details_table.setItem(row_index, 2, expense_item)
-
-            tax_item = QTableWidgetItem(f"{row_data['tax']:,.2f}")
-            tax_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            tax_item.setForeground(QColor(self.tax_color))
-            self.monthly_details_table.setItem(row_index, 3, tax_item)
-
-            profit_item = QTableWidgetItem(f"{row_data['profit']:,.2f}")
-            profit_item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-            if row_data["profit"] >= 0:
-                profit_item.setForeground(QColor(self.profit_positive_color))
-            else:
-                profit_item.setForeground(QColor(self.profit_negative_color))
-            self.monthly_details_table.setItem(row_index, 4, profit_item)
+        for row_index, row in enumerate(rows):
+            self.monthly_details_table.setItem(row_index, 0, self._centered_item(row.label))
+            self.monthly_details_table.setItem(
+                row_index, 1, self._money_item(row.income, self.income_color)
+            )
+            self.monthly_details_table.setItem(
+                row_index, 2, self._money_item(row.expense, self.expense_color)
+            )
+            self.monthly_details_table.setItem(
+                row_index, 3, self._money_item(row.tax, self.tax_color)
+            )
+            self.monthly_details_table.setItem(
+                row_index, 4, self._money_item(row.profit, self._profit_color(row.profit))
+            )
         self.table_ui.apply_row_heights(self.monthly_details_table)
 
     def load_period_comparison(self) -> None:
