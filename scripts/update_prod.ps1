@@ -1,9 +1,9 @@
-# =====================================================================
+﻿# =====================================================================
 #  SolePro Finance Assistant — обновление ПРОД-версии с GitHub.
 #
 #  Делает резервную копию реальной базы и снимок текущей версии,
 #  забирает последний код из GitHub и обновляет зависимости.
-#  Боевые .env, settings/ и data (символьная ссылка на реальную БД)
+#  Боевые .env, settings/ и data (символьная ссылка на реальную базу)
 #  НЕ затрагиваются.
 #
 #  Запуск (из папки прода):
@@ -13,7 +13,7 @@
 #
 #  ВАЖНО: перед запуском ЗАКРОЙТЕ приложение SolePro (десктоп и бот).
 #  Скрипт ничего не удаляет из данных; перед обновлением база копируется
-#  в .backup\db, а вся прежняя версия — в .backup\<версия>_<дата>.
+#  в .backup\db, а вся прежняя версия - в .backup\<версия>_<дата>.
 # =====================================================================
 param(
     [string]$ProdPath = (Split-Path -Parent $PSScriptRoot),
@@ -24,10 +24,15 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 
 function Write-Step($m) { Write-Host "==> $m" -ForegroundColor Cyan }
 function Write-Ok($m)   { Write-Host "    $m" -ForegroundColor Green }
 function Write-Note($m) { Write-Host "    $m" -ForegroundColor Yellow }
+
+# robocopy лежит в System32; вызываем по полному пути на случай, если System32 не в PATH.
+$robocopy = Join-Path $env:SystemRoot "System32\robocopy.exe"
+if (-not (Test-Path -LiteralPath $robocopy)) { $robocopy = "robocopy" }
 
 Write-Host "=== SolePro Finance Assistant — обновление прод-версии ===" -ForegroundColor Cyan
 Write-Host "Прод-папка: $ProdPath"
@@ -48,8 +53,8 @@ if ($isSymlink) {
 } else {
     Write-Note "ВНИМАНИЕ: 'data' не является символьной ссылкой — возможно, это НЕ прод-папка."
     if (-not $Yes) {
-        $ans = Read-Host "Продолжить всё равно? (введите 'yes' для продолжения)"
-        if ($ans -ne "yes") { throw "Отменено пользователем." }
+        $ans = Read-Host "Продолжить всё равно? (y/n)"
+        if ($ans.Trim().ToLower() -notin @("y", "yes")) { throw "Отменено пользователем." }
     }
 }
 
@@ -68,8 +73,8 @@ if (-not $Yes) {
     Write-Note "ЗАКРОЙТЕ приложение SolePro (десктоп и бот) перед продолжением!"
     Write-Note "Будет: бэкап БД + снимок текущей версии, затем обновление кода из GitHub."
     Write-Note "Боевые .env, settings/, data (символьная ссылка) НЕ затрагиваются."
-    $ans = Read-Host "Продолжить обновление? (yes/no)"
-    if ($ans -ne "yes") { throw "Отменено пользователем." }
+    $ans = Read-Host "Продолжить обновление? (y/n)"
+    if ($ans.Trim().ToLower() -notin @("y", "yes")) { throw "Отменено пользователем." }
 }
 
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -99,7 +104,7 @@ $snapArgs = @(
     "/XD", $backupRoot, $dataPath, (Join-Path $ProdPath ".venv"), (Join-Path $ProdPath ".git"),
     "/NFL", "/NDL", "/NJH", "/NJS", "/NP"
 )
-& robocopy @snapArgs | Out-Null
+& $robocopy @snapArgs | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Ошибка robocopy при создании снимка (код $LASTEXITCODE)." }
 Write-Ok "Снимок создан: $snapDir"
 
@@ -130,7 +135,7 @@ $syncArgs = @(
     "/XF", (Join-Path $tmp ".env"),
     "/NFL", "/NDL", "/NJH", "/NJS", "/NP"
 )
-& robocopy @syncArgs | Out-Null
+& $robocopy @syncArgs | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Ошибка robocopy при обновлении кода (код $LASTEXITCODE)." }
 Write-Ok "Код обновлён."
 
@@ -156,4 +161,4 @@ Write-Host ""
 Write-Host "=== Обновление завершено: $curVer -> $newVer ===" -ForegroundColor Cyan
 Write-Host "Резервная копия БД: $dbBackupDir" -ForegroundColor Green
 Write-Host "Снимок версии:      $snapDir" -ForegroundColor Green
-Write-Note "Запустите RunDesktopApp.pyw — миграции БД применятся автоматически при старте."
+Write-Note "Запустите RunDesktopApp.pyw - миграции базы применятся автоматически при старте."

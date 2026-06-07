@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — Исправление скриптов обновления прода (07.06.2026, v1.4.15)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333;
+            background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); min-height: 100vh; padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .changelog-card { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; animation: slideIn 0.6s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px);} to { opacity: 1; transform: translateY(0);} }
+        .header { background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); color: white; padding: 50px; text-align: center; position: relative; overflow: hidden; }
+        .header::before { content:""; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: moveBackground 60s linear infinite; }
+        @keyframes moveBackground { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+        .header h1 { font-size: 3.2rem; margin-bottom: 15px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); position: relative; z-index: 1; }
+        .header .subtitle { font-size: 1.4rem; opacity: 0.95; margin-bottom: 25px; position: relative; z-index: 1; font-weight: 300; }
+        .metadata { display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .meta-item { background: rgba(255,255,255,0.15); padding: 12px 24px; border-radius: 50px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; gap:8px; }
+        .content { padding: 50px; }
+        .section { margin-bottom: 50px; border-left: 5px solid #2196F3; padding: 25px; background: linear-gradient(to right, rgba(33,150,243,0.05), transparent); border-radius: 0 10px 10px 0; }
+        .section h2 { color: #1565C0; font-size: 2rem; margin-bottom: 25px; display:flex; align-items:center; gap:15px; padding-bottom:10px; border-bottom: 2px solid #E3F2FD; }
+        .section h2 i { font-size: 1.8rem; background: #2196F3; color: white; width: 50px; height: 50px; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+        .change-card { background: white; border-radius: 15px; padding: 30px; border: 2px solid #E3F2FD; position: relative; overflow: hidden; margin-top: 20px; }
+        .change-card::before { content:""; position:absolute; top:0; left:0; width:100%; height:5px; background:#2196F3; }
+        .change-card h3 { color: #0D47A1; font-size: 1.4rem; margin-bottom: 18px; display:flex; align-items:center; gap:12px; font-weight:600; }
+        .status { display:inline-block; padding:8px 16px; border-radius:25px; font-size:0.9rem; font-weight:700; margin-bottom:18px; letter-spacing:0.5px; text-transform:uppercase; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: #B71C1C; }
+        .change-list { list-style: none; }
+        .change-list li { padding: 10px 0 10px 28px; position: relative; border-bottom: 1px solid #E3F2FD; }
+        .change-list li:last-child { border-bottom: none; }
+        .change-list li::before { content: "✓"; position: absolute; left: 0; color: #2196F3; font-weight: 800; }
+        .file-list { background: #F5F9FF; border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid #E3F2FD; }
+        .file-item { padding: 12px 15px; border-bottom: 1px solid #E3F2FD; font-family: 'Consolas','Monaco',monospace; font-size: 0.95rem; color: #2D3748; display:flex; align-items:center; gap:10px; }
+        .file-item:last-child { border-bottom: none; }
+        .file-item.modified::before { content: "⚡"; font-size: 1.1rem; }
+        .table { width:100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #E3F2FD; }
+        .table th, .table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #E3F2FD; }
+        .table th { background: linear-gradient(135deg, #2196F3, #1565C0); color: white; font-weight: 600; }
+        .table tr:last-child td { border-bottom: none; }
+        .table .bad { color: #C62828; font-weight: 600; }
+        .table .good { color: #1B5E20; font-weight: 700; }
+        .footer { text-align: center; padding: 40px; background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%); color: white; }
+        .footer p { margin-bottom: 15px; font-size: 1.1rem; }
+        .tech-stack { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:20px; }
+        .tech-item { background: rgba(255,255,255,0.1); padding:10px 20px; border-radius:25px; font-size:0.9rem; border:1px solid rgba(255,255,255,0.2); }
+        @media (max-width: 768px) { .content{padding:25px;} .header{padding:30px 20px;} .header h1{font-size:2.2rem;} .section h2{font-size:1.6rem;} .section h2 i{width:40px;height:40px;font-size:1.4rem;} }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Исправление скриптов обновления прода: кодировка и системные утилиты</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 07.06.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.15</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-bug"></i> Тип: Bugfix</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-bug"></i> Обзор</h2>
+                    <p>Исправлены две проблемы в скриптах обновления прод-версии (добавлены в v1.4.14), выявленные при первом запуске на боевой машине: некорректное чтение кириллицы под Windows PowerShell 5.1 и недоступность системных утилит при «урезанном» PATH.</p>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-wrench"></i> Что исправлено</h2>
+                    <div class="change-card">
+                        <span class="status">BUGFIX</span>
+                        <table class="table">
+                            <thead><tr><th>Проблема</th><th>Было</th><th>Стало</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td>Кириллица в .ps1 ломала парсер</td>
+                                    <td class="bad">UTF-8 без BOM → PS 5.1 читал как cp1251</td>
+                                    <td class="good">UTF-8 с BOM</td>
+                                </tr>
+                                <tr>
+                                    <td>robocopy / chcp «не распознаны»</td>
+                                    <td class="bad">вызов по имени (требует System32 в PATH)</td>
+                                    <td class="good">вызов по полному пути из %SystemRoot%\System32</td>
+                                </tr>
+                                <tr>
+                                    <td>Вывод русского текста</td>
+                                    <td class="bad">мог отображаться искажённо</td>
+                                    <td class="good">[Console]::OutputEncoding = UTF-8</td>
+                                </tr>
+                                <tr>
+                                    <td>Подтверждение</td>
+                                    <td class="bad">(yes/no)</td>
+                                    <td class="good">(y/n) — принимает y или yes</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-folder-open"></i> Затронутые файлы</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">scripts/update_prod.ps1 — BOM, robocopy по полному пути, (y/n), UTF-8 вывод</div>
+                        <div class="file-item modified">scripts/backup_db.ps1 — BOM, UTF-8 вывод</div>
+                        <div class="file-item modified">scripts/update_prod.bat — chcp по полному пути, ASCII-заголовок</div>
+                        <div class="file-item modified">pyproject.toml — версия 1.4.15</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-info-circle"></i> Примечание по кодировке</h2>
+                    <p>UTF-8 BOM здесь — намеренное исключение из правила «без BOM», касающееся <strong>только PowerShell-скриптов</strong>: Windows PowerShell 5.1 без BOM читает .ps1 в системной ANSI-кодировке (cp1251) и портит кириллицу. Файлы исходного кода (Python и пр.) остаются без BOM.</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Исправление скриптов обновления прода | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Скрипты обновления работают на боевой машине</p>
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">PowerShell 5.1</div>
+                    <div class="tech-item">UTF-8 BOM</div>
+                    <div class="tech-item">robocopy full path</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.15 |
+                    <i class="fas fa-check-circle"></i> Статус: Исправлено |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 07.06.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

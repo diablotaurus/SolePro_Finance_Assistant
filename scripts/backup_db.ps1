@@ -1,8 +1,8 @@
-# =====================================================================
+﻿# =====================================================================
 #  SolePro Finance Assistant — ручная резервная копия базы данных.
 #  Копирует finances.db (+ -wal/-shm) в .backup\db с отметкой даты/времени.
-#  База лежит в data/ (символьная ссылка на реальное хранилище) — сам
-#  каталог data и реальная БД при этом НЕ изменяются.
+#  База лежит в data/ (символьная ссылка на реальное хранилище) - сам
+#  каталог data и реальная база при этом НЕ изменяются.
 #
 #  Запуск (из папки прода):
 #     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\backup_db.ps1
@@ -15,6 +15,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 
 $dataPath = Join-Path $ProdPath "data"
 $dbBackupDir = Join-Path $ProdPath ".backup\db"
