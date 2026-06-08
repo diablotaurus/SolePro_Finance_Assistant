@@ -30,6 +30,29 @@ function Write-Step($m) { Write-Host "==> $m" -ForegroundColor Cyan }
 function Write-Ok($m)   { Write-Host "    $m" -ForegroundColor Green }
 function Write-Note($m) { Write-Host "    $m" -ForegroundColor Yellow }
 
+function Resolve-Python([string]$Root) {
+    # Приоритет: .venv проекта; затем системный Python >= 3.13.
+    $venvPy = Join-Path $Root ".venv\Scripts\python.exe"
+    if (Test-Path -LiteralPath $venvPy) { return @{ Exe = $venvPy; Prefix = @() } }
+    $candidates = @(
+        @{ Exe = "py";      Prefix = @("-3.13") },
+        @{ Exe = "py";      Prefix = @("-3") },
+        @{ Exe = "python";  Prefix = @() },
+        @{ Exe = "python3"; Prefix = @() }
+    )
+    foreach ($c in $candidates) {
+        if (-not (Get-Command $c.Exe -ErrorAction SilentlyContinue)) { continue }
+        try { $out = & $c.Exe @($c.Prefix + @("--version")) 2>&1 } catch { continue }
+        $m = [regex]::Match("$out", 'Python (\d+)\.(\d+)')
+        if ($m.Success) {
+            $maj = [int]$m.Groups[1].Value
+            $min = [int]$m.Groups[2].Value
+            if ($maj -gt 3 -or ($maj -eq 3 -and $min -ge 13)) { return $c }
+        }
+    }
+    return $null
+}
+
 # robocopy лежит в System32; вызываем по полному пути на случай, если System32 не в PATH.
 $robocopy = Join-Path $env:SystemRoot "System32\robocopy.exe"
 if (-not (Test-Path -LiteralPath $robocopy)) { $robocopy = "robocopy" }
@@ -59,7 +82,9 @@ if ($isSymlink) {
 }
 
 try { git --version | Out-Null } catch { throw "git не найден в PATH." }
-try { py -3.13 --version | Out-Null } catch { throw "py -3.13 (Python 3.13) не найден." }
+$py = Resolve-Python $ProdPath
+if (-not $py) { throw "Не найден Python 3.13+ (нужен py-лаунчер, python в PATH или .venv проекта)." }
+Write-Ok ("Python: {0} {1}" -f $py.Exe, ($py.Prefix -join ' '))
 
 # --- Текущая версия прода ---
 $pyprojText = Get-Content -LiteralPath (Join-Path $ProdPath "pyproject.toml") -Raw
@@ -141,10 +166,10 @@ Write-Ok "Код обновлён."
 
 # --- 5) Зависимости ---
 if (-not $SkipDeps) {
-    Write-Step "Обновление зависимостей (py -3.13 -m pip)"
+    Write-Step "Обновление зависимостей (pip)"
     Push-Location $ProdPath
     try {
-        py -3.13 -m pip install -r requirements.txt
+        & $py.Exe @($py.Prefix + @("-m", "pip", "install", "-r", "requirements.txt"))
         if ($LASTEXITCODE -ne 0) { throw "pip install завершился с ошибкой (код $LASTEXITCODE)." }
     } finally { Pop-Location }
     Write-Ok "Зависимости обновлены."
