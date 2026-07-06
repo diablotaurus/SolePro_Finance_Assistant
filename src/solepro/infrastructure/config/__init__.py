@@ -56,6 +56,11 @@ class TelegramConfig:
         if os.getenv("TELEGRAM_ADMIN_CHAT_ID") and os.getenv("TELEGRAM_ADMIN_CHAT_ID").isdigit()
         else None
     ))
+    # Прокси для Telegram (напр. локальный порт Happ/xray). Пусто = напрямую.
+    # При недоступности прокси бот автоматически подключается напрямую.
+    proxy_url: Optional[str] = field(default_factory=lambda: (
+        os.getenv("TELEGRAM_PROXY", "").strip() or None
+    ))
 
 
 @dataclass

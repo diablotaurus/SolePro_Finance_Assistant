@@ -2,7 +2,9 @@
 Основной класс Telegram бота.
 """
 import logging
+import socket
 from typing import Optional
+from urllib.parse import urlparse
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
@@ -19,6 +21,50 @@ from ...infrastructure.config import get_telegram_config
 from ...shared.logging_config import setup_logging as configure_logging
 from .handlers import setup_handlers, HandlerDependencies
 from .middlewares import AccessMiddleware
+
+
+# Порты прокси по умолчанию, если в URL порт не указан явно.
+_DEFAULT_PROXY_PORTS = {
+    "socks5": 1080,
+    "socks5h": 1080,
+    "socks4": 1080,
+    "http": 8080,
+    "https": 8080,
+}
+
+
+def is_proxy_reachable(proxy_url: str, timeout: float = 2.0) -> bool:
+    """
+    Проверить, доступен ли прокси (слушается ли его host:port).
+
+    Используется для «мягкого» прокси: если локальный прокси (например,
+    порт Happ/xray) выключен, порт не слушается — тогда бот подключается
+    к Telegram напрямую, а не падает.
+
+    Args:
+        proxy_url: URL прокси, напр. "socks5://192.168.0.8:10808".
+        timeout: Таймаут TCP-подключения в секундах.
+
+    Returns:
+        True, если TCP-соединение с прокси установилось; иначе False.
+    """
+    if not proxy_url:
+        return False
+    try:
+        parsed = urlparse(proxy_url)
+    except (ValueError, AttributeError):
+        return False
+    host = parsed.hostname
+    if not host:
+        return False
+    port = parsed.port or _DEFAULT_PROXY_PORTS.get((parsed.scheme or "").lower())
+    if not port:
+        return False
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
 
 
 class TelegramBot:
@@ -86,12 +132,25 @@ class TelegramBot:
     def setup_application(self) -> None:
         """Настроить приложение бота."""
         # Создаем приложение
-        self.application = (
+        builder = (
             Application.builder()
             .token(self.config.bot_token)
             .post_init(self.post_init)
-            .build()
         )
+
+        # Прокси (например, локальный порт Happ/xray). Если прокси задан, но
+        # недоступен, — подключаемся напрямую, чтобы бот не падал.
+        proxy_url = self.config.proxy_url
+        if proxy_url:
+            if is_proxy_reachable(proxy_url):
+                builder = builder.proxy(proxy_url).get_updates_proxy(proxy_url)
+                self.logger.info("🌐 Telegram через прокси: %s", proxy_url)
+            else:
+                self.logger.warning(
+                    "⚠️ Прокси %s недоступен — подключение напрямую", proxy_url
+                )
+
+        self.application = builder.build()
         
         # Добавляем middleware для проверки доступа
         self.application.add_handler(AccessMiddleware(allowed_users=self.config.allowed_users))

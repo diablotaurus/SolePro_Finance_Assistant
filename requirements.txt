@@ -6,8 +6,8 @@ pydantic>=2.0.0
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
 
-# Telegram
-python-telegram-bot[job-queue]>=20.3
+# Telegram (socks — поддержка SOCKS5-прокси, напр. локальный порт Happ/xray)
+python-telegram-bot[job-queue,socks]>=20.3
 
 # Desktop
 PyQt6>=6.5.0

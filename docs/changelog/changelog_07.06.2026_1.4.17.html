@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — Прокси для Telegram-бота (07.06.2026, v1.4.17)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .changelog-card { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; animation: slideIn 0.6s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px);} to { opacity: 1; transform: translateY(0);} }
+        .header { background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); color: white; padding: 50px; text-align: center; position: relative; overflow: hidden; }
+        .header::before { content:""; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: moveBackground 60s linear infinite; }
+        @keyframes moveBackground { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+        .header h1 { font-size: 3.2rem; margin-bottom: 15px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); position: relative; z-index: 1; }
+        .header .subtitle { font-size: 1.4rem; opacity: 0.95; margin-bottom: 25px; position: relative; z-index: 1; font-weight: 300; }
+        .metadata { display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .meta-item { background: rgba(255,255,255,0.15); padding: 12px 24px; border-radius: 50px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; gap:8px; }
+        .content { padding: 50px; }
+        .section { margin-bottom: 50px; border-left: 5px solid #2196F3; padding: 25px; background: linear-gradient(to right, rgba(33,150,243,0.05), transparent); border-radius: 0 10px 10px 0; }
+        .section h2 { color: #1565C0; font-size: 2rem; margin-bottom: 25px; display:flex; align-items:center; gap:15px; padding-bottom:10px; border-bottom: 2px solid #E3F2FD; }
+        .section h2 i { font-size: 1.8rem; background: #2196F3; color: white; width: 50px; height: 50px; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+        .change-card { background: white; border-radius: 15px; padding: 30px; border: 2px solid #E3F2FD; position: relative; overflow: hidden; margin-top: 20px; }
+        .change-card::before { content:""; position:absolute; top:0; left:0; width:100%; height:5px; background:#2196F3; }
+        .status { display:inline-block; padding:8px 16px; border-radius:25px; font-size:0.9rem; font-weight:700; margin-bottom:18px; letter-spacing:0.5px; text-transform:uppercase; background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .change-list { list-style: none; }
+        .change-list li { padding: 10px 0 10px 28px; position: relative; border-bottom: 1px solid #E3F2FD; }
+        .change-list li:last-child { border-bottom: none; }
+        .change-list li::before { content: "✓"; position: absolute; left: 0; color: #2196F3; font-weight: 800; }
+        .code-snippet { background: #1E1E1E; color: #D4D4D4; border-radius: 12px; padding: 22px; margin: 18px 0; font-family: 'Consolas','Monaco',monospace; font-size: 0.92rem; overflow-x: auto; border-left: 5px solid #2196F3; white-space: pre; }
+        .code-snippet .c { color: #6A9955; }
+        .code-snippet .k { color: #569CD6; }
+        .file-list { background: #F5F9FF; border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid #E3F2FD; }
+        .file-item { padding: 12px 15px; border-bottom: 1px solid #E3F2FD; font-family: 'Consolas','Monaco',monospace; font-size: 0.95rem; color: #2D3748; display:flex; align-items:center; gap:10px; }
+        .file-item:last-child { border-bottom: none; }
+        .file-item.modified::before { content: "⚡"; font-size: 1.1rem; }
+        .file-item.added::before { content: "✨"; font-size: 1.1rem; }
+        .footer { text-align: center; padding: 40px; background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%); color: white; }
+        .footer p { margin-bottom: 15px; font-size: 1.1rem; }
+        .tech-stack { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:20px; }
+        .tech-item { background: rgba(255,255,255,0.1); padding:10px 20px; border-radius:25px; font-size:0.9rem; border:1px solid rgba(255,255,255,0.2); }
+        @media (max-width: 768px) { .content{padding:25px;} .header{padding:30px 20px;} .header h1{font-size:2.2rem;} .section h2{font-size:1.6rem;} .section h2 i{width:40px;height:40px;font-size:1.4rem;} }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Прокси для Telegram-бота с автоматическим обходом при недоступности</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 07.06.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.17</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-plug"></i> Тип: Feature</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-network-wired"></i> Обзор</h2>
+                    <p>Telegram-бот научился ходить к Telegram <strong>через прокси</strong> (SOCKS5/HTTP), заданный переменной окружения <code>TELEGRAM_PROXY</code>. Удобно, если прямой доступ к <code>api.telegram.org</code> ограничен: трафик пускается через локальный прокси (например, порт Happ/xray). Если прокси задан, но недоступен (например, Happ выключен), бот <strong>автоматически подключается напрямую</strong> — без падения.</p>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-plug"></i> Что добавлено</h2>
+                    <div class="change-card">
+                        <span class="status">FEATURE</span>
+                        <ul class="change-list">
+                            <li>Новая настройка <code>TELEGRAM_PROXY</code> в <code>.env</code> (по умолчанию пусто = напрямую)</li>
+                            <li>Прокси применяется и к API-запросам, и к получению обновлений (long polling)</li>
+                            <li>Поддержка SOCKS5 (добавлена зависимость <code>socksio</code> через extra <code>[socks]</code>) и HTTP-прокси</li>
+                            <li>«Мягкий» режим: перед стартом проверяется доступность прокси (TCP-подключение к host:port с коротким таймаутом)</li>
+                            <li>Прокси недоступен → бот идёт напрямую; в лог пишется предупреждение</li>
+                        </ul>
+                        <div class="code-snippet"><span class="c"># .env</span>
+<span class="c"># Прокси для Telegram (напр. локальный порт Happ/xray). Пусто = напрямую.</span>
+TELEGRAM_PROXY=socks5://192.168.0.8:10808</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-shield-halved"></i> Как работает fallback</h2>
+                    <div class="change-card">
+                        <ul class="change-list">
+                            <li>Функция <code>is_proxy_reachable()</code> парсит URL и пробует TCP-подключение к прокси</li>
+                            <li>Порт берётся из URL; если не указан — подставляется дефолт для схемы (socks5 → 1080)</li>
+                            <li>Локальный прокси выключен → порт не слушается → мгновенный возврат к прямому соединению</li>
+                            <li>Логика чистая и покрыта юнит-тестами (без обращения в интернет)</li>
+                        </ul>
+                        <div class="code-snippet"><span class="k">if</span> proxy_url:
+    <span class="k">if</span> is_proxy_reachable(proxy_url):
+        builder = builder.proxy(proxy_url).get_updates_proxy(proxy_url)  <span class="c"># через прокси</span>
+    <span class="k">else</span>:
+        <span class="c"># ⚠️ прокси недоступен — подключение напрямую</span></div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-vial"></i> Тесты</h2>
+                    <div class="change-card">
+                        <ul class="change-list">
+                            <li>Новый модуль <code>test_telegram_proxy.py</code>: доступность прокси на реально слушающем сокете vs закрытом порту, пустой/битый URL, дефолтный порт, чтение <code>TELEGRAM_PROXY</code> в конфиг</li>
+                            <li><code>test_telegram_bot.py</code>: прокси применяется, когда доступен, и пропускается, когда недоступен</li>
+                            <li>Всего тестов: <strong>181 → 192</strong>, все проходят</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-folder-open"></i> Затронутые файлы</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">src/solepro/infrastructure/config/__init__.py — поле proxy_url (TELEGRAM_PROXY)</div>
+                        <div class="file-item modified">src/solepro/presentation/telegram/bot.py — is_proxy_reachable + условный билдер с прокси</div>
+                        <div class="file-item added">src/tests/test_telegram_proxy.py — тесты прокси и конфига</div>
+                        <div class="file-item modified">src/tests/test_telegram_bot.py — тесты ветки с прокси</div>
+                        <div class="file-item modified">pyproject.toml — extra [job-queue,socks], версия 1.4.17</div>
+                        <div class="file-item modified">requirements.txt — extra [job-queue,socks]</div>
+                        <div class="file-item modified">.env.example — пример TELEGRAM_PROXY</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Прокси для Telegram-бота | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Бот работает через прокси, а при его недоступности — напрямую</p>
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">python-telegram-bot 22.6</div>
+                    <div class="tech-item">SOCKS5 / HTTP</div>
+                    <div class="tech-item">socksio</div>
+                    <div class="tech-item">Auto-fallback</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.17 |
+                    <i class="fas fa-check-circle"></i> Статус: Готово |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 07.06.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

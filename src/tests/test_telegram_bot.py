@@ -38,6 +38,8 @@ class _Builder:
         self._app = app
         self._token = None
         self._post_init = None
+        self.proxy_url = None
+        self.get_updates_proxy_url = None
 
     def token(self, token):
         self._token = token
@@ -45,6 +47,14 @@ class _Builder:
 
     def post_init(self, callback):
         self._post_init = callback
+        return self
+
+    def proxy(self, url):
+        self.proxy_url = url
+        return self
+
+    def get_updates_proxy(self, url):
+        self.get_updates_proxy_url = url
         return self
 
     def build(self):
@@ -58,6 +68,7 @@ def fake_config():
         allowed_users=[1001, 1002],
         log_level="INFO",
         admin_chat_id=9999,
+        proxy_url=None,
     )
 
 
@@ -104,6 +115,51 @@ def test_setup_application_registers_handlers(monkeypatch, fake_config):
     assert ("middleware", fake_config.allowed_users) in fake_app.handlers
     assert len(fake_app.error_handlers) == 1
     assert setup_called["value"] is True
+    # Прокси не задан → билдер прокси не получал.
+    assert builder.proxy_url is None
+    assert builder.get_updates_proxy_url is None
+
+
+def _prepare_bot(monkeypatch, config):
+    """Собрать TelegramBot с фейковым Application и вернуть (bot, builder)."""
+    fake_app = _FakeApp()
+    builder = _Builder(fake_app)
+
+    class _FakeApplication:
+        @staticmethod
+        def builder():
+            return builder
+
+    monkeypatch.setattr(bot_module, "Application", _FakeApplication)
+    monkeypatch.setattr(bot_module, "get_telegram_config", lambda: config)
+    monkeypatch.setattr(
+        bot_module, "AccessMiddleware", lambda allowed_users: ("middleware", allowed_users)
+    )
+    monkeypatch.setattr(bot_module, "setup_handlers", lambda app, dependencies=None: None)
+    return bot_module.TelegramBot(), builder
+
+
+def test_setup_application_uses_proxy_when_reachable(monkeypatch, fake_config):
+    fake_config.proxy_url = "socks5://127.0.0.1:10808"
+    monkeypatch.setattr(bot_module, "is_proxy_reachable", lambda url, timeout=2.0: True)
+
+    bot, builder = _prepare_bot(monkeypatch, fake_config)
+    bot.setup_application()
+
+    assert builder.proxy_url == "socks5://127.0.0.1:10808"
+    assert builder.get_updates_proxy_url == "socks5://127.0.0.1:10808"
+
+
+def test_setup_application_skips_proxy_when_unreachable(monkeypatch, fake_config):
+    fake_config.proxy_url = "socks5://127.0.0.1:10808"
+    monkeypatch.setattr(bot_module, "is_proxy_reachable", lambda url, timeout=2.0: False)
+
+    bot, builder = _prepare_bot(monkeypatch, fake_config)
+    bot.setup_application()
+
+    # Прокси недоступен → билдер прокси не получал (fallback напрямую).
+    assert builder.proxy_url is None
+    assert builder.get_updates_proxy_url is None
 
 
 @pytest.mark.asyncio
