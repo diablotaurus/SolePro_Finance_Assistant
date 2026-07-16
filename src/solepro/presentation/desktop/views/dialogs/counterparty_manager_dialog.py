@@ -191,7 +191,7 @@ class CounterpartyManagerDialog(QDialog):
         counterparty_data = data["data"]
         is_edit = data["is_edit"]
         if is_edit:
-            counterparty_id = data["counterparty"].id
+            counterparty_id = data["counterparty_id"]
             self.controller.update_counterparty(UUID(str(counterparty_id)), counterparty_data)
         else:
             self.controller.add_counterparty(counterparty_data)

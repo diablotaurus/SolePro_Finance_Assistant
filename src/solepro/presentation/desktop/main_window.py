@@ -625,13 +625,13 @@ class MainWindow(QMainWindow):
             data: Данные транзакции
         """
         from uuid import UUID
-        
+
         transaction_data = data["data"]
         is_edit = data["is_edit"]
-        
+
         if is_edit:
             # Редактирование
-            transaction_id = data["transaction"].id
+            transaction_id = data["transaction_id"]
             if not isinstance(transaction_id, UUID):
                 transaction_id = UUID(str(transaction_id))
             self.controller.update_transaction(transaction_id, transaction_data)

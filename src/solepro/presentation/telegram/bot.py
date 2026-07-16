@@ -234,9 +234,10 @@ class TelegramBot:
             # Настраиваем приложение
             self.setup_application()
             
-            # Запускаем бота
+            # Запускаем бота. Подписываемся только на message: обработчиков
+            # callback_query/inline_query нет — при их появлении расширить.
             self.application.run_polling(
-                allowed_updates=['message', 'callback_query', 'inline_query'],
+                allowed_updates=['message'],
                 drop_pending_updates=True,
                 timeout=30,
             )

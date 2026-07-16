@@ -6,6 +6,7 @@ from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 from typing import Union, Optional
 import locale
 
+from ..constants import MAX_MONEY_AMOUNT
 from ..exceptions.domain_exceptions import InvalidMoneyException
 
 
@@ -59,7 +60,7 @@ class Money:
             errors.append("Значение должно быть типа Decimal")
 
         # Проверка на слишком большие суммы (условно)
-        if abs(self.value) > Decimal('1000000000'):  # 1 миллиард
+        if abs(self.value) > MAX_MONEY_AMOUNT:
             errors.append("Сумма слишком большая")
         
         if errors:

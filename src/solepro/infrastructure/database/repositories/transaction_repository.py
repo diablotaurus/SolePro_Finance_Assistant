@@ -3,7 +3,7 @@
 """
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional, Dict, Any
+from typing import Any, List, Optional
 from uuid import UUID
 
 from sqlalchemy import func, and_, or_, desc, asc
@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session, joinedload
 
 from ....core.domain.entities.transaction import Transaction
 from ....core.domain.value_objects.money import Money
-from ....core.domain.enums.transaction_type import TransactionType
 from ....core.domain.exceptions.domain_exceptions import EntityNotFoundException
 from ....core.domain.repositories.transaction_repository import (
     TransactionRepository,
@@ -230,66 +229,6 @@ class SQLAlchemyTransactionRepository(TransactionRepository):
 
         return [self._to_entity(model) for model in models]
 
-    def find_by_counterparty(
-        self,
-        counterparty_id: UUID,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[Transaction]:
-        models = (
-            self.session.query(TransactionModel)
-            .options(joinedload(TransactionModel.counterparty))
-            .filter(TransactionModel.counterparty_id == str(counterparty_id))
-            .order_by(desc(TransactionModel.date))
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-
-        return [self._to_entity(model) for model in models]
-
-    def find_by_type(
-        self,
-        transaction_type: TransactionType,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[Transaction]:
-        # Определяем условия для каждого типа
-        conditions = {
-            TransactionType.INCOME: and_(
-                TransactionModel.income > 0,
-                TransactionModel.expense == 0
-            ),
-            TransactionType.EXPENSE: and_(
-                TransactionModel.income == 0,
-                TransactionModel.expense > 0
-            ),
-            TransactionType.MIXED: and_(
-                TransactionModel.income > 0,
-                TransactionModel.expense > 0
-            ),
-            TransactionType.NEUTRAL: and_(
-                TransactionModel.income == 0,
-                TransactionModel.expense == 0
-            ),
-        }
-
-        condition = conditions.get(transaction_type)
-        if condition is None:
-            return []
-
-        models = (
-            self.session.query(TransactionModel)
-            .options(joinedload(TransactionModel.counterparty))
-            .filter(condition)
-            .order_by(desc(TransactionModel.date))
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-
-        return [self._to_entity(model) for model in models]
-
     def _query_search(
         self,
         query: str,
@@ -352,99 +291,6 @@ class SQLAlchemyTransactionRepository(TransactionRepository):
             self._to_view(model)
             for model in self._query_search(query, fields=fields, skip=skip, limit=limit)
         ]
-
-    def get_statistics(
-        self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        # Базовый запрос
-        query = self.session.query(
-            func.count(TransactionModel.id).label("count"),
-            func.coalesce(func.sum(TransactionModel.income), 0).label("total_income"),
-            func.coalesce(func.sum(TransactionModel.expense), 0).label("total_expense"),
-            func.coalesce(func.sum(TransactionModel.tax), 0).label("total_tax"),
-            func.min(TransactionModel.date).label("first_date"),
-            func.max(TransactionModel.date).label("last_date"),
-        )
-
-        # Фильтрация по дате
-        if start_date:
-            query = query.filter(TransactionModel.date >= start_date)
-        if end_date:
-            query = query.filter(TransactionModel.date <= end_date)
-
-        result = query.first()
-
-        total_income = self._as_decimal(result.total_income)
-        total_expense = self._as_decimal(result.total_expense)
-        total_tax = self._as_decimal(result.total_tax)
-        total_profit = total_income - total_expense - total_tax
-
-        # Средние значения (только для транзакций с доходом/расходом)
-        avg_income = None
-        avg_expense = None
-        avg_profit = None
-
-        if result.count > 0:
-            avg_income = total_income / result.count if total_income > 0 else Decimal("0")
-            avg_expense = total_expense / result.count if total_expense > 0 else Decimal("0")
-            avg_profit = total_profit / result.count
-
-        return {
-            "total_count": result.count,
-            "total_income": total_income,
-            "total_expense": total_expense,
-            "total_tax": total_tax,
-            "total_profit": total_profit,
-            "avg_income": avg_income,
-            "avg_expense": avg_expense,
-            "avg_profit": avg_profit,
-            "first_transaction_date": result.first_date,
-            "last_transaction_date": result.last_date,
-        }
-
-    def get_monthly_summary(
-        self,
-        year: int,
-        month: int
-    ) -> Dict[str, Any]:
-        # Получаем статистику за конкретный месяц
-        start_date = datetime(year, month, 1)
-        if month == 12:
-            end_date = datetime(year + 1, 1, 1)
-        else:
-            end_date = datetime(year, month + 1, 1)
-
-        return self.get_statistics(start_date=start_date, end_date=end_date)
-
-    def get_total_income(self) -> Money:
-        result = self.session.query(
-            func.coalesce(func.sum(TransactionModel.income), 0)
-        ).scalar()
-
-        return Money(value=self._as_decimal(result))
-
-    def get_total_expense(self) -> Money:
-        result = self.session.query(
-            func.coalesce(func.sum(TransactionModel.expense), 0)
-        ).scalar()
-
-        return Money(value=self._as_decimal(result))
-
-    def get_total_tax(self) -> Money:
-        result = self.session.query(
-            func.coalesce(func.sum(TransactionModel.tax), 0)
-        ).scalar()
-
-        return Money(value=self._as_decimal(result))
-
-    def get_total_profit(self) -> Money:
-        income = self.get_total_income().to_decimal()
-        expense = self.get_total_expense().to_decimal()
-        tax = self.get_total_tax().to_decimal()
-
-        return Money(value=income - expense - tax)
 
     def count(self) -> int:
         return self.session.query(func.count(TransactionModel.id)).scalar()

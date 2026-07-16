@@ -44,10 +44,24 @@ class DesktopUiSettings:
 
     @staticmethod
     def _resolve_settings_path(module_file: str, project_root_parent_index: int) -> Path:
-        project_root = Path(module_file).resolve().parents[project_root_parent_index]
-        settings_path = project_root / "settings" / "settings.ini"
-        if settings_path.exists():
-            return settings_path
+        resolved = Path(module_file).resolve()
+
+        # Основной способ: подняться до корня проекта по маркеру
+        # pyproject.toml — устойчиво к переносу модулей между подпапками.
+        for parent in resolved.parents:
+            if (parent / "pyproject.toml").exists():
+                candidate = parent / "settings" / "settings.ini"
+                if candidate.exists():
+                    return candidate
+                break
+
+        # Фолбэк: исторический фиксированный индекс родителя.
+        parents = resolved.parents
+        if project_root_parent_index < len(parents):
+            settings_path = parents[project_root_parent_index] / "settings" / "settings.ini"
+            if settings_path.exists():
+                return settings_path
+
         return Path.cwd() / "settings" / "settings.ini"
 
 

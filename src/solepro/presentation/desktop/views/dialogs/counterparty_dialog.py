@@ -151,23 +151,10 @@ class CounterpartyDialog(QDialog):
         if data:
             super().accept()
 
-            # Создаем объект контрагента для сигнала
-            from uuid import uuid4
-            from datetime import datetime
-
-            counterparty = CounterpartyResponseDTO(
-                id=self.counterparty.id if self.counterparty else uuid4(),
-                name=data.name,
-                description=data.description,
-                contact_info=data.contact_info,
-                transaction_count=self.counterparty.transaction_count if self.counterparty else 0,
-                total_income=self.counterparty.total_income if self.counterparty else 0.0,
-                created_at=self.counterparty.created_at if self.counterparty else datetime.now(),
-                updated_at=datetime.now(),
-            )
-
+            # Сохранением занимается контроллер: наружу отдаём только
+            # введённые данные и ID редактируемого контрагента.
             self.counterparty_saved.emit({
-                "counterparty": counterparty,
+                "counterparty_id": self.counterparty.id if self.counterparty else None,
                 "data": data,
                 "is_edit": self.is_edit_mode
             })

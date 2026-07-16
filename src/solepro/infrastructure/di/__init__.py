@@ -8,10 +8,6 @@ from dependency_injector import containers, providers
 
 from ..database.session_manager import DatabaseSessionManager
 from ..database.unit_of_work import SQLAlchemyUnitOfWork
-from ..database.repositories import (
-    SQLAlchemyTransactionRepository,
-    SQLAlchemyCounterpartyRepository,
-)
 from ...core.application.use_cases import (
     AddTransactionUseCase,
     UpdateTransactionUseCase,
@@ -37,31 +33,9 @@ class Container(containers.DeclarativeContainer):
     Использует dependency-injector для внедрения зависимостей.
     """
     
-    # Конфигурация
-    config = providers.Configuration()
-    
-    # Менеджер сессий БД
-    session_manager = providers.Singleton(
-        DatabaseSessionManager,
-        database_url=config.database.url
-    )
-    
-    # Сессии БД (фабрика)
-    session_factory = providers.Factory(
-        lambda sm: sm.get_session(),
-        session_manager
-    )
-    
-    # Репозитории
-    transaction_repository = providers.Factory(
-        SQLAlchemyTransactionRepository,
-        session=session_factory
-    )
-    
-    counterparty_repository = providers.Factory(
-        SQLAlchemyCounterpartyRepository,
-        session=session_factory
-    )
+    # Менеджер сессий БД. URL берётся из конфигурации приложения (.env)
+    # внутри самого DatabaseSessionManager.
+    session_manager = providers.Singleton(DatabaseSessionManager)
 
     # Unit of Work
     unit_of_work = providers.Factory(

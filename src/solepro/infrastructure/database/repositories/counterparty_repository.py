@@ -254,12 +254,18 @@ class SQLAlchemyCounterpartyRepository(CounterpartyRepository):
         )
 
         top_counterparties = []
+        total_income_sum = Decimal(str(total_income_sum or 0))
         for row in totals_query.all():
             if row.transaction_count == 0:
                 continue
-            total_profit = float(row.total_income) - float(row.total_expense) - float(row.total_tax)
+            # Денежные суммы держим в Decimal до самого DTO — без прохода
+            # через float (единообразно с остальными денежными расчетами).
+            income = Decimal(str(row.total_income or 0))
+            expense = Decimal(str(row.total_expense or 0))
+            tax = Decimal(str(row.total_tax or 0))
+            total_profit = income - expense - tax
             percentage = (
-                (float(row.total_income) / float(total_income_sum) * 100)
+                float(income / total_income_sum * 100)
                 if total_income_sum else 0.0
             )
             top_counterparties.append(
@@ -267,10 +273,10 @@ class SQLAlchemyCounterpartyRepository(CounterpartyRepository):
                     "counterparty_id": str(row.id),
                     "counterparty_name": row.name,
                     "transaction_count": int(row.transaction_count),
-                    "total_income": float(row.total_income),
-                    "total_expense": float(row.total_expense),
-                    "total_tax": float(row.total_tax),
-                    "total_profit": float(total_profit),
+                    "total_income": income,
+                    "total_expense": expense,
+                    "total_tax": tax,
+                    "total_profit": total_profit,
                     "percentage_of_total": percentage,
                 }
             )

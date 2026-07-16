@@ -378,31 +378,11 @@ class TransactionDialog(QDialog):
         data = self.get_transaction_data()
         if data:
             super().accept()
-            
-            # Создаем объект транзакции для сигнала
-            # В реальном приложении здесь будет сохраненная транзакция из контроллера
-            from .....core.application.dto.transaction_dto import TransactionResponseDTO
-            from decimal import Decimal
-            from uuid import uuid4
-            
-            profit = data.income - data.expense - data.tax
-            
-            transaction = TransactionResponseDTO(
-                id=self.transaction.id if self.transaction else uuid4(),
-                date=data.date,
-                income=data.income,
-                expense=data.expense,
-                tax=data.tax,
-                profit=profit,
-                counterparty_id=data.counterparty_id if hasattr(data, 'counterparty_id') else None,
-                counterparty_name=self.counterparty_combo.currentText(),
-                note=data.note or "",
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-            )
-            
+
+            # Сохранением занимается контроллер: наружу отдаём только
+            # введённые данные и ID редактируемой транзакции.
             self.transaction_saved.emit({
-                "transaction": transaction,
+                "transaction_id": self.transaction.id if self.transaction else None,
                 "data": data,
                 "is_edit": self.is_edit_mode
             })

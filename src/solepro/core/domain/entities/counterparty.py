@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
+from ..constants import MAX_COUNTERPARTY_NAME_LENGTH
 from ..exceptions.domain_exceptions import InvalidCounterpartyException
 
 
@@ -42,8 +43,11 @@ class Counterparty:
             errors.append("Наименование контрагента обязательно")
 
         # Имя не должно быть слишком длинным.
-        if len(self.name) > 200:
-            errors.append("Наименование контрагента не должно превышать 200 символов")
+        if len(self.name) > MAX_COUNTERPARTY_NAME_LENGTH:
+            errors.append(
+                f"Наименование контрагента не должно превышать "
+                f"{MAX_COUNTERPARTY_NAME_LENGTH} символов"
+            )
 
         # Управляющие символы в имени запрещены.
         if any(char in self.name for char in ['\x00', '\n', '\r', '\t']):

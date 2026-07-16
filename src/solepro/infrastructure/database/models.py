@@ -21,6 +21,8 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.types import CHAR, TypeDecorator
 
+from ...core.domain.constants import MAX_COUNTERPARTY_NAME_LENGTH, MAX_MONEY_AMOUNT
+
 Base = declarative_base()
 
 
@@ -65,7 +67,7 @@ class CounterpartyModel(Base):
         default=uuid.uuid4,
         index=True
     )
-    name = Column(String(200), nullable=False, unique=True, index=True)
+    name = Column(String(MAX_COUNTERPARTY_NAME_LENGTH), nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
     contact_info = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
@@ -86,8 +88,11 @@ class CounterpartyModel(Base):
         """Валидация имени контрагента."""
         if not name or not name.strip():
             raise ValueError("Имя контрагента не может быть пустым")
-        if len(name.strip()) > 200:
-            raise ValueError("Имя контрагента не должно превышать 200 символов")
+        if len(name.strip()) > MAX_COUNTERPARTY_NAME_LENGTH:
+            raise ValueError(
+                f"Имя контрагента не должно превышать "
+                f"{MAX_COUNTERPARTY_NAME_LENGTH} символов"
+            )
         return name.strip()
 
     def __repr__(self) -> str:
@@ -143,7 +148,7 @@ class TransactionModel(Base):
             value = Decimal(str(value))
         if value < 0:
             raise ValueError(f"{key} не может быть отрицательным")
-        if value > Decimal("1000000000"):  # 1 миллиард
+        if value > MAX_MONEY_AMOUNT:
             raise ValueError(f"{key} слишком большая сумма")
         return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 

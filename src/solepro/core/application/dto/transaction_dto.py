@@ -9,6 +9,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
+from ....core.domain.constants import (
+    MAX_COUNTERPARTY_NAME_LENGTH,
+    MAX_MONEY_AMOUNT,
+    MAX_NOTE_LENGTH,
+)
 from ....core.domain.enums.transaction_type import TransactionType
 from ....core.domain.value_objects.money import Money
 
@@ -20,14 +25,14 @@ class TransactionBaseDTO(BaseModel):
     expense: Decimal = Field(default=Decimal("0"), ge=0, description="Сумма расхода")
     tax: Decimal = Field(default=Decimal("0"), ge=0, description="Сумма налога")
     counterparty_id: Optional[UUID] = Field(None, description="ID контрагента")
-    note: Optional[str] = Field(None, max_length=1000, description="Примечание")
+    note: Optional[str] = Field(None, max_length=MAX_NOTE_LENGTH, description="Примечание")
 
     @field_validator("income", "expense", "tax")
     def validate_amounts(cls, v: Decimal) -> Decimal:
         """Валидация денежных сумм."""
         if v < 0:
             raise ValueError("Сумма не может быть отрицательной")
-        if v > Decimal("1000000000"):  # 1 миллиард
+        if v > MAX_MONEY_AMOUNT:
             raise ValueError("Сумма слишком большая")
         return round(v, 2)
 
@@ -38,7 +43,11 @@ class TransactionBaseDTO(BaseModel):
 
 class TransactionCreateDTO(TransactionBaseDTO):
     """DTO для создания транзакции."""
-    counterparty_name: Optional[str] = Field(None, max_length=200, description="Имя контрагента (если ID не указан)")
+    counterparty_name: Optional[str] = Field(
+        None,
+        max_length=MAX_COUNTERPARTY_NAME_LENGTH,
+        description="Имя контрагента (если ID не указан)",
+    )
 
     @field_validator("date")
     def validate_date(cls, v: datetime) -> datetime:
@@ -63,7 +72,7 @@ class TransactionUpdateDTO(BaseModel):
     # None в counterparty_id означает «не менять», поэтому для снятия
     # контрагента нужен отдельный явный флаг.
     clear_counterparty: bool = Field(False, description="Убрать контрагента у транзакции")
-    note: Optional[str] = Field(None, max_length=1000, description="Примечание")
+    note: Optional[str] = Field(None, max_length=MAX_NOTE_LENGTH, description="Примечание")
 
     model_config = ConfigDict(
         from_attributes=True,

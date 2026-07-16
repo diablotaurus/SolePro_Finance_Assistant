@@ -56,7 +56,6 @@ class FilterPanel(QWidget):
         self.type_combo.addItem("Расход", "expense")
         self.type_combo.addItem("Налог = 0", "no_tax")
         self.type_combo.addItem("Налог", "tax")
-        self.type_combo.currentIndexChanged.connect(self.on_filter_changed)
 
         # Пагинация
         pagination_layout = QHBoxLayout()
@@ -67,7 +66,6 @@ class FilterPanel(QWidget):
         self.page_size_combo.addItem("50 записей", 50)
         self.page_size_combo.addItem("100 записей", 100)
         self.page_size_combo.setCurrentIndex(3)  # 100 записей
-        self.page_size_combo.currentIndexChanged.connect(self.on_filter_changed)
 
         pagination_layout.addWidget(self.page_size_combo)
 
@@ -75,7 +73,6 @@ class FilterPanel(QWidget):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Поиск по контрагенту или примечанию...")
         self.search_input.setFixedWidth(320)
-        self.search_input.textChanged.connect(self.on_filter_changed)
         search_row = QHBoxLayout()
         search_row.addWidget(QLabel("Поиск:"))
         search_row.addWidget(self.search_input)
@@ -96,13 +93,11 @@ class FilterPanel(QWidget):
         self.start_date_edit.setDisplayFormat("dd.MM.yyyy")
         current_year_start = QDate(QDate.currentDate().year(), 1, 1)
         self.start_date_edit.setDate(current_year_start)
-        self.start_date_edit.dateChanged.connect(self.on_filter_changed)
         
         self.end_date_edit = QDateEdit()
         self.end_date_edit.setCalendarPopup(True)
         self.end_date_edit.setDisplayFormat("dd.MM.yyyy")
         self.end_date_edit.setDate(QDate.currentDate())
-        self.end_date_edit.dateChanged.connect(self.on_filter_changed)
         
         period_layout.addWidget(QLabel("с:"))
         period_layout.addWidget(self.start_date_edit)
@@ -118,7 +113,6 @@ class FilterPanel(QWidget):
         self.min_amount_spin.setValue(0)
         self.min_amount_spin.setPrefix("от ")
         self.min_amount_spin.setSuffix(" руб.")
-        self.min_amount_spin.valueChanged.connect(self.on_filter_changed)
         
         self.max_amount_spin = QSpinBox()
         self.max_amount_spin.setMinimum(0)
@@ -126,7 +120,6 @@ class FilterPanel(QWidget):
         self.max_amount_spin.setValue(1000000000)
         self.max_amount_spin.setPrefix("до ")
         self.max_amount_spin.setSuffix(" руб.")
-        self.max_amount_spin.valueChanged.connect(self.on_filter_changed)
         
         amount_layout.addWidget(self.min_amount_spin)
         amount_layout.addWidget(self.max_amount_spin)
@@ -163,12 +156,6 @@ class FilterPanel(QWidget):
         
         group.setLayout(group_layout)
         layout.addWidget(group)
-    
-    def on_filter_changed(self) -> None:
-        """Обработчик изменения фильтра."""
-        # Этот метод может использоваться для отложенного применения фильтров
-        # Пока что просто отмечаем, что фильтры изменились
-        pass
     
     def apply_filters(self) -> None:
         """Применить фильтры."""

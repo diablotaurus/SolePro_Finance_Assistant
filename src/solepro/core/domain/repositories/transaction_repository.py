@@ -4,12 +4,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from uuid import UUID
 
 from ..entities.transaction import Transaction
-from ..value_objects.money import Money
-from ..enums.transaction_type import TransactionType
 
 
 @dataclass(frozen=True)
@@ -115,46 +113,6 @@ class TransactionRepository(ABC):
         pass
     
     @abstractmethod
-    def find_by_counterparty(
-        self,
-        counterparty_id: UUID,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[Transaction]:
-        """
-        Найти транзакции по контрагенту.
-        
-        Args:
-            counterparty_id: ID контрагента
-            skip: Количество записей для пропуска
-            limit: Максимальное количество записей
-            
-        Returns:
-            Список транзакций с указанным контрагентом
-        """
-        pass
-    
-    @abstractmethod
-    def find_by_type(
-        self,
-        transaction_type: TransactionType,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[Transaction]:
-        """
-        Найти транзакции по типу.
-        
-        Args:
-            transaction_type: Тип транзакции
-            skip: Количество записей для пропуска
-            limit: Максимальное количество записей
-            
-        Returns:
-            Список транзакций указанного типа
-        """
-        pass
-    
-    @abstractmethod
     def search(
         self,
         query: str,
@@ -233,82 +191,6 @@ class TransactionRepository(ABC):
         """
         pass
 
-    @abstractmethod
-    def get_statistics(
-        self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
-        """
-        Получить статистику по транзакциям.
-        
-        Args:
-            start_date: Начальная дата (если None - с начала)
-            end_date: Конечная дата (если None - по текущий момент)
-            
-        Returns:
-            Словарь со статистикой
-        """
-        pass
-    
-    @abstractmethod
-    def get_monthly_summary(
-        self,
-        year: int,
-        month: int
-    ) -> Dict[str, Any]:
-        """
-        Получить сводку за месяц.
-        
-        Args:
-            year: Год
-            month: Месяц (1-12)
-            
-        Returns:
-            Сводка за месяц
-        """
-        pass
-    
-    @abstractmethod
-    def get_total_income(self) -> Money:
-        """
-        Получить общий доход.
-        
-        Returns:
-            Общая сумма дохода
-        """
-        pass
-    
-    @abstractmethod
-    def get_total_expense(self) -> Money:
-        """
-        Получить общий расход.
-        
-        Returns:
-            Общая сумма расхода
-        """
-        pass
-    
-    @abstractmethod
-    def get_total_tax(self) -> Money:
-        """
-        Получить общий налог.
-        
-        Returns:
-            Общая сумма налога
-        """
-        pass
-    
-    @abstractmethod
-    def get_total_profit(self) -> Money:
-        """
-        Получить общую прибыль.
-        
-        Returns:
-            Общая прибыль
-        """
-        pass
-    
     @abstractmethod
     def count(self) -> int:
         """
