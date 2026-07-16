@@ -127,6 +127,12 @@ class TransactionFilterSpecification:
         if value is None:
             return None
         if isinstance(value, datetime):
+            # Конечная граница с временем 00:00 означает «весь этот день»:
+            # date-пикеры отдают дату без времени, а pydantic приводит её к
+            # datetime полуночи — без расширения до конца дня терялись бы
+            # транзакции с ненулевым временем (например, добавленные ботом).
+            if value.time() == time.min:
+                return datetime.combine(value.date(), time.max)
             return value
         return datetime.combine(value, time.max)
 

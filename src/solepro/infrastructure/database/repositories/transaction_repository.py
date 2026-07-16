@@ -79,8 +79,11 @@ class SQLAlchemyTransactionRepository(TransactionRepository):
             updated_at=entity.updated_at,
         )
 
-        if entity.counterparty_id:
-            model.counterparty_id = str(entity.counterparty_id)
+        # Выставляем всегда (в т.ч. None): merge() копирует только явно
+        # заданные атрибуты, иначе снятие контрагента не сохранялось бы.
+        model.counterparty_id = (
+            str(entity.counterparty_id) if entity.counterparty_id else None
+        )
 
         return model
 

@@ -343,13 +343,16 @@ class TransactionDialog(QDialog):
             
             # Создаем DTO
             if self.is_edit_mode and self.transaction:
-                # Для редактирования
+                # Для редактирования. Пустой выбор в комбобоксе означает
+                # «убрать контрагента» — передаём это явным флагом,
+                # так как None в counterparty_id значит «не менять».
                 dto = TransactionUpdateDTO(
                     date=date,
                     income=income,
                     expense=expense,
                     tax=tax,
                     counterparty_id=counterparty_id if counterparty_id not in [None, "new"] else None,
+                    clear_counterparty=counterparty_id is None,
                     note=note or None,
                 )
             else:

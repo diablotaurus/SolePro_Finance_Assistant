@@ -74,6 +74,30 @@ class TestCounterpartyUseCases:
         assert use_case.execute(saved.id) is True
         assert use_case.execute(saved.id) is False
 
+    def test_delete_counterparty_preserves_transactions(self, session):
+        """Регрессия v1.4.19: транзакции удалённого контрагента сохраняются
+        и отвязываются (counterparty_id = None), а не остаются «висячими»."""
+        cp_repo = SQLAlchemyCounterpartyRepository(session)
+        tx_repo = SQLAlchemyTransactionRepository(session)
+        use_case = DeleteCounterpartyUseCase(cp_repo)
+
+        counterparty = cp_repo.save(Counterparty(name="Удаляемый с транзакциями"))
+        transaction = tx_repo.save(
+            Transaction(
+                date=datetime.now(),
+                income=Money(Decimal("100")),
+                counterparty_id=counterparty.id,
+            )
+        )
+
+        assert use_case.execute(counterparty.id) is True
+
+        survivor = tx_repo.get_by_id(transaction.id)
+        assert survivor is not None
+        assert survivor.counterparty_id is None
+        view = tx_repo.get_by_id_with_counterparty(transaction.id)
+        assert view.counterparty_name is None
+
     def test_get_counterparty_found_and_not_found(self, session):
         repository = SQLAlchemyCounterpartyRepository(session)
         use_case = GetCounterpartyUseCase(repository)

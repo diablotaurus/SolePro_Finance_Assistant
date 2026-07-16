@@ -71,11 +71,13 @@ class CounterpartyModel(Base):
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
-    # Связи
+    # Связи. Каскадного удаления НЕТ намеренно: при удалении контрагента его
+    # транзакции (финансовые записи) должны сохраняться с counterparty_id=NULL,
+    # что соответствует ondelete="SET NULL" внешнего ключа.
     transactions = relationship(
         "TransactionModel",
         back_populates="counterparty",
-        cascade="all, delete-orphan",
+        passive_deletes=True,
         lazy="dynamic"
     )
 

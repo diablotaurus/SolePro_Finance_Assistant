@@ -167,10 +167,16 @@ class CounterpartyManagerDialog(QDialog):
         if not counterparty:
             QMessageBox.warning(self, "Предупреждение", "Выберите контрагента для удаления")
             return
+        message = f"Удалить контрагента '{counterparty.name}'?"
+        if counterparty.transaction_count > 0:
+            message += (
+                f"\n\nУ контрагента {counterparty.transaction_count} транзакц.: "
+                "они сохранятся, но останутся без контрагента."
+            )
         reply = QMessageBox.question(
             self,
             "Подтверждение",
-            f"Удалить контрагента '{counterparty.name}'?",
+            message,
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply != QMessageBox.StandardButton.Yes:

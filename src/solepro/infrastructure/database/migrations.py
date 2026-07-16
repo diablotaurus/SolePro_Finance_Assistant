@@ -32,6 +32,9 @@ def upgrade_database_to_head(database_url: Optional[str] = None) -> bool:
     config.set_main_option("script_location", str(project_root / "alembic"))
     db_url = database_url or get_database_config().url
     config.set_main_option("sqlalchemy.url", db_url)
+    # env.py сам определяет URL из конфига приложения; передаём явный URL
+    # через attributes, иначе параметр database_url игнорировался бы.
+    config.attributes["sqlalchemy_url_override"] = db_url
 
     try:
         command.upgrade(config, "head")

@@ -182,6 +182,9 @@ class UpdateTransactionUseCase:
                 if not counterparty:
                     raise EntityNotFoundException("Контрагент", str(dto.counterparty_id))
                 update_data["counterparty_id"] = dto.counterparty_id
+            elif dto.clear_counterparty:
+                # Явное снятие контрагента с транзакции.
+                update_data["clear_counterparty"] = True
 
             # Создаем обновленную сущность
             updated_transaction = transaction.update(**update_data)

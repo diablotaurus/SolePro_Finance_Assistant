@@ -143,7 +143,32 @@ class TestTransaction:
         assert updated.income.value == Decimal("2000")
         assert updated.note == "Новая заметка"
         assert updated.id == transaction.id  # ID должен остаться прежним
-    
+
+    def test_update_transaction_clear_counterparty(self):
+        """Снятие контрагента: None означает «не менять», нужен явный флаг."""
+        from uuid import uuid4
+
+        counterparty_id = uuid4()
+        transaction = Transaction(
+            income=Money(Decimal("1000")),
+            counterparty_id=counterparty_id,
+        )
+
+        # None не снимает контрагента.
+        kept = transaction.update(note="Просто заметка")
+        assert kept.counterparty_id == counterparty_id
+
+        # Явный флаг снимает.
+        cleared = transaction.update(clear_counterparty=True)
+        assert cleared.counterparty_id is None
+
+        # Новый контрагент имеет приоритет над флагом.
+        replacement_id = uuid4()
+        replaced = transaction.update(
+            counterparty_id=replacement_id, clear_counterparty=True
+        )
+        assert replaced.counterparty_id == replacement_id
+
     def test_invalid_transaction(self):
         """Тест невалидных транзакций."""
         # Дата в будущем

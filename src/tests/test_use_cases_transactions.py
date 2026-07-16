@@ -129,6 +129,50 @@ class TestTransactionUseCases:
         assert updated.tax == Decimal("5")
         assert updated.note == "Новое"
 
+    def test_update_transaction_clears_counterparty(self, session):
+        tx_repo = SQLAlchemyTransactionRepository(session)
+        cp_repo = SQLAlchemyCounterpartyRepository(session)
+        use_case = UpdateTransactionUseCase(tx_repo, cp_repo)
+
+        counterparty = _create_counterparty(cp_repo, "Контрагент для снятия")
+        saved = _create_transaction(
+            tx_repo,
+            date=datetime.now(),
+            income=Decimal("100"),
+            expense=Decimal("0"),
+            tax=Decimal("0"),
+            counterparty_id=counterparty.id,
+        )
+        assert saved.counterparty_id == counterparty.id
+
+        updated = use_case.execute(
+            saved.id, TransactionUpdateDTO(clear_counterparty=True)
+        )
+
+        assert updated.counterparty_id is None
+        assert updated.counterparty_name is None
+
+    def test_update_transaction_none_counterparty_keeps_existing(self, session):
+        tx_repo = SQLAlchemyTransactionRepository(session)
+        cp_repo = SQLAlchemyCounterpartyRepository(session)
+        use_case = UpdateTransactionUseCase(tx_repo, cp_repo)
+
+        counterparty = _create_counterparty(cp_repo, "Контрагент остаётся")
+        saved = _create_transaction(
+            tx_repo,
+            date=datetime.now(),
+            income=Decimal("100"),
+            expense=Decimal("0"),
+            tax=Decimal("0"),
+            counterparty_id=counterparty.id,
+        )
+
+        updated = use_case.execute(
+            saved.id, TransactionUpdateDTO(note="Только примечание")
+        )
+
+        assert updated.counterparty_id == counterparty.id
+
     def test_update_transaction_rejects_unknown_counterparty(self, session):
         tx_repo = SQLAlchemyTransactionRepository(session)
         cp_repo = SQLAlchemyCounterpartyRepository(session)

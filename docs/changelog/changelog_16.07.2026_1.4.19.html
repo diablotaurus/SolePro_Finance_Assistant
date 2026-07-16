@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — Исправления по итогам code review (16.07.2026, v1.4.19)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .changelog-card { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; animation: slideIn 0.6s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px);} to { opacity: 1; transform: translateY(0);} }
+        .header { background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); color: white; padding: 50px; text-align: center; position: relative; overflow: hidden; }
+        .header::before { content:""; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: moveBackground 60s linear infinite; }
+        @keyframes moveBackground { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+        .header h1 { font-size: 3.2rem; margin-bottom: 15px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); position: relative; z-index: 1; }
+        .header .subtitle { font-size: 1.4rem; opacity: 0.95; margin-bottom: 25px; position: relative; z-index: 1; font-weight: 300; }
+        .metadata { display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .meta-item { background: rgba(255,255,255,0.15); padding: 12px 24px; border-radius: 50px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); display:flex; align-items:center; gap:8px; }
+        .content { padding: 50px; }
+        .section { margin-bottom: 50px; border-left: 5px solid #2196F3; padding: 25px; background: linear-gradient(to right, rgba(33,150,243,0.05), transparent); border-radius: 0 10px 10px 0; }
+        .section h2 { color: #1565C0; font-size: 2rem; margin-bottom: 25px; display:flex; align-items:center; gap:15px; padding-bottom:10px; border-bottom: 2px solid #E3F2FD; }
+        .section h2 i { font-size: 1.8rem; background: #2196F3; color: white; width: 50px; height: 50px; border-radius: 50%; display:flex; align-items:center; justify-content:center; }
+        .change-card { background: white; border-radius: 15px; padding: 30px; border: 2px solid #E3F2FD; position: relative; overflow: hidden; margin-top: 20px; }
+        .change-card::before { content:""; position:absolute; top:0; left:0; width:100%; height:5px; background:#2196F3; }
+        .change-card h3 { color: #0D47A1; font-size: 1.3rem; margin-bottom: 15px; font-weight: 600; }
+        .status { display:inline-block; padding:8px 16px; border-radius:25px; font-size:0.9rem; font-weight:700; margin-bottom:18px; letter-spacing:0.5px; text-transform:uppercase; background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: #B71C1C; }
+        .change-list { list-style: none; }
+        .change-list li { padding: 10px 0 10px 28px; position: relative; border-bottom: 1px solid #E3F2FD; }
+        .change-list li:last-child { border-bottom: none; }
+        .change-list li::before { content: "✓"; position: absolute; left: 0; color: #2196F3; font-weight: 800; }
+        .code-snippet { background: #1E1E1E; color: #D4D4D4; border-radius: 12px; padding: 22px; margin: 18px 0; font-family: 'Consolas','Monaco',monospace; font-size: 0.92rem; overflow-x: auto; border-left: 5px solid #2196F3; white-space: pre; }
+        .code-snippet .c { color: #6A9955; }
+        .file-list { background: #F5F9FF; border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid #E3F2FD; }
+        .file-item { padding: 12px 15px; border-bottom: 1px solid #E3F2FD; font-family: 'Consolas','Monaco',monospace; font-size: 0.95rem; color: #2D3748; display:flex; align-items:center; gap:10px; }
+        .file-item:last-child { border-bottom: none; }
+        .file-item.modified::before { content: "⚡"; font-size: 1.1rem; }
+        .file-item.added::before { content: "✨"; font-size: 1.1rem; }
+        .footer { text-align: center; padding: 40px; background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%); color: white; }
+        .footer p { margin-bottom: 15px; font-size: 1.1rem; }
+        .tech-stack { display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-top:20px; }
+        .tech-item { background: rgba(255,255,255,0.1); padding:10px 20px; border-radius:25px; font-size:0.9rem; border:1px solid rgba(255,255,255,0.2); }
+        @media (max-width: 768px) { .content{padding:25px;} .header{padding:30px 20px;} .header h1{font-size:2.2rem;} .section h2{font-size:1.6rem;} .section h2 i{width:40px;height:40px;font-size:1.4rem;} }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Исправления трёх багов уровня данных по итогам полного code review</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 16.07.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.19</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-bug"></i> Тип: Bugfix</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-magnifying-glass"></i> Обзор</h2>
+                    <p>По итогам полного code review проекта найдены и исправлены три бага, влияющих на корректность данных. Все исправления подтверждены воспроизведением до фикса и регрессионными тестами после (тестов стало <strong>192 → 205</strong>).</p>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-calendar-xmark"></i> Баг 1. Фильтр «по дату» терял транзакции, добавленные ботом</h2>
+                    <div class="change-card">
+                        <span class="status">BUGFIX</span>
+                        <ul class="change-list">
+                            <li>Date-пикеры отдают дату без времени; pydantic приводил её к datetime полуночи</li>
+                            <li>Нормализация конечной границы «до конца дня» не срабатывала для datetime</li>
+                            <li>Транзакции бота (вводятся с реальным временем) выпадали из выборки при фильтре «по: сегодня» — по умолчанию в десктопе</li>
+                            <li>Исправление: конечная граница с временем 00:00 трактуется как «весь этот день» (до 23:59:59.999999)</li>
+                        </ul>
+                        <div class="code-snippet"><span class="c"># До: транзакция бота от 10.07 14:30 НЕ проходила фильтр «по 10.07»</span>
+<span class="c"># После:</span>
+Транзакция бота 10.07 14:30 проходит фильтр 'по 10.07': True</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-link-slash"></i> Баг 2. Удаление контрагента оставляло «висячие» ссылки</h2>
+                    <div class="change-card">
+                        <span class="status">BUGFIX</span>
+                        <ul class="change-list">
+                            <li>В SQLite не был включён PRAGMA foreign_keys — ondelete="SET NULL" не работал; транзакции удалённого контрагента ссылались на несуществующую запись (в топе контрагентов появлялись «сырые» UUID)</li>
+                            <li>Включён PRAGMA foreign_keys=ON для всех SQLite-соединений</li>
+                            <li>Убран противоречащий cascade="all, delete-orphan" (мина: при переходе на ORM-удаление он бы молча удалил все транзакции контрагента)</li>
+                            <li>Репозиторий при удалении явно отвязывает транзакции (SET NULL) — работает независимо от версии схемы БД</li>
+                            <li>Новая миграция Alembic 20260716_0003 чистит уже существующие «висячие» ссылки</li>
+                            <li>UI предупреждает: «У контрагента N транзакц.: они сохранятся, но останутся без контрагента»</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-user-slash"></i> Баг 3. Нельзя было убрать контрагента у транзакции</h2>
+                    <div class="change-card">
+                        <span class="status">BUGFIX</span>
+                        <ul class="change-list">
+                            <li>В TransactionUpdateDTO None означает «не менять» — выбор «-- Выберите контрагента --» при редактировании молча игнорировался</li>
+                            <li>Добавлен явный флаг clear_counterparty: DTO → use case → доменная сущность</li>
+                            <li>Попутно исправлен репозиторий: merge() не затирал counterparty_id в NULL, т.к. атрибут выставлялся условно</li>
+                            <li>Новый counterparty_id, если передан, имеет приоритет над флагом</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-database"></i> Попутное исправление: upgrade_database_to_head игнорировал URL</h2>
+                    <div class="change-card">
+                        <ul class="change-list">
+                            <li>alembic/env.py всегда брал URL из конфигурации приложения (.env), затирая явно переданный параметр database_url</li>
+                            <li>Теперь явный URL передаётся через config.attributes и имеет приоритет; запуск alembic из CLI работает как раньше</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-vial"></i> Тесты (192 → 205)</h2>
+                    <div class="change-card">
+                        <ul class="change-list">
+                            <li>Новый модуль test_specifications.py: нормализация границ периода (5 тестов), включая регресс «транзакция бота проходит фильтр date-пикера»</li>
+                            <li>test_use_cases_counterparties.py: удаление контрагента сохраняет транзакции и отвязывает их</li>
+                            <li>test_use_cases_transactions.py: снятие контрагента флагом + None не трогает контрагента</li>
+                            <li>test_domain.py: clear_counterparty в сущности (None ≠ снять; приоритет нового ID)</li>
+                            <li>Миграция 20260716_0003 проверена на чистой БД и на БД с «висячей» ссылкой</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-folder-open"></i> Затронутые файлы</h2>
+                    <div class="file-list">
+                        <div class="file-item modified">src/solepro/core/application/specifications.py — конечная граница 00:00 = весь день</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/session_manager.py — PRAGMA foreign_keys=ON</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/models.py — убран каскад, passive_deletes</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/repositories/counterparty_repository.py — явный SET NULL при удалении</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/repositories/transaction_repository.py — merge корректно снимает контрагента</div>
+                        <div class="file-item modified">src/solepro/infrastructure/database/migrations.py, alembic/env.py — приоритет явного URL</div>
+                        <div class="file-item added">alembic/versions/20260716_0003_cleanup_dangling_counterparty_refs.py — чистка «висячих» ссылок</div>
+                        <div class="file-item modified">src/solepro/core/domain/entities/transaction.py — clear_counterparty в update()</div>
+                        <div class="file-item modified">src/solepro/core/application/dto/transaction_dto.py — флаг clear_counterparty</div>
+                        <div class="file-item modified">src/solepro/core/application/use_cases/transaction_use_cases.py — проброс флага</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/views/dialogs/transaction_dialog.py — пустой выбор = снять контрагента</div>
+                        <div class="file-item modified">src/solepro/presentation/desktop/views/dialogs/counterparty_manager_dialog.py — предупреждение при удалении</div>
+                        <div class="file-item added">src/tests/test_specifications.py — тесты нормализации периода</div>
+                        <div class="file-item modified">src/tests/ — test_domain, test_use_cases_transactions, test_use_cases_counterparties, test_migrations_module</div>
+                        <div class="file-item modified">pyproject.toml — версия 1.4.19</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Исправления по итогам code review | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Фильтры видят все транзакции, удаление контрагентов безопасно, контрагента можно снять</p>
+                <div class="tech-stack" style="margin-top: 25px;">
+                    <div class="tech-item">Specification</div>
+                    <div class="tech-item">PRAGMA foreign_keys</div>
+                    <div class="tech-item">Alembic 0003</div>
+                    <div class="tech-item">205 тестов</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.19 |
+                    <i class="fas fa-check-circle"></i> Статус: Исправлено |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 16.07.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

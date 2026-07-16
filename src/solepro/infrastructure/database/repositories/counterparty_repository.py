@@ -102,6 +102,16 @@ class SQLAlchemyCounterpartyRepository(CounterpartyRepository):
         return self._to_entity(saved_model)
     
     def delete(self, counterparty_id: UUID) -> bool:
+        # Явно отвязываем транзакции (SET NULL), не полагаясь на FK-каскад БД:
+        # существующие SQLite-базы могли быть созданы без ondelete-правила.
+        (
+            self.session.query(TransactionModel)
+            .filter(TransactionModel.counterparty_id == str(counterparty_id))
+            .update(
+                {TransactionModel.counterparty_id: None},
+                synchronize_session=False,
+            )
+        )
         result = (
             self.session.query(CounterpartyModel)
             .filter(CounterpartyModel.id == str(counterparty_id))

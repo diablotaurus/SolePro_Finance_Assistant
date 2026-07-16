@@ -55,6 +55,9 @@ class TransactionUpdateDTO(BaseModel):
     expense: Optional[Decimal] = Field(None, ge=0, description="Сумма расхода")
     tax: Optional[Decimal] = Field(None, ge=0, description="Сумма налога")
     counterparty_id: Optional[UUID] = Field(None, description="ID контрагента")
+    # None в counterparty_id означает «не менять», поэтому для снятия
+    # контрагента нужен отдельный явный флаг.
+    clear_counterparty: bool = Field(False, description="Убрать контрагента у транзакции")
     note: Optional[str] = Field(None, max_length=1000, description="Примечание")
 
     model_config = ConfigDict(

@@ -57,6 +57,9 @@ class DatabaseSessionManager:
                 cursor = dbapi_connection.cursor()
                 cursor.execute("PRAGMA journal_mode=WAL;")
                 cursor.execute("PRAGMA synchronous=NORMAL;")
+                # SQLite по умолчанию не проверяет внешние ключи — без этого
+                # ondelete="SET NULL" в схеме не работает.
+                cursor.execute("PRAGMA foreign_keys=ON;")
                 cursor.close()
         
         # Создаем фабрику сессий

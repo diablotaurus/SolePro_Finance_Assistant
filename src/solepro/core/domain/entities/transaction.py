@@ -93,14 +93,26 @@ class Transaction:
         note: Optional[str] = None,
         date: Optional[datetime] = None,
         counterparty_id: Optional[UUID] = None,
+        clear_counterparty: bool = False,
     ) -> "Transaction":
         """
         Создать новую версию транзакции с обновленными значениями.
-        
+
+        None означает «не менять поле», поэтому для снятия контрагента
+        используется явный флаг clear_counterparty (новый counterparty_id,
+        если передан, имеет приоритет).
+
         Возвращает новый объект Transaction, так как сущность immutable.
         """
         from dataclasses import replace
-        
+
+        if counterparty_id is not None:
+            new_counterparty_id = counterparty_id
+        elif clear_counterparty:
+            new_counterparty_id = None
+        else:
+            new_counterparty_id = self.counterparty_id
+
         return replace(
             self,
             income=income if income is not None else self.income,
@@ -108,7 +120,7 @@ class Transaction:
             tax=tax if tax is not None else self.tax,
             note=note if note is not None else self.note,
             date=date if date is not None else self.date,
-            counterparty_id=counterparty_id if counterparty_id is not None else self.counterparty_id,
+            counterparty_id=new_counterparty_id,
             updated_at=datetime.now(),
         )
     

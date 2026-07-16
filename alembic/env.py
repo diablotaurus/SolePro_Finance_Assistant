@@ -42,9 +42,17 @@ target_metadata = Base.metadata
 
 
 def get_database_url():
-    """Получить URL базы данных из конфигурации."""
+    """Получить URL базы данных.
+
+    Приоритет: явный URL, переданный программно через config.attributes
+    (upgrade_database_to_head), затем конфигурация приложения (.env).
+    """
+    override = config.attributes.get("sqlalchemy_url_override")
+    if override:
+        return override
+
     from solepro.infrastructure.config import get_database_config
-    
+
     db_config = get_database_config()
     return db_config.url
 

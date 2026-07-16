@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "solepro-finance-assistant"
-version = "1.4.18"
+version = "1.4.19"
 description = "Финансовый ассистент для индивидуальных предпринимателей"
 readme = "README.md"
 authors = [

@@ -13,6 +13,7 @@ class _FakeAlembicConfig:
     def __init__(self, ini_path: str):
         self.ini_path = ini_path
         self.options: dict[str, str] = {}
+        self.attributes: dict = {}
 
     def set_main_option(self, key: str, value: str) -> None:
         self.options[key] = value
