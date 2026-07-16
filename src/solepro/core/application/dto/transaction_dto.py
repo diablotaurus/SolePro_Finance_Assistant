@@ -31,13 +31,6 @@ class TransactionBaseDTO(BaseModel):
             raise ValueError("Сумма слишком большая")
         return round(v, 2)
 
-    @field_validator("date")
-    def validate_date(cls, v: datetime) -> datetime:
-        """Валидация даты."""
-        if v > datetime.now():
-            raise ValueError("Дата не может быть в будущем")
-        return v
-
     model_config = ConfigDict(
         from_attributes=True,
     )
@@ -46,6 +39,18 @@ class TransactionBaseDTO(BaseModel):
 class TransactionCreateDTO(TransactionBaseDTO):
     """DTO для создания транзакции."""
     counterparty_name: Optional[str] = Field(None, max_length=200, description="Имя контрагента (если ID не указан)")
+
+    @field_validator("date")
+    def validate_date(cls, v: datetime) -> datetime:
+        """Валидация даты нового ввода.
+
+        Проверка только при создании: response-DTO не должен валидировать
+        бизнес-правила ввода, иначе перевод системных часов назад ломал бы
+        отображение уже сохранённых данных.
+        """
+        if v > datetime.now():
+            raise ValueError("Дата не может быть в будущем")
+        return v
 
 
 class TransactionUpdateDTO(BaseModel):

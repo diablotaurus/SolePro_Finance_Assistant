@@ -153,7 +153,22 @@ class TelegramBot:
         self.application = builder.build()
         
         # Добавляем middleware для проверки доступа
-        self.application.add_handler(AccessMiddleware(allowed_users=self.config.allowed_users))
+        if not self.config.allowed_users:
+            if self.config.allow_all_users:
+                self.logger.warning(
+                    "⚠️ TELEGRAM_ALLOW_ALL=True — бот доступен ВСЕМ пользователям!"
+                )
+            else:
+                self.logger.warning(
+                    "⚠️ TELEGRAM_ALLOWED_USERS пуст — доступ к боту закрыт для всех. "
+                    "Укажите ID пользователей или TELEGRAM_ALLOW_ALL=True (для разработки)."
+                )
+        self.application.add_handler(
+            AccessMiddleware(
+                allowed_users=self.config.allowed_users,
+                allow_all=self.config.allow_all_users,
+            )
+        )
         
         # Настраиваем обработчики
         dependencies = HandlerDependencies(

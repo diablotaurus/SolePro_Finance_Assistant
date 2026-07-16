@@ -38,6 +38,22 @@ def test_telegram_config_invalid_admin_id_becomes_none(monkeypatch):
     assert cfg.admin_chat_id is None
 
 
+def test_telegram_config_allow_all_defaults_to_false(monkeypatch):
+    monkeypatch.delenv("TELEGRAM_ALLOW_ALL", raising=False)
+
+    cfg = config_module.get_telegram_config()
+
+    assert cfg.allow_all_users is False
+
+
+def test_telegram_config_allow_all_parsed_from_env(monkeypatch):
+    monkeypatch.setenv("TELEGRAM_ALLOW_ALL", "True")
+
+    cfg = config_module.get_telegram_config()
+
+    assert cfg.allow_all_users is True
+
+
 def test_app_config_boolean_and_integer_fields_from_env(monkeypatch):
     monkeypatch.setenv("APP_DEBUG", "False")
     monkeypatch.setenv("ENABLE_AUTO_BACKUP", "false")

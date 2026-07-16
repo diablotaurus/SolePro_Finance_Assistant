@@ -37,18 +37,25 @@ class DatabaseSessionManager:
                 Path(db_path).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
 
         # Создаем движок
-        connect_args = {"check_same_thread": False} if "sqlite" in self.database_url else {}
-        if "sqlite" in self.database_url:
+        is_sqlite = "sqlite" in self.database_url
+        connect_args = {}
+        engine_kwargs = {"echo": config.echo}
+        if is_sqlite:
+            connect_args["check_same_thread"] = False
             connect_args["timeout"] = 30
+        else:
+            # Параметры пула применимы только к сетевым СУБД: пул SQLite
+            # (в частности, для :memory:) их не принимает.
+            engine_kwargs.update(
+                pool_size=config.pool_size,
+                max_overflow=config.max_overflow,
+                pool_recycle=config.pool_recycle,
+            )
 
         self.engine = create_engine(
             self.database_url,
-            pool_size=config.pool_size,
-            max_overflow=config.max_overflow,
-            pool_recycle=config.pool_recycle,
-            echo=config.echo,
-            # Для SQLite включаем поддержку внешних ключей
-            connect_args=connect_args
+            connect_args=connect_args,
+            **engine_kwargs,
         )
 
         if "sqlite" in self.database_url:

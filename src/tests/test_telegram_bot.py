@@ -69,6 +69,7 @@ def fake_config():
         log_level="INFO",
         admin_chat_id=9999,
         proxy_url=None,
+        allow_all_users=False,
     )
 
 
@@ -99,7 +100,11 @@ def test_setup_application_registers_handlers(monkeypatch, fake_config):
 
     monkeypatch.setattr(bot_module, "Application", _FakeApplication)
     monkeypatch.setattr(bot_module, "get_telegram_config", lambda: fake_config)
-    monkeypatch.setattr(bot_module, "AccessMiddleware", lambda allowed_users: ("middleware", allowed_users))
+    monkeypatch.setattr(
+        bot_module,
+        "AccessMiddleware",
+        lambda allowed_users, allow_all=False: ("middleware", allowed_users),
+    )
     monkeypatch.setattr(
         bot_module,
         "setup_handlers",
@@ -133,7 +138,9 @@ def _prepare_bot(monkeypatch, config):
     monkeypatch.setattr(bot_module, "Application", _FakeApplication)
     monkeypatch.setattr(bot_module, "get_telegram_config", lambda: config)
     monkeypatch.setattr(
-        bot_module, "AccessMiddleware", lambda allowed_users: ("middleware", allowed_users)
+        bot_module,
+        "AccessMiddleware",
+        lambda allowed_users, allow_all=False: ("middleware", allowed_users),
     )
     monkeypatch.setattr(bot_module, "setup_handlers", lambda app, dependencies=None: None)
     return bot_module.TelegramBot(), builder

@@ -61,6 +61,11 @@ class TelegramConfig:
     proxy_url: Optional[str] = field(default_factory=lambda: (
         os.getenv("TELEGRAM_PROXY", "").strip() or None
     ))
+    # Явное разрешение доступа всем при пустом TELEGRAM_ALLOWED_USERS
+    # (только для разработки). По умолчанию пустой список = доступ закрыт.
+    allow_all_users: bool = field(default_factory=lambda: os.getenv(
+        "TELEGRAM_ALLOW_ALL", "False"
+    ).lower() == "true")
 
 
 @dataclass

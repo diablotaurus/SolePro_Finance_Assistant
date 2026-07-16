@@ -44,11 +44,28 @@ def test_check_update_allows_authorized_user():
     assert middleware.check_update(update) is False
 
 
-def test_check_update_allows_all_when_allowlist_empty():
+def test_check_update_blocks_everyone_when_allowlist_empty():
+    """Fail-closed: пустой allowlist закрывает доступ, а не открывает."""
     middleware = AccessMiddleware(allowed_users=[])
     update = _build_update(user_id=999)
 
+    assert middleware.check_update(update) is True
+
+
+def test_check_update_allows_all_with_explicit_flag():
+    """Открытый доступ для разработки включается только явным флагом."""
+    middleware = AccessMiddleware(allowed_users=[], allow_all=True)
+    update = _build_update(user_id=999)
+
     assert middleware.check_update(update) is False
+
+
+def test_allow_all_flag_ignored_when_allowlist_present():
+    """При заполненном allowlist флаг allow_all не расширяет доступ."""
+    middleware = AccessMiddleware(allowed_users=[1], allow_all=True)
+    update = _build_update(user_id=999)
+
+    assert middleware.check_update(update) is True
 
 
 @pytest.mark.asyncio

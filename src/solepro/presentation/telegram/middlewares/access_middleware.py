@@ -14,15 +14,18 @@ class AccessMiddleware(BaseHandler):
     Проверяет, есть ли пользователь в списке разрешенных пользователей.
     """
     
-    def __init__(self, allowed_users: List[int]):
+    def __init__(self, allowed_users: List[int], allow_all: bool = False):
         """
         Инициализировать middleware.
-        
+
         Args:
             allowed_users: Список ID разрешенных пользователей
+            allow_all: Разрешить доступ всем при пустом списке
+                (только для разработки; по умолчанию доступ закрыт)
         """
         super().__init__(callback=self._handle, block=True)
         self.allowed_users = allowed_users
+        self.allow_all = allow_all
 
     async def _handle(self, update: Update, context) -> None:
         """Handle unauthorized access with a user-facing message."""
@@ -58,10 +61,12 @@ class AccessMiddleware(BaseHandler):
         if not user:
             # Если нет пользователя, пропускаем
             return None
-        
-        # Если список пустой, разрешаем всем (удобно для разработки)
+
+        # Пустой список = доступ закрыт для всех (fail-closed): финансовый
+        # бот не должен открываться из-за незаполненного .env. Открытый
+        # доступ для разработки включается явно (TELEGRAM_ALLOW_ALL=True).
         if not self.allowed_users:
-            return False
+            return not self.allow_all
 
         # True => этот handler обработает апдейт и заблокирует остальные
         return user.id not in self.allowed_users

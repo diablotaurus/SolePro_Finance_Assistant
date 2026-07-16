@@ -76,6 +76,34 @@ class TestMoney:
         with pytest.raises(InvalidMoneyException):
             Money(Decimal("100"), "XYZ")  # Неподдерживаемая валюта
 
+    def test_str_does_not_depend_on_system_locale(self):
+        """str(Money) работает на любой системе (регрессия v1.4.20)."""
+        money = Money(Decimal("1234567.89"), "RUB")
+        assert str(money) == "1 234 567,89 ₽"
+
+    def test_format_falls_back_when_locale_unavailable(self, monkeypatch):
+        """Недоступная локаль не роняет форматирование, а даёт фолбэк.
+
+        setlocale подменяется, т.к. Windows принимает почти любые имена
+        локалей, а на Linux без ru_RU реальный вызов бросает locale.Error.
+        """
+        import locale as locale_module
+
+        def _raise(*args, **kwargs):
+            raise locale_module.Error("unsupported locale")
+
+        monkeypatch.setattr(
+            "solepro.core.domain.value_objects.money.locale.setlocale", _raise
+        )
+
+        money = Money(Decimal("1000.50"), "RUB")
+        result = money.format(show_currency=True, locale_name="ru_RU")
+        assert result == "1 000,50 ₽"
+
+    def test_format_without_currency(self):
+        money = Money(Decimal("-25.5"), "RUB")
+        assert money.format(show_currency=False) == "-25,50"
+
 
 class TestTransaction:
     """Тесты для сущности Transaction."""

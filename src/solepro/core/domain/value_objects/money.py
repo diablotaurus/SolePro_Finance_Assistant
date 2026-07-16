@@ -126,45 +126,52 @@ class Money:
     def format(self, show_currency: bool = True, locale_name: Optional[str] = None) -> str:
         """
         Форматировать сумму для отображения.
-        
+
         Args:
             show_currency: Показывать ли символ валюты
-            locale_name: Локаль для форматирования (например 'ru_RU')
-            
+            locale_name: Локаль для форматирования (например 'ru_RU');
+                если локаль недоступна в системе, используется встроенное
+                форматирование (пробел — разделитель тысяч, запятая — дробная)
+
         Returns:
             Отформатированная строка
         """
-        try:
-            if locale_name:
+        rounded = self.round(decimals=2)
+        formatted: Optional[str] = None
+
+        if locale_name:
+            old_locale = None
+            try:
                 old_locale = locale.getlocale(locale.LC_MONETARY)
                 locale.setlocale(locale.LC_MONETARY, locale_name)
-            
-            # Округляем до 2 знаков
-            rounded = self.round(decimals=2)
-            
-            # Форматируем с разделителями тысяч
-            if locale_name:
                 formatted = locale.currency(
                     rounded.to_float(),
                     symbol=False,
                     grouping=True
                 )
-            else:
-                # Простое форматирование без локали
-                formatted = f"{rounded.value:,.2f}".replace(',', ' ').replace('.', ',')
-            
-            if show_currency:
-                symbol = self.CURRENCY_SYMBOLS.get(self.currency, self.currency)
-                return f"{formatted} {symbol}"
-            
-            return formatted
-            
-        finally:
-            if locale_name:
-                locale.setlocale(locale.LC_MONETARY, old_locale)
-    
+            except (locale.Error, ValueError):
+                formatted = None  # локаль недоступна — фолбэк ниже
+            finally:
+                if old_locale is not None:
+                    try:
+                        locale.setlocale(locale.LC_MONETARY, old_locale)
+                    except locale.Error:
+                        pass
+
+        if formatted is None:
+            # Встроенное форматирование, не зависящее от локалей системы.
+            formatted = f"{rounded.value:,.2f}".replace(',', ' ').replace('.', ',')
+
+        if show_currency:
+            symbol = self.CURRENCY_SYMBOLS.get(self.currency, self.currency)
+            return f"{formatted} {symbol}"
+
+        return formatted
+
     def __str__(self) -> str:
-        return self.format(show_currency=True, locale_name='ru_RU')
+        # Без locale_name: результат одинаков на любой системе и не падает
+        # там, где локаль ru_RU не установлена (например, Linux-серверы).
+        return self.format(show_currency=True)
     
     def __repr__(self) -> str:
         return f"Money(value={self.value}, currency='{self.currency}')"

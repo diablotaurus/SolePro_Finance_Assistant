@@ -61,6 +61,39 @@ def test_session_manager_creates_sqlite_directory(monkeypatch, tmp_path):
         manager.close()
 
 
+def test_session_manager_supports_in_memory_sqlite(monkeypatch):
+    """Регрессия v1.4.20: пул-параметры не передаются SQLite —
+    раньше sqlite:///:memory: падал на max_overflow."""
+    monkeypatch.setattr(session_manager_module, "get_database_config", _stub_db_config)
+
+    manager = session_manager_module.DatabaseSessionManager(
+        database_url="sqlite:///:memory:"
+    )
+    try:
+        manager.create_tables()
+        with manager.session() as session:
+            from solepro.infrastructure.database.models import CounterpartyModel
+
+            assert session.query(CounterpartyModel).count() == 0
+    finally:
+        manager.close()
+
+
+def test_sqlite_connections_enforce_foreign_keys(monkeypatch, tmp_path):
+    """PRAGMA foreign_keys=ON включается для каждого SQLite-соединения."""
+    monkeypatch.setattr(session_manager_module, "get_database_config", _stub_db_config)
+    db_url = f"sqlite:///{(tmp_path / 'fk_test.db').as_posix()}"
+    manager = session_manager_module.DatabaseSessionManager(database_url=db_url)
+    try:
+        from sqlalchemy import text
+
+        with manager.engine.connect() as connection:
+            value = connection.execute(text("PRAGMA foreign_keys")).scalar()
+        assert value == 1
+    finally:
+        manager.close()
+
+
 def test_session_context_commits_and_removes(monkeypatch, tmp_path):
     monkeypatch.setattr(session_manager_module, "get_database_config", _stub_db_config)
     db_url = f"sqlite:///{(tmp_path / 'commit_test.db').as_posix()}"
