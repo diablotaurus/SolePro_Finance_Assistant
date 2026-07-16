@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import Callable, Optional
 
+from PyQt6.QtCore import QLibraryInfo, QTranslator
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 
@@ -64,6 +65,8 @@ class DesktopApplication:
         self.controller: Optional[MainController] = None
         self.session_manager: Optional[SessionManagerProtocol] = None
         self.refresh_timer: Optional[TimerProtocol] = None
+        # Ссылка на переводчик Qt: без неё его соберёт сборщик мусора.
+        self._qt_translator: Optional[QTranslator] = None
         
     def setup_database(self) -> None:
         """Настроить базу данных."""
@@ -130,6 +133,7 @@ class DesktopApplication:
         """Настроить приложение Qt."""
         self.app = self._build_qt_application()
         self._configure_application_metadata(self.app)
+        self._install_qt_translations()
         self._apply_app_icon()
         
         # Применяем стили
@@ -154,6 +158,25 @@ class DesktopApplication:
     def _build_main_window(self, controller: MainController) -> MainWindow:
         """Create desktop main window."""
         return MainWindow(controller)
+
+    def _install_qt_translations(self) -> None:
+        """Русские подписи стандартных кнопок Qt (Да/Нет, Отмена и т.п.).
+
+        Перевод qtbase_ru.qm поставляется вместе с PyQt6. Установка —
+        best-effort: если перевод не загрузился, приложение работает
+        с английскими подписями стандартных кнопок.
+        """
+        if self.app is None:
+            return
+        translator = QTranslator()
+        translations_path = QLibraryInfo.path(
+            QLibraryInfo.LibraryPath.TranslationsPath
+        )
+        if translator.load("qtbase_ru", translations_path):
+            self.app.installTranslator(translator)
+            self._qt_translator = translator
+        else:
+            logger.warning("Перевод Qt (qtbase_ru) не найден — кнопки останутся английскими")
 
     def _apply_app_icon(self) -> None:
         """Установить иконку приложения, если файл доступен."""

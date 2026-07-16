@@ -122,6 +122,7 @@ class _QtAppSpy:
         self.org_name = None
         self.org_domain = None
         self.icon = None
+        self.translators = []
 
     def setApplicationName(self, value):
         self.app_name = value
@@ -134,6 +135,10 @@ class _QtAppSpy:
 
     def setWindowIcon(self, icon):
         self.icon = icon
+
+    def installTranslator(self, translator):
+        self.translators.append(translator)
+        return True
 
     def exec(self):
         return self.exec_result
@@ -362,6 +367,35 @@ def test_desktop_application_setup_application_calls_metadata_configurer(monkeyp
     app.setup_application()
 
     assert calls["configured"] == 1
+
+
+def test_desktop_application_installs_qt_translations(monkeypatch):
+    """setup_application подключает русский перевод стандартных кнопок Qt."""
+    app = _build_app_with_empty_container()
+    fake_qapp = _QtAppSpy()
+
+    monkeypatch.setattr(app, "_build_qt_application", lambda: fake_qapp)
+    monkeypatch.setattr(app, "_apply_app_icon", lambda: None)
+    monkeypatch.setattr(app, "create_controller", lambda: object())
+    monkeypatch.setattr(app, "_build_main_window", lambda controller: object())
+    monkeypatch.setattr(desktop_app_module, "apply_style", lambda qapp: None)
+
+    app.setup_application()
+
+    assert len(fake_qapp.translators) == 1
+    assert app._qt_translator is fake_qapp.translators[0]
+
+
+def test_qtbase_ru_translates_yes_no_buttons():
+    """Комплектный qtbase_ru действительно переводит Да/Нет."""
+    from PyQt6.QtCore import QLibraryInfo, QTranslator
+
+    translator = QTranslator()
+    path = QLibraryInfo.path(QLibraryInfo.LibraryPath.TranslationsPath)
+    assert translator.load("qtbase_ru", path) is True
+
+    assert translator.translate("QPlatformTheme", "&Yes") == "&Да"
+    assert translator.translate("QPlatformTheme", "&No") == "&Нет"
 
 
 def test_desktop_application_run_error(monkeypatch):
