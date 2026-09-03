@@ -3,6 +3,8 @@ Tests for scripts/init_db.py helpers and bootstrap flow.
 """
 import importlib.machinery
 import importlib.util
+import sqlite3
+from contextlib import closing
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -39,7 +41,7 @@ def test_seed_initial_data_created_and_skipped(monkeypatch):
     module = _load_init_db_module()
     monkeypatch.setattr(module, "_get_initial_counterparties", lambda: ["A", "B"])
 
-    state = {"closed": False, "saved": []}
+    state = {"closed": False, "committed": False, "rolled_back": False, "saved": []}
 
     class _FakeRepo:
         def __init__(self, session):
@@ -52,7 +54,11 @@ def test_seed_initial_data_created_and_skipped(monkeypatch):
             state["saved"].append(counterparty.name)
             return counterparty
 
-    fake_session = SimpleNamespace(close=lambda: state.__setitem__("closed", True))
+    fake_session = SimpleNamespace(
+        commit=lambda: state.__setitem__("committed", True),
+        rollback=lambda: state.__setitem__("rolled_back", True),
+        close=lambda: state.__setitem__("closed", True),
+    )
     fake_session_manager = SimpleNamespace(get_session=lambda: fake_session)
 
     monkeypatch.setattr(module, "SQLAlchemyCounterpartyRepository", _FakeRepo)
@@ -62,7 +68,63 @@ def test_seed_initial_data_created_and_skipped(monkeypatch):
 
     assert result == {"created": 1, "skipped": 1}
     assert state["saved"] == ["B"]
+    assert state["committed"] is True
+    assert state["rolled_back"] is False
     assert state["closed"] is True
+
+
+def test_seed_initial_data_rolls_back_on_error(monkeypatch):
+    module = _load_init_db_module()
+    monkeypatch.setattr(module, "_get_initial_counterparties", lambda: ["A"])
+    state = {"committed": False, "rolled_back": False, "closed": False}
+
+    class _FailingRepo:
+        def __init__(self, session):
+            self.session = session
+
+        def exists_by_name(self, name: str) -> bool:
+            return False
+
+        def save(self, counterparty):
+            raise RuntimeError("save failed")
+
+    fake_session = SimpleNamespace(
+        commit=lambda: state.__setitem__("committed", True),
+        rollback=lambda: state.__setitem__("rolled_back", True),
+        close=lambda: state.__setitem__("closed", True),
+    )
+    monkeypatch.setattr(module, "SQLAlchemyCounterpartyRepository", _FailingRepo)
+    monkeypatch.setattr(
+        module.container,
+        "session_manager",
+        lambda: SimpleNamespace(get_session=lambda: fake_session),
+    )
+
+    import pytest
+
+    with pytest.raises(RuntimeError, match="save failed"):
+        module.seed_initial_data()
+
+    assert state == {"committed": False, "rolled_back": True, "closed": True}
+
+
+def test_seed_initial_data_persists_rows(tmp_path, monkeypatch):
+    from solepro.infrastructure.database.session_manager import DatabaseSessionManager
+
+    module = _load_init_db_module()
+    database_path = tmp_path / "seed.db"
+    manager = DatabaseSessionManager(f"sqlite:///{database_path.as_posix()}")
+    manager.create_tables()
+    monkeypatch.setattr(module, "_get_initial_counterparties", lambda: ["Persistent"])
+    monkeypatch.setattr(module.container, "session_manager", lambda: manager)
+
+    assert module.seed_initial_data() == {"created": 1, "skipped": 0}
+
+    with closing(sqlite3.connect(database_path)) as connection:
+        assert connection.execute("SELECT name FROM counterparties").fetchone() == (
+            "Persistent",
+        )
+    manager.close()
 
 
 def test_init_database_uses_migrations_without_create_tables(monkeypatch):

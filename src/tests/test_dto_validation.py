@@ -12,6 +12,7 @@ from solepro.core.application.dto.counterparty_dto import CounterpartyCreateDTO
 from solepro.core.application.dto.transaction_dto import (
     TransactionCreateDTO,
     TransactionResponseDTO,
+    TransactionUpdateDTO,
 )
 
 
@@ -58,3 +59,13 @@ class TestTransactionDTOValidation:
 
         with pytest.raises(ValueError):
             TransactionCreateDTO(date=now, tax=Decimal("-1"))
+
+    @pytest.mark.parametrize("dto_type", [TransactionCreateDTO, TransactionUpdateDTO])
+    def test_amounts_use_half_up_rounding(self, dto_type):
+        payload = {"income": Decimal("1.005")}
+        if dto_type is TransactionCreateDTO:
+            payload["date"] = datetime.now()
+
+        dto = dto_type(**payload)
+
+        assert dto.income == Decimal("1.01")

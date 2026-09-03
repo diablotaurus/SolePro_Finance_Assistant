@@ -406,4 +406,5 @@ class TestCounterpartyRepository:
         assert repository.exists(alpha.id) is True
         assert repository.exists(uuid4()) is False
         assert repository.exists_by_name("Stats Alpha") is True
+        assert repository.exists_by_name("stats alpha") is True
         assert repository.exists_by_name("Missing Name") is False

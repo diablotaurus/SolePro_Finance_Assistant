@@ -173,10 +173,10 @@ def test_load_transactions_show_all_emits_data_loaded():
     stats = StatisticsDTO(total_transactions=1, total_income=Decimal("100"))
     controller, ucs = _build_controller(list_result=tx_list, stats_result=stats)
 
-    captured = {"transactions": None, "stats": None}
+    captured = {"page": None, "stats": None, "period_stats": None}
     controller.data_loaded.connect(
-        lambda transactions, statistics: captured.update(
-            {"transactions": transactions, "stats": statistics}
+        lambda page, statistics, period_statistics: captured.update(
+            {"page": page, "stats": statistics, "period_stats": period_statistics}
         )
     )
 
@@ -184,10 +184,11 @@ def test_load_transactions_show_all_emits_data_loaded():
 
     assert len(ucs["list"].calls) == 1
     assert len(ucs["search"].calls) == 0
-    assert captured["transactions"] is not None
-    assert len(captured["transactions"]) == 1
-    assert captured["transactions"][0].note == "show-all"
-    assert captured["stats"]["total_transactions"] == 1
+    assert captured["page"] is not None
+    assert len(captured["page"].transactions) == 1
+    assert captured["page"].transactions[0].note == "show-all"
+    assert captured["stats"].total_transactions == 1
+    assert captured["period_stats"].total_transactions == 1
 
 
 def test_load_transactions_search_branch_uses_search_use_case():
@@ -362,8 +363,11 @@ def test_refresh_data_uses_current_filter():
 
 def test_export_to_excel_delegates_to_service():
     export_service = _ExportService()
-    controller, _ = _build_controller(export_service=export_service)
-    controller.current_transactions = [_tx("exp")]
+    export_page = TransactionListDTO(
+        transactions=[_tx("exp")], total_count=1, page=1, page_size=1000, total_pages=1
+    )
+    controller, _ = _build_controller(list_result=export_page, export_service=export_service)
+    controller.current_filter = TransactionFilterDTO(show_all=True)
 
     success = controller.export_to_excel("report.xlsx")
 
@@ -373,6 +377,32 @@ def test_export_to_excel_delegates_to_service():
     assert len(transactions) == 1
     assert transactions[0].note == "exp"
     assert filepath == "report.xlsx"
+
+
+def test_export_to_excel_loads_every_filtered_page():
+    export_service = _ExportService()
+    first = [_tx(f"page-1-{index}") for index in range(1000)]
+    second = [_tx("page-2")]
+
+    class _PagedCoordinator(_TransactionCoordinatorStub):
+        def load_transactions(self, filter_dto=None):
+            return TransactionListDTO(
+                transactions=first if filter_dto.page == 1 else second,
+                total_count=1001,
+                page=filter_dto.page,
+                page_size=1000,
+                total_pages=2,
+            )
+
+    controller = MainController(
+        transaction_coordinator=_PagedCoordinator(),
+        counterparty_coordinator=_CounterpartyCoordinatorStub(),
+        transaction_export_service=export_service,
+    )
+    controller.current_filter = TransactionFilterDTO(search_query="invoice")
+
+    assert controller.export_to_excel("all.xlsx") is True
+    assert len(export_service.calls[0][0]) == 1001
 
 
 def test_export_to_excel_emits_error_on_service_failure():

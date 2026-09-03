@@ -7,6 +7,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 from telegram import Update, ReplyKeyboardMarkup
+from telegram.error import NetworkError
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -67,6 +68,18 @@ def is_proxy_reachable(proxy_url: str, timeout: float = 2.0) -> bool:
         return False
 
 
+def _proxy_log_target(proxy_url: str) -> str:
+    """Return a proxy endpoint safe for logs (without credentials)."""
+    try:
+        parsed = urlparse(proxy_url)
+        host = parsed.hostname or "unknown-host"
+        port = parsed.port or _DEFAULT_PROXY_PORTS.get((parsed.scheme or "").lower())
+        endpoint = f"{parsed.scheme or 'proxy'}://{host}"
+        return f"{endpoint}:{port}" if port else endpoint
+    except (ValueError, AttributeError):
+        return "invalid-proxy-url"
+
+
 class TelegramBot:
     """
     Telegram бот для учета финансов.
@@ -82,16 +95,15 @@ class TelegramBot:
         self.config = get_telegram_config()
         self.application: Optional[Application] = None
         self.logger = logging.getLogger(__name__)
+        self.setup_logging()
         
         # Проверяем конфигурацию
         if not self.config.bot_token:
             raise ValueError("Токен бота не указан в конфигурации")
-        
-        self.setup_logging()
     
     def setup_logging(self) -> None:
         """Настроить логирование."""
-        configure_logging(level=self.config.log_level)
+        configure_logging(level=self.config.log_level, log_file=self.config.log_file)
     
     async def post_init(self, application: Application) -> None:
         """
@@ -127,7 +139,9 @@ class TelegramBot:
                     reply_markup=keyboard
                 )
             except Exception as e:
-                self.logger.error(f"Не удалось отправить сообщение пользователю {chat_id}: {e}")
+                self.logger.exception(
+                    "Не удалось отправить сообщение пользователю %s: %s", chat_id, e
+                )
     
     def setup_application(self) -> None:
         """Настроить приложение бота."""
@@ -142,12 +156,13 @@ class TelegramBot:
         # недоступен, — подключаемся напрямую, чтобы бот не падал.
         proxy_url = self.config.proxy_url
         if proxy_url:
+            proxy_target = _proxy_log_target(proxy_url)
             if is_proxy_reachable(proxy_url):
                 builder = builder.proxy(proxy_url).get_updates_proxy(proxy_url)
-                self.logger.info("🌐 Telegram через прокси: %s", proxy_url)
+                self.logger.info("🌐 Telegram через прокси: %s", proxy_target)
             else:
                 self.logger.warning(
-                    "⚠️ Прокси %s недоступен — подключение напрямую", proxy_url
+                    "⚠️ Прокси %s недоступен — подключение напрямую", proxy_target
                 )
 
         self.application = builder.build()
@@ -184,7 +199,7 @@ class TelegramBot:
         # Обработчик ошибок
         self.application.add_error_handler(self.error_handler)
     
-    async def error_handler(self, update: Update, context) -> None:
+    async def error_handler(self, update: Optional[Update], context) -> None:
         """
         Обработчик ошибок бота.
         
@@ -192,7 +207,20 @@ class TelegramBot:
             update: Обновление
             context: Контекст
         """
-        self.logger.error(f"Ошибка при обработке обновления: {context.error}")
+        error = context.error
+        if update is None and isinstance(error, NetworkError):
+            self.logger.warning(
+                "Временная сетевая ошибка Telegram polling; "
+                "библиотека повторит запрос автоматически: %s",
+                error,
+            )
+            return
+
+        self.logger.error(
+            "Ошибка при обработке обновления: %s",
+            error,
+            exc_info=(type(error), error, error.__traceback__) if error else None,
+        )
         
         # Отправляем сообщение об ошибке пользователю
         if update and update.effective_chat:
@@ -203,7 +231,7 @@ class TelegramBot:
                          "Попробуйте позже или обратитесь к администратору."
                 )
             except Exception as e:
-                self.logger.error(f"Не удалось отправить сообщение об ошибке: {e}")
+                self.logger.exception("Не удалось отправить сообщение об ошибке: %s", e)
         
         # Отправляем сообщение администратору
         if self.config.admin_chat_id:
@@ -224,7 +252,9 @@ class TelegramBot:
                     text=error_message[:4000]  # Ограничение Telegram
                 )
             except Exception as e:
-                self.logger.error(f"Не удалось отправить сообщение администратору об ошибке: {e}")
+                self.logger.exception(
+                    "Не удалось отправить сообщение администратору об ошибке: %s", e
+                )
     
     def run(self) -> None:
         """Запустить бота."""
@@ -243,7 +273,7 @@ class TelegramBot:
             )
             
         except Exception as e:
-            self.logger.error(f"Ошибка запуска бота: {e}")
+            self.logger.exception("Ошибка запуска бота: %s", e)
             raise
     
     def stop(self) -> None:

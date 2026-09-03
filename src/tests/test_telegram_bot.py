@@ -1,9 +1,11 @@
 """
 Тесты для TelegramBot.
 """
+import logging
 from types import SimpleNamespace
 
 import pytest
+from telegram.error import NetworkError, TimedOut
 
 from solepro.presentation.telegram import bot as bot_module
 
@@ -67,6 +69,7 @@ def fake_config():
         bot_token="token-123",
         allowed_users=[1001, 1002],
         log_level="INFO",
+        log_file="logs/test-bot.log",
         admin_chat_id=9999,
         proxy_url=None,
         allow_all_users=False,
@@ -81,6 +84,7 @@ def test_init_requires_token(monkeypatch):
             bot_token="",
             allowed_users=[],
             log_level="INFO",
+            log_file="logs/test-bot.log",
             admin_chat_id=None,
         ),
     )
@@ -206,6 +210,44 @@ async def test_error_handler_user_and_admin_message(monkeypatch, fake_config):
     assert "Произошла ошибка" in sent[0]["text"]
     assert sent[1]["chat_id"] == 9999
     assert "Ошибка в боте" in sent[1]["text"]
+
+
+def test_proxy_log_target_hides_credentials():
+    target = bot_module._proxy_log_target("socks5://secret-user:secret-pass@127.0.0.1:10808")
+
+    assert target == "socks5://127.0.0.1:10808"
+    assert "secret" not in target
+
+
+@pytest.mark.parametrize(
+    "network_error",
+    [
+        NetworkError("httpx.RemoteProtocolError: disconnected"),
+        TimedOut(),
+    ],
+)
+@pytest.mark.asyncio
+async def test_error_handler_suppresses_background_network_alerts(
+    monkeypatch,
+    fake_config,
+    caplog,
+    network_error,
+):
+    monkeypatch.setattr(bot_module, "get_telegram_config", lambda: fake_config)
+    bot = bot_module.TelegramBot()
+
+    async def _unexpected_send_message(**kwargs):
+        pytest.fail(f"Сетевая ошибка polling не должна отправлять сообщение: {kwargs}")
+
+    context = SimpleNamespace(
+        error=network_error,
+        bot=SimpleNamespace(send_message=_unexpected_send_message),
+    )
+
+    with caplog.at_level(logging.WARNING, logger=bot_module.__name__):
+        await bot.error_handler(None, context)
+
+    assert "Временная сетевая ошибка Telegram polling" in caplog.text
 
 
 def test_run_and_stop(monkeypatch, fake_config):

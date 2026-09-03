@@ -81,15 +81,16 @@ class Money:
             Экземпляр Money
         """
         try:
-            cleaned = amount.strip()
+            cleaned = amount.strip().replace(" ", "").replace("\u00a0", "")
             if "," in cleaned and "." in cleaned:
-                cleaned = cleaned.replace(",", "")
+                decimal_separator = "," if cleaned.rfind(",") > cleaned.rfind(".") else "."
+                thousands_separator = "." if decimal_separator == "," else ","
+                cleaned = cleaned.replace(thousands_separator, "")
+                cleaned = cleaned.replace(decimal_separator, ".")
             else:
                 cleaned = cleaned.replace(",", ".")
 
-            cleaned = ''.join(char for char in cleaned if char.isdigit() or char in '.-')
-            
-            if not cleaned:
+            if not cleaned or any(char not in "0123456789.-" for char in cleaned):
                 raise ValueError("Пустая строка")
             
             decimal_value = Decimal(cleaned)

@@ -114,3 +114,52 @@ def test_dialogs_smoke(qtbot, qapp):
     manager_dialog.show()
     qtbot.wait(50)
     manager_dialog.close()
+
+
+def test_edit_dialogs_can_clear_optional_text(qtbot, qapp):
+    from datetime import datetime
+    from decimal import Decimal
+    from uuid import uuid4
+
+    from solepro.core.application.dto.counterparty_dto import CounterpartyResponseDTO
+    from solepro.core.application.dto.transaction_dto import TransactionResponseDTO
+    from solepro.presentation.desktop.views.dialogs.counterparty_dialog import CounterpartyDialog
+    from solepro.presentation.desktop.views.dialogs.transaction_dialog import TransactionDialog
+
+    now = datetime.now()
+    counterparty = CounterpartyResponseDTO(
+        id=uuid4(),
+        name="Test",
+        description="Old description",
+        contact_info="Old contact",
+        created_at=now,
+        updated_at=now,
+    )
+    counterparty_dialog = CounterpartyDialog(counterparty=counterparty)
+    qtbot.add_widget(counterparty_dialog)
+    counterparty_dialog.description_edit.clear()
+    counterparty_dialog.contact_edit.clear()
+
+    counterparty_dto = counterparty_dialog.get_counterparty_data()
+
+    assert counterparty_dto.description == ""
+    assert counterparty_dto.contact_info == ""
+
+    transaction = TransactionResponseDTO(
+        id=uuid4(),
+        date=now,
+        income=Decimal("10"),
+        expense=Decimal("0"),
+        tax=Decimal("0"),
+        profit=Decimal("10"),
+        note="Old note",
+        created_at=now,
+        updated_at=now,
+    )
+    transaction_dialog = TransactionDialog(transaction=transaction)
+    qtbot.add_widget(transaction_dialog)
+    transaction_dialog.note_edit.clear()
+
+    transaction_dto = transaction_dialog.get_transaction_data()
+
+    assert transaction_dto.note == ""

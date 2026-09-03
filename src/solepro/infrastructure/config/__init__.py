@@ -51,6 +51,9 @@ class TelegramConfig:
     log_level: str = field(default_factory=lambda: os.getenv(
         "TELEGRAM_LOG_LEVEL", "INFO"
     ))
+    log_file: str = field(default_factory=lambda: os.getenv(
+        "TELEGRAM_LOG_FILE", "logs/bot.log"
+    ))
     admin_chat_id: Optional[int] = field(default_factory=lambda: (
         int(os.getenv("TELEGRAM_ADMIN_CHAT_ID"))
         if os.getenv("TELEGRAM_ADMIN_CHAT_ID") and os.getenv("TELEGRAM_ADMIN_CHAT_ID").isdigit()

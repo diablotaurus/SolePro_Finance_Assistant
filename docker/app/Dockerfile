@@ -1,56 +1,33 @@
-# Dockerfile for SolePro Finance Assistant
+# Dockerfile for the SolePro Telegram bot.
+FROM python:3.13-slim AS builder
 
-# Build stage
-FROM python:3.11-slim as builder
-
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    g++ \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+WORKDIR /build
 COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 
-# Runtime stage
-FROM python:3.11-slim
+FROM python:3.13-slim
+
+ENV PYTHONPATH=/app/src \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system solepro \
+    && useradd --system --gid solepro --home-dir /app solepro
 
 WORKDIR /app
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy Python dependencies from builder
-COPY --from=builder /root/.local /root/.local
-
-# Make sure scripts in .local are usable
-ENV PATH=/root/.local/bin:$PATH
-
-# Create non-root user
-RUN groupadd -r solepro && useradd -r -g solepro solepro
-
-# Create necessary directories
+COPY --from=builder /wheels /wheels
+RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
+COPY --chown=solepro:solepro . .
 RUN mkdir -p /app/data /app/logs /app/exports /app/backups \
     && chown -R solepro:solepro /app
 
-# Copy application code
-COPY . .
-
-# Switch to non-root user
 USER solepro
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)"
-
-# Expose port (for future web interface)
-EXPOSE 8000
-
-# Default command (can be overridden)
-CMD ["python", "-m", "solepro.presentation.telegram.bot"]
+CMD ["sh", "-c", "python scripts/init_db.py && exec python -m solepro.presentation.telegram.bot"]

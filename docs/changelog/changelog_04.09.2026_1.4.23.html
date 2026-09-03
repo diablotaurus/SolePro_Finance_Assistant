@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Надежность данных, интерфейсов и обновления (04.09.2026, v1.4.23)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .changelog-card { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; animation: slideIn 0.6s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .header { background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); color: white; padding: 50px; text-align: center; position: relative; overflow: hidden; }
+        .header::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: moveBackground 60s linear infinite; }
+        @keyframes moveBackground { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .header h1 { font-size: 3.2rem; margin-bottom: 15px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); position: relative; z-index: 1; }
+        .header .subtitle { font-size: 1.4rem; opacity: 0.95; margin-bottom: 25px; position: relative; z-index: 1; font-weight: 300; }
+        .metadata { display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .meta-item { background: rgba(255,255,255,0.15); padding: 12px 24px; border-radius: 50px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 8px; }
+        .content { padding: 50px; }
+        .section { margin-bottom: 50px; border-left: 5px solid #2196F3; padding: 25px; background: linear-gradient(to right, rgba(33,150,243,0.05), transparent); border-radius: 0 10px 10px 0; }
+        .section h2 { color: #1565C0; font-size: 2rem; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; padding-bottom: 10px; border-bottom: 2px solid #E3F2FD; }
+        .section h2 i { font-size: 1.8rem; background: #2196F3; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .changes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-top: 20px; }
+        .change-card { background: white; border-radius: 15px; padding: 30px; border: 2px solid #E3F2FD; position: relative; overflow: hidden; }
+        .change-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #2196F3; }
+        .change-card h3 { color: #1565C0; margin-bottom: 12px; font-size: 1.25rem; }
+        .status { display: inline-block; padding: 8px 16px; border-radius: 25px; font-size: 0.85rem; font-weight: 700; margin-bottom: 18px; letter-spacing: 0.5px; text-transform: uppercase; background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .change-list { list-style: none; }
+        .change-list li { padding: 10px 0 10px 28px; position: relative; border-bottom: 1px solid #E3F2FD; }
+        .change-list li:last-child { border-bottom: none; }
+        .change-list li::before { content: "✓"; position: absolute; left: 0; color: #2196F3; font-weight: 800; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #E3F2FD; }
+        .table th, .table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #E3F2FD; vertical-align: top; }
+        .table th { background: linear-gradient(135deg, #2196F3, #1565C0); color: white; font-weight: 600; }
+        .table tr:last-child td { border-bottom: none; }
+        .table .result { color: #1B5E20; font-weight: 700; white-space: nowrap; }
+        .note { margin-top: 22px; padding: 18px 22px; background: #FFF8E1; border-left: 4px solid #F9A825; border-radius: 0 10px 10px 0; }
+        .file-list { background: #F5F9FF; border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid #E3F2FD; }
+        .file-item { padding: 12px 15px; border-bottom: 1px solid #E3F2FD; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.95rem; color: #2D3748; }
+        .file-item:last-child { border-bottom: none; }
+        .file-item::before { content: "•"; color: #2196F3; font-weight: 800; margin-right: 10px; }
+        .footer { text-align: center; padding: 40px; background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%); color: white; }
+        .footer p { margin-bottom: 15px; font-size: 1.1rem; }
+        .tech-stack { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
+        .tech-item { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 25px; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2); }
+        code { font-family: 'Consolas', 'Monaco', monospace; color: #0D47A1; }
+        @media (max-width: 768px) { .content { padding: 25px; } .header { padding: 30px 20px; } .header h1 { font-size: 2.2rem; } .section h2 { font-size: 1.6rem; } .section h2 i { width: 40px; height: 40px; font-size: 1.4rem; } .changes-grid { grid-template-columns: 1fr; } .table { display: block; overflow-x: auto; } }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Комплексное усиление надёжности данных, интерфейсов и прод-обновления</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 04.09.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.23</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-shield-halved"></i> Тип: Стабилизация</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-clipboard-check"></i> Обзор релиза</h2>
+                    <p>Версия <strong>1.4.23</strong> фиксирует результат полного технического аудита проекта. Основной акцент сделан на сохранности финансовых данных, корректности миграций, предсказуемой работе desktop-интерфейса и Telegram-бота, а также на безопасной установке и обновлении прод-версии.</p>
+                    <div class="note"><strong>Важно:</strong> пользовательские <code>.env</code>, <code>settings/</code>, рабочая база в <code>data/</code> и каталог резервных копий не входят в поставку и не заменяются скриптом обновления.</div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-database"></i> Данные и миграции</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3>Безопасный переход старых баз</h3>
+                            <span class="status">Целостность данных</span>
+                            <ul class="change-list">
+                                <li>Добавлено распознавание старой схемы SQLite без таблицы <code>alembic_version</code>.</li>
+                                <li>Совместимая база получает базовую ревизию и последовательно обновляется до актуальной схемы.</li>
+                                <li>Частично созданные и неизвестные схемы больше не маскируются как корректные.</li>
+                                <li>Ошибки миграции передаются вызывающему коду как явное исключение.</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <h3>Точные денежные значения</h3>
+                            <span class="status">Финансовая логика</span>
+                            <ul class="change-list">
+                                <li>Денежные поля ORM переведены с двоичного <code>Float</code> на точный <code>Numeric</code>.</li>
+                                <li>Создание и редактирование используют единое округление <code>ROUND_HALF_UP</code>.</li>
+                                <li>Парсер принимает русскую запись <code>1.000,50</code> и отклоняет скрытый посторонний текст.</li>
+                                <li>Убрано необоснованное ограничение убытка в один миллион рублей.</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <h3>Транзакционность и справочники</h3>
+                            <span class="status">Репозитории</span>
+                            <ul class="change-list">
+                                <li><code>init_db.py</code> выполняет явные commit, rollback и освобождение scoped session.</li>
+                                <li>Проверка уникальности контрагентов не зависит от регистра символов.</li>
+                                <li>Интеграционный тест подтверждает миграцию старых сумм и очистку некорректных ссылок.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-desktop"></i> Desktop-приложение</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3>Пагинация и фильтры</h3>
+                            <span class="status">MVC</span>
+                            <ul class="change-list">
+                                <li>Контроллер передаёт представлению типизированный результат: страницу операций, общую и отфильтрованную статистику.</li>
+                                <li>Навигация по страницам размещена в панели фильтров и синхронизирована с состоянием выборки.</li>
+                                <li>Сброс фильтра больше не инициирует повторную загрузку одних и тех же данных.</li>
+                                <li>Итоги периода считаются по всей фильтрованной выборке, а не только по видимой странице.</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <h3>Экспорт и формы</h3>
+                            <span class="status">Пользовательские сценарии</span>
+                            <ul class="change-list">
+                                <li>Экспорт последовательно получает все страницы выбранного периода пакетами по 1000 записей.</li>
+                                <li>Необязательные поля описания, примечания и контакта теперь можно полностью очистить.</li>
+                                <li>Добавлены UI smoke-тесты для пагинации, итогов и очистки полей.</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <h3>Статистика</h3>
+                            <span class="status">Корректность расчётов</span>
+                            <ul class="change-list">
+                                <li>Годовой рост не показывается как процент после нулевой или отрицательной базы сравнения.</li>
+                                <li>Налоговая нагрузка и риск не рассчитываются при нулевой или отрицательной прибыли.</li>
+                                <li>Представление получает явное неопределённое состояние вместо вводящих в заблуждение значений.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fab fa-telegram"></i> Telegram-бот</h2>
+                    <div class="change-card">
+                        <ul class="change-list">
+                            <li>Добавлен отдельный постоянный лог бота, настраиваемый переменной <code>TELEGRAM_LOG_FILE</code>.</li>
+                            <li>Учётные данные прокси скрываются перед записью адреса в журнал.</li>
+                            <li>Внутренние ошибки журналируются с полным traceback, а пользователь получает безопасное общее сообщение.</li>
+                            <li>Кратковременные <code>NetworkError</code>, <code>TimedOut</code> и <code>RemoteProtocolError</code> фиксируются в логе без повторяющегося спама администратору.</li>
+                            <li>Добавлена точка запуска <code>RunBot.pyw</code> для desktop-сценария без лишней консоли.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-cloud-arrow-down"></i> Установка и обновление</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3>Первичная установка</h3>
+                            <span class="status">Windows</span>
+                            <ul class="change-list">
+                                <li><code>setup.bat</code> и <code>setup.ps1</code> находят Python 3.13+, создают <code>.venv</code> и устанавливают проект.</li>
+                                <li><code>.env</code> создаётся из примера только при отсутствии пользовательского файла.</li>
+                                <li>Сообщения PowerShell вынесены в UTF-8 JSON, исходники скриптов остаются совместимыми с Windows PowerShell 5.1.</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <h3>Резервное копирование</h3>
+                            <span class="status">SQLite</span>
+                            <ul class="change-list">
+                                <li>Новый <code>backup_sqlite.py</code> использует штатный SQLite Online Backup API.</li>
+                                <li>После копирования выполняется <code>integrity_check</code>.</li>
+                                <li>Открытые подключения гарантированно закрываются при успехе и ошибке.</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <h3>Прод-обновление</h3>
+                            <span class="status">Безопасное развёртывание</span>
+                            <ul class="change-list">
+                                <li>Перед обновлением проверяются запущенные Python-процессы из прод-каталога.</li>
+                                <li>Зависимости устанавливаются до замены файлов приложения.</li>
+                                <li>Манифест поставки позволяет удалять только устаревшие ранее развёрнутые файлы.</li>
+                                <li>После синхронизации обязательно применяются миграции и начальные данные.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-box"></i> Запуск, Docker и зависимости</h2>
+                    <div class="change-card">
+                        <ul class="change-list">
+                            <li>Отладочный desktop-запуск исправлен и использует существующий <code>scripts/run_desktop.py</code>.</li>
+                            <li>Docker-образ переведён на Python 3.13, запускается от непривилегированного пользователя и применяет миграции перед ботом.</li>
+                            <li><code>docker-compose.yml</code> получает секреты только из окружения, без небезопасных значений по умолчанию.</li>
+                            <li><code>migrate_data.py</code> использует корректный путь <code>src</code>, <code>Decimal</code>, детерминированное сопоставление UUID и одну транзакцию с rollback.</li>
+                            <li>Ограничения основных версий зависимостей синхронизированы между <code>requirements.txt</code> и <code>pyproject.toml</code>.</li>
+                            <li>GitHub Actions обновлён до актуальных основных версий действий и минимальных разрешений.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-vial-circle-check"></i> Проверка качества</h2>
+                    <table class="table">
+                        <thead><tr><th>Проверка</th><th>Результат</th><th>Назначение</th></tr></thead>
+                        <tbody>
+                            <tr><td>Полный набор pytest</td><td class="result">233 теста пройдены</td><td>Домен, DTO, инфраструктура, миграции, desktop, Telegram и служебные скрипты</td></tr>
+                            <tr><td>ResourceWarning как ошибка</td><td class="result">Пройдено</td><td>Контроль незакрытых файлов, соединений и других ресурсов</td></tr>
+                            <tr><td>Покрытие тестами</td><td class="result">72%</td><td>Контроль общего уровня автоматической проверки</td></tr>
+                            <tr><td>Python compileall</td><td class="result">Пройдено</td><td>Синтаксис модулей и точек запуска</td></tr>
+                            <tr><td>PowerShell Parser</td><td class="result">Пройдено</td><td>Синтаксис установочных, резервных и update-скриптов</td></tr>
+                            <tr><td>UTF-8 без BOM</td><td class="result">Пройдено</td><td>Соответствие правилам проекта для изменённых файлов</td></tr>
+                            <tr><td><code>git diff --check</code></td><td class="result">Пройдено</td><td>Отсутствие ошибок пробелов и повреждённых строк</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="note"><strong>Ограничение проверки:</strong> Docker-конфигурация проверена статически. Сборка контейнера не запускалась, поскольку Docker отсутствует в текущем окружении.</div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-folder-open"></i> Основные затронутые компоненты</h2>
+                    <div class="file-list">
+                        <div class="file-item">core/domain и application/dto - денежные правила и валидация операций</div>
+                        <div class="file-item">infrastructure/database - модели, репозитории и безопасный запуск Alembic</div>
+                        <div class="file-item">presentation/desktop - контроллер, пагинация, экспорт, формы и статистика</div>
+                        <div class="file-item">presentation/telegram - журналирование, обработка ошибок и сетевых сбоев</div>
+                        <div class="file-item">scripts - установка, обновление, резервное копирование и перенос данных</div>
+                        <div class="file-item">docker и docker-compose.yml - совместимый и ограниченный контейнерный запуск</div>
+                        <div class="file-item">README.md, scripts/README_prod.md и .env.example - актуальная эксплуатационная документация</div>
+                        <div class="file-item">src/tests - расширенные unit, integration, UI smoke и maintenance-тесты</div>
+                        <div class="file-item">pyproject.toml - версия 1.4.23 и согласованные зависимости</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-road"></i> Следующий этап</h2>
+                    <p>Крупные UI-модули <code>StatisticsDialog</code>, <code>MainWindow</code> и <code>SettingsDialog</code> намеренно не декомпозировались в рамках стабилизационного релиза. Их разделение на меньшие компоненты запланировано отдельной задачей с предварительным анализом связей и расширением UI-тестов.</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Надёжность данных и безопасное обновление | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Стабильный срез после полного технического аудита проекта</p>
+                <div class="tech-stack">
+                    <div class="tech-item">SQLAlchemy + Alembic</div>
+                    <div class="tech-item">PyQt6</div>
+                    <div class="tech-item">python-telegram-bot</div>
+                    <div class="tech-item">233 теста</div>
+                    <div class="tech-item">UTF-8 без BOM</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.23 |
+                    <i class="fas fa-check-circle"></i> Статус: Готово |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 04.09.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -33,7 +33,8 @@ from .views.dialogs.statistics_dialog import StatisticsDialog
 from .views.dialogs.counterparty_manager_dialog import CounterpartyManagerDialog
 from .views.dialogs.settings_dialog import SettingsDialog
 from .ui_settings import DesktopUiSettings
-from ...core.application.dto.transaction_dto import TransactionFilterDTO
+from ...core.application.dto.statistics_dto import StatisticsDTO
+from ...core.application.dto.transaction_dto import TransactionFilterDTO, TransactionListDTO
 
 
 class MainWindow(QMainWindow):
@@ -407,29 +408,43 @@ class MainWindow(QMainWindow):
         """Обновить данные."""
         self.controller.load_transactions(self.filter_panel.get_current_filter())
     
-    def on_data_loaded(self, transactions: list, statistics: dict) -> None:
+    def on_data_loaded(
+        self,
+        transaction_page: TransactionListDTO,
+        statistics: Optional[StatisticsDTO],
+        period_statistics: Optional[StatisticsDTO],
+    ) -> None:
         """
         Обработчик загрузки данных.
         
         Args:
-            transactions: Список транзакций
-            statistics: Статистика
+            transaction_page: Страница транзакций и сведения о пагинации
+            statistics: Общая статистика
+            period_statistics: Статистика с учетом текущего фильтра
         """
         # Обновляем таблицу
-        self.transaction_table.load_transactions(transactions)
+        self.transaction_table.load_transactions(transaction_page.transactions)
+        self.filter_panel.set_page_info(
+            page=transaction_page.page,
+            total_pages=transaction_page.total_pages,
+            total_count=transaction_page.total_count,
+        )
         
         # Обновляем итоги за период (с учетом фильтров)
-        self.update_period_totals(transactions)
+        if period_statistics:
+            self.update_period_totals(period_statistics)
 
         # Обновляем общие итоги
         if statistics:
             self.update_totals(statistics)
         
         # Обновляем статус
-        count = len(transactions)
-        self.status_bar.showMessage(f"Загружено {count} записей")
+        count = len(transaction_page.transactions)
+        self.status_bar.showMessage(
+            f"Показано {count} из {transaction_page.total_count} записей"
+        )
     
-    def update_totals(self, statistics: dict) -> None:
+    def update_totals(self, statistics: StatisticsDTO) -> None:
         """
         Обновить панель итогов.
         
@@ -437,19 +452,19 @@ class MainWindow(QMainWindow):
             statistics: Статистика
         """
         # Доход
-        total_income = statistics.get("total_income", 0)
+        total_income = statistics.total_income
         self.total_income_label.setText(f"Общий доход: {float(total_income):,.2f} руб.")
         
         # Расход
-        total_expense = statistics.get("total_expense", 0)
+        total_expense = statistics.total_expense
         self.total_expense_label.setText(f"Общий расход: {float(total_expense):,.2f} руб.")
         
         # Налог
-        total_tax = statistics.get("total_tax", 0)
+        total_tax = statistics.total_tax
         self.total_tax_label.setText(f"Общий налог: {float(total_tax):,.2f} руб.")
         
         # Прибыль
-        total_profit = statistics.get("total_profit", 0)
+        total_profit = statistics.total_profit
         profit_text = f"Общая прибыль: {float(total_profit):,.2f} руб."
         self.total_profit_label.setText(profit_text)
         
@@ -470,16 +485,16 @@ class MainWindow(QMainWindow):
             )
         
         # Количество записей
-        count = statistics.get("total_transactions", 0)
+        count = statistics.total_transactions
         self.transaction_count_label.setText(f"Всего записей: {count}")
 
-    def update_period_totals(self, transactions: list) -> None:
-        """Обновить панель итогов за период (по текущему списку транзакций)."""
-        total_income = sum(float(t.income) for t in transactions)
-        total_expense = sum(float(t.expense) for t in transactions)
-        total_tax = sum(float(t.tax) for t in transactions)
-        total_profit = sum(float(t.profit) for t in transactions)
-        count = len(transactions)
+    def update_period_totals(self, statistics: StatisticsDTO) -> None:
+        """Обновить итоги по всему отфильтрованному периоду."""
+        total_income = statistics.total_income
+        total_expense = statistics.total_expense
+        total_tax = statistics.total_tax
+        total_profit = statistics.total_profit
+        count = statistics.total_transactions
 
         self.period_income_label.setText(
             f"Текущий доход: {float(total_income):,.2f} руб."
@@ -506,7 +521,7 @@ class MainWindow(QMainWindow):
     
     def on_filter_cleared(self) -> None:
         """Обработчик очистки фильтров."""
-        self.controller.load_transactions()
+        self.controller.load_transactions(self.filter_panel.get_current_filter())
     
     def on_transaction_added(self, transaction) -> None:
         """

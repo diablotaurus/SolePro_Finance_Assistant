@@ -6,6 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from datetime import datetime
+import logging
 from typing import Any, Callable, Optional
 
 from telegram import Update
@@ -26,6 +27,22 @@ from ...infrastructure.config import get_app_config
 DATE, INCOME, EXPENSE, TAX, COUNTERPARTY, NOTE, CONFIRM = range(7)
 
 MAIN_MENU = ReplyKeyboardMarkup([["Добавить", "Статистика"]], resize_keyboard=True)
+logger = logging.getLogger(__name__)
+
+
+async def _reply_internal_error(update: Update, operation: str, exc: Exception) -> None:
+    """Log technical details and return a stable user-facing error message."""
+    logger.error(
+        "Ошибка Telegram-команды (%s): %s",
+        operation,
+        exc,
+        exc_info=(type(exc), exc, exc.__traceback__),
+    )
+    if update.message:
+        await update.message.reply_text(
+            f"❌ Не удалось выполнить операцию «{operation}». Попробуйте позже.",
+            reply_markup=MAIN_MENU,
+        )
 
 
 @dataclass(frozen=True)
@@ -116,10 +133,7 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             reply_markup=MAIN_MENU
         )
     except Exception as exc:
-        await update.message.reply_text(
-            f"❌ Ошибка получения статистики: {exc}",
-            reply_markup=MAIN_MENU
-        )
+        await _reply_internal_error(update, "получение статистики", exc)
 
 
 async def counterparties_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -137,10 +151,7 @@ async def counterparties_command(update: Update, context: ContextTypes.DEFAULT_T
             reply_markup=MAIN_MENU
         )
     except Exception as exc:
-        await update.message.reply_text(
-            f"❌ Ошибка получения контрагентов: {exc}",
-            reply_markup=MAIN_MENU
-        )
+        await _reply_internal_error(update, "получение контрагентов", exc)
 
 
 async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -229,7 +240,12 @@ async def add_tax(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         names = [c.name for c in result.counterparties]
         for i in range(0, len(names), 2):
             keyboard_rows.append(names[i:i + 2])
-    except Exception:
+    except Exception as exc:
+        logger.warning(
+            "Не удалось загрузить контрагентов для клавиатуры: %s",
+            exc,
+            exc_info=(type(exc), exc, exc.__traceback__),
+        )
         keyboard_rows = []
     keyboard_rows.append(["-"])
     keyboard = ReplyKeyboardMarkup(keyboard_rows, resize_keyboard=True, one_time_keyboard=True)
@@ -301,10 +317,7 @@ async def add_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             reply_markup=MAIN_MENU
         )
     except Exception as exc:
-        await update.message.reply_text(
-            f"❌ Ошибка добавления транзакции: {exc}",
-            reply_markup=MAIN_MENU
-        )
+        await _reply_internal_error(update, "добавление транзакции", exc)
     finally:
         context.user_data.clear()
     return ConversationHandler.END
@@ -347,10 +360,7 @@ async def transactions_command(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup=MAIN_MENU
         )
     except Exception as exc:
-        await update.message.reply_text(
-            f"❌ Ошибка получения транзакций: {exc}",
-            reply_markup=MAIN_MENU
-        )
+        await _reply_internal_error(update, "получение транзакций", exc)
 
 
 async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -380,10 +390,7 @@ async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             reply_markup=MAIN_MENU
         )
     except Exception as exc:
-        await update.message.reply_text(
-            f"❌ Ошибка поиска: {exc}",
-            reply_markup=MAIN_MENU
-        )
+        await _reply_internal_error(update, "поиск транзакций", exc)
 
 
 async def topcounterparties_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -410,10 +417,7 @@ async def topcounterparties_command(update: Update, context: ContextTypes.DEFAUL
             reply_markup=MAIN_MENU
         )
     except Exception as exc:
-        await update.message.reply_text(
-            f"❌ Ошибка получения статистики по контрагентам: {exc}",
-            reply_markup=MAIN_MENU
-        )
+        await _reply_internal_error(update, "статистика по контрагентам", exc)
 
 
 async def unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

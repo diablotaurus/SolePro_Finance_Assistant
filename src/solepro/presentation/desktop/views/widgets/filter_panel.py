@@ -14,6 +14,8 @@ from PyQt6.QtWidgets import (
     QDateEdit,
     QSpinBox,
     QGroupBox,
+    QStyle,
+    QToolButton,
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QDate
 from PyQt6.QtGui import QFont
@@ -68,6 +70,29 @@ class FilterPanel(QWidget):
         self.page_size_combo.setCurrentIndex(3)  # 100 записей
 
         pagination_layout.addWidget(self.page_size_combo)
+
+        self.previous_page_button = QToolButton()
+        self.previous_page_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowLeft)
+        )
+        self.previous_page_button.setToolTip("Предыдущая страница")
+        self.previous_page_button.clicked.connect(self.previous_page)
+
+        self.page_label = QLabel("Страница 1 из 1")
+        self.page_label.setMinimumWidth(110)
+        self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.next_page_button = QToolButton()
+        self.next_page_button.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowRight)
+        )
+        self.next_page_button.setToolTip("Следующая страница")
+        self.next_page_button.clicked.connect(self.next_page)
+
+        pagination_layout.addWidget(self.previous_page_button)
+        pagination_layout.addWidget(self.page_label)
+        pagination_layout.addWidget(self.next_page_button)
+        self.set_page_info(page=1, total_pages=1, total_count=0)
 
         # Поиск по тексту
         self.search_input = QLineEdit()
@@ -160,7 +185,7 @@ class FilterPanel(QWidget):
     def apply_filters(self) -> None:
         """Применить фильтры."""
         self.show_all = False
-        self._update_current_filter()
+        self._update_current_filter(page=1)
         
         # Отправляем сигнал
         self.filter_changed.emit(self.current_filter)
@@ -179,11 +204,10 @@ class FilterPanel(QWidget):
         
         # Сбрасываем текущий фильтр
         self.show_all = False
-        self._update_current_filter()
+        self._update_current_filter(page=1)
         
         # Отправляем сигнал
         self.filter_cleared.emit()
-        self.filter_changed.emit(self.current_filter)
 
     def show_all_records(self) -> None:
         """Показать все записи без фильтров."""
@@ -193,8 +217,31 @@ class FilterPanel(QWidget):
         self.max_amount_spin.setValue(1000000000)
         self.page_size_combo.setCurrentIndex(3)
         self.show_all = True
-        self._update_current_filter()
+        self._update_current_filter(page=1)
         self.filter_changed.emit(self.current_filter)
+
+    def previous_page(self) -> None:
+        """Перейти к предыдущей странице результатов."""
+        if self.current_filter.page <= 1:
+            return
+        self._update_current_filter(page=self.current_filter.page - 1)
+        self.filter_changed.emit(self.current_filter)
+
+    def next_page(self) -> None:
+        """Перейти к следующей странице результатов."""
+        if not self.next_page_button.isEnabled():
+            return
+        self._update_current_filter(page=self.current_filter.page + 1)
+        self.filter_changed.emit(self.current_filter)
+
+    def set_page_info(self, page: int, total_pages: int, total_count: int) -> None:
+        """Обновить индикатор и доступность навигации."""
+        display_total = max(total_pages, 1)
+        display_page = min(max(page, 1), display_total)
+        self.page_label.setText(f"Страница {display_page} из {display_total}")
+        self.page_label.setToolTip(f"Всего записей: {total_count}")
+        self.previous_page_button.setEnabled(page > 1)
+        self.next_page_button.setEnabled(total_pages > 0 and page < total_pages)
     
     def get_current_filter(self) -> TransactionFilterDTO:
         """
@@ -205,9 +252,9 @@ class FilterPanel(QWidget):
         """
         return self.current_filter
 
-    def _update_current_filter(self) -> None:
+    def _update_current_filter(self, page: int = 1) -> None:
         """Собрать текущий фильтр без отправки сигнала."""
-        filter_dto = TransactionFilterDTO()
+        filter_dto = TransactionFilterDTO(page=page)
         filter_dto.page_size = self.page_size_combo.currentData() or 100
         filter_dto.show_all = self.show_all
 

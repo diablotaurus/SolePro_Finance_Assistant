@@ -15,6 +15,7 @@ from ....core.application.dto.statistics_dto import CounterpartyStatisticsDTO, S
 from ....core.application.dto.transaction_dto import (
     TransactionCreateDTO,
     TransactionFilterDTO,
+    TransactionListDTO,
     TransactionResponseDTO,
     TransactionUpdateDTO,
 )
@@ -28,7 +29,7 @@ class MainController(QObject):
     """Desktop MVC controller."""
 
     # Signals
-    data_loaded = pyqtSignal(list, dict)  # transactions, statistics
+    data_loaded = pyqtSignal(object, object, object)
     transaction_added = pyqtSignal(TransactionResponseDTO)
     transaction_updated = pyqtSignal(TransactionResponseDTO)
     transaction_deleted = pyqtSignal(UUID)
@@ -48,7 +49,9 @@ class MainController(QObject):
 
         # Cached state
         self.current_transactions: List[TransactionResponseDTO] = []
+        self.current_transaction_page = TransactionListDTO()
         self.current_statistics: Optional[StatisticsDTO] = None
+        self.current_period_statistics: Optional[StatisticsDTO] = None
         self.current_filter: Optional[TransactionFilterDTO] = None
 
     def load_transactions(self, filter_dto: Optional[TransactionFilterDTO] = None) -> None:
@@ -145,7 +148,7 @@ class MainController(QObject):
         )
 
     def export_to_excel(self, filepath: str) -> bool:
-        """Export cached transactions to an Excel file."""
+        """Export all transactions matching the current filter."""
         return self._execute_with_error(
             action=lambda: self._export_to_excel(filepath),
             error_prefix="Ошибка экспорта в Excel",
@@ -153,8 +156,20 @@ class MainController(QObject):
         )
 
     def _export_to_excel(self, filepath: str) -> bool:
+        export_filter = (self.current_filter or TransactionFilterDTO(show_all=True)).model_copy(
+            update={"page": 1, "page_size": 1000}
+        )
+        transactions: List[TransactionResponseDTO] = []
+
+        while True:
+            page = self.transaction_coordinator.load_transactions(export_filter)
+            transactions.extend(page.transactions)
+            if not page.transactions or len(transactions) >= page.total_count:
+                break
+            export_filter = export_filter.model_copy(update={"page": export_filter.page + 1})
+
         self.transaction_export_service.export_to_excel(
-            transactions=self.current_transactions,
+            transactions=transactions,
             filepath=filepath,
         )
         return True
@@ -186,10 +201,11 @@ class MainController(QObject):
         self._reload_current_transactions()
 
     def _emit_data_loaded(self) -> None:
-        """Emit current transaction list with cached statistics payload."""
+        """Emit page data together with overall and filtered statistics."""
         self.data_loaded.emit(
-            self.current_transactions,
-            self.current_statistics.model_dump() if self.current_statistics else {},
+            self.current_transaction_page,
+            self.current_statistics,
+            self.current_period_statistics,
         )
 
     def _emit_error(self, message: str) -> None:
@@ -199,8 +215,12 @@ class MainController(QObject):
     def _load_transactions_impl(self, filter_dto: Optional[TransactionFilterDTO]) -> None:
         self.current_filter = filter_dto
         result = self.transaction_coordinator.load_transactions(filter_dto=filter_dto)
+        self.current_transaction_page = result
         self.current_transactions = result.transactions
-        self.load_statistics()
+        self.current_statistics = self.transaction_coordinator.load_statistics()
+        self.current_period_statistics = self.transaction_coordinator.get_transaction_statistics(
+            filter_dto=filter_dto
+        )
         self._emit_data_loaded()
 
     def _load_statistics_impl(self) -> None:

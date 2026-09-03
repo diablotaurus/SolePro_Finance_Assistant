@@ -60,11 +60,6 @@ class Transaction:
         if self.tax.value < 0:
             errors.append("Сумма налога не может быть отрицательной")
         
-        # Прибыль должна быть разумной (не проверяем строго, только предупреждаем)
-        profit = self.calculate_profit()
-        if profit.value < -1000000:  # Убыток более 1 млн
-            errors.append("Убыток транзакции подозрительно велик")
-        
         if errors:
             raise InvalidTransactionException(
                 f"Ошибка валидации транзакции: {'; '.join(errors)}"

@@ -10,6 +10,9 @@ from decimal import Decimal
 # Максимально допустимая денежная сумма (1 миллиард).
 MAX_MONEY_AMOUNT = Decimal("1000000000")
 
+# Точность хранения денежных сумм в БД и прикладных DTO.
+MONEY_QUANTUM = Decimal("0.01")
+
 # Максимальная длина наименования контрагента (совпадает с длиной колонки БД).
 MAX_COUNTERPARTY_NAME_LENGTH = 200
 

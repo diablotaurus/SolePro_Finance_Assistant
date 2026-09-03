@@ -333,10 +333,6 @@ class SQLAlchemyCounterpartyRepository(CounterpartyRepository):
         return count > 0
     
     def exists_by_name(self, name: str) -> bool:
-        count = (
-            self.session.query(func.count(CounterpartyModel.id))
-            .filter(CounterpartyModel.name == name.strip())
-            .scalar()
-        )
-        
-        return count > 0
+        normalized_name = name.strip().casefold()
+        names = self.session.query(CounterpartyModel.name).all()
+        return any(existing_name.casefold() == normalized_name for existing_name, in names)

@@ -1,24 +1,6 @@
-:: setup.bat - установка зависимостей для всех версий Python
 @echo off
-chcp 65001 > nul
-echo ========================================
-echo        Установка зависимостей для 
-echo        SolePro Finance Assistant
-echo ========================================
-echo.
-
-echo Устанавливаем для Python 3.13 (основная версия)...
-py -3.13 -m pip install -r requirements.txt
-
-echo.
-echo Устанавливаем для Python 3.14 (на случай запуска по умолчанию)...
-py -3.14 -m pip install -r requirements.txt
-
-echo.
-echo Готово!
-echo.
-echo Теперь можно запустить приложение:
-echo - Двойной клик по RunDesktopApp.pyw (без консоли)
-echo - Или запустите DebugDesktopApp.bat (с консолью)
+"%SystemRoot%\System32\chcp.com" 65001 >nul 2>&1
+title SolePro Finance Assistant - Setup
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\setup.ps1" %*
 echo.
 pause

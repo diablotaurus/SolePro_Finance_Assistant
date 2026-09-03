@@ -145,6 +145,8 @@ def test_tax_risk_levels():
     assert risk(5, 100) == "low"      # 5%
     assert risk(15, 100) == "medium"  # 15%
     assert risk(30, 100) == "high"    # 30%
+    assert risk(10, 0) == "not_applicable"
+    assert risk(10, -100) == "not_applicable"
 
 
 def test_tax_monthly_rows():
@@ -177,6 +179,17 @@ def test_yearly_rows_margin_and_growth():
     assert round(rows[1].income_growth, 4) == 50.0  # (150-100)/100
     assert round(rows[1].profit_growth, 4) == 50.0  # (120-80)/80
     assert round(rows[1].margin, 4) == 80.0
+
+
+def test_yearly_profit_growth_is_undefined_after_loss():
+    stats = StatisticsDTO(monthly_statistics=[
+        _monthly(2024, 1, 100, 150, 0, -50, 1),
+        _monthly(2025, 1, 150, 0, 0, 100, 1),
+    ])
+
+    rows = StatisticsViewModel(stats).yearly_rows()
+
+    assert rows[1].profit_growth is None
 
 
 def test_yearly_totals():

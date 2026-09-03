@@ -81,17 +81,17 @@ class TaxMonthlyRow:
     tax: float
     profit: float
     effective_rate: float
-    burden_rate: float
+    burden_rate: Optional[float]
 
 
 @dataclass(frozen=True)
 class TaxKpis:
     """Сводные налоговые KPI."""
     effective_rate: float
-    burden_rate: float
+    burden_rate: Optional[float]
     run_rate: float
     forecast_next: float
-    risk_level: str  # "low" / "medium" / "high"
+    risk_level: str  # "low" / "medium" / "high" / "not_applicable"
 
 
 class StatisticsViewModel:
@@ -113,7 +113,7 @@ class StatisticsViewModel:
     @staticmethod
     def _growth(previous_value: float, current_value: float) -> Optional[float]:
         """Прирост в процентах относительно предыдущего значения."""
-        if previous_value == 0:
+        if previous_value <= 0:
             return None
         return (current_value - previous_value) / previous_value * 100.0
 
@@ -262,7 +262,7 @@ class StatisticsViewModel:
         total_profit = float(self._statistics.total_profit or 0)
 
         effective_rate = (total_tax / total_income * 100.0) if total_income > 0 else 0.0
-        burden_rate = (total_tax / total_profit * 100.0) if total_profit > 0 else 0.0
+        burden_rate = (total_tax / total_profit * 100.0) if total_profit > 0 else None
 
         recent_months = self._sorted_monthly()[-self.RECENT_MONTHS_FOR_RUN_RATE:]
         run_rate = (
@@ -272,7 +272,9 @@ class StatisticsViewModel:
         )
         forecast_next = run_rate
 
-        if burden_rate < self.LOW_RISK_THRESHOLD:
+        if burden_rate is None:
+            risk_level = "not_applicable"
+        elif burden_rate < self.LOW_RISK_THRESHOLD:
             risk_level = "low"
         elif burden_rate < self.MEDIUM_RISK_THRESHOLD:
             risk_level = "medium"
@@ -295,7 +297,7 @@ class StatisticsViewModel:
             tax = float(monthly.tax)
             profit = float(monthly.profit)
             effective_rate = (tax / income * 100.0) if income > 0 else 0.0
-            burden_rate = (tax / profit * 100.0) if profit > 0 else 0.0
+            burden_rate = (tax / profit * 100.0) if profit > 0 else None
             rows.append(
                 TaxMonthlyRow(
                     label=f"{monthly.month:02d}.{monthly.year}",

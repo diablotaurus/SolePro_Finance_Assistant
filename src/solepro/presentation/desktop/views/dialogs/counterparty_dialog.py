@@ -113,15 +113,9 @@ class CounterpartyDialog(QDialog):
             if not name:
                 raise ValueError("Название контрагента обязательно")
 
-            # Описание
+            # Пустая строка в режиме редактирования означает очистку поля.
             description = self.description_edit.toPlainText().strip()
-            if not description:
-                description = None
-
-            # Контактная информация
             contact_info = self.contact_edit.toPlainText().strip()
-            if not contact_info:
-                contact_info = None
 
             # Создаем DTO
             if self.is_edit_mode and self.counterparty:
@@ -135,8 +129,8 @@ class CounterpartyDialog(QDialog):
                 # Для создания
                 dto = CounterpartyCreateDTO(
                     name=name,
-                    description=description,
-                    contact_info=contact_info,
+                    description=description or None,
+                    contact_info=contact_info or None,
                 )
 
             return dto

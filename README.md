@@ -18,7 +18,7 @@
 - 🖥️ Десктопное приложение на PyQt6
 - 🤖 Telegram-бот для быстрого учёта
 - 🗄️ SQLite (по умолчанию) и PostgreSQL, миграции через Alembic
-- 🧪 156 автотестов, CI на GitHub Actions
+- 🧪 233 автотеста, CI на GitHub Actions
 
 ---
 
@@ -71,24 +71,67 @@ src/solepro/
 alembic/        # Миграции базы данных
 docker/         # Контейнеризация
 docs/           # Документация и changelog
-scripts/        # Скрипты (init_db, migrate_data, run_desktop)
+scripts/        # Установка, обновление, бэкап и служебные скрипты
 src/tests/      # Тесты
 ```
 
 ---
 
+## 📋 Требования
+
+- **Windows 10/11** — основной поддерживаемый сценарий для desktop-приложения;
+- **Python 3.13 или новее**;
+- **Git** — для клонирования и обновления проекта;
+- доступ в интернет для установки зависимостей;
+- VPN или прокси может потребоваться для Telegram-бота, если `api.telegram.org`
+  недоступен напрямую.
+
+Для desktop-приложения PostgreSQL не обязателен: по умолчанию используется
+локальная SQLite-база `data/finances.db`.
+
+---
+
 ## 🚀 Быстрый старт
 
-> Требуется **Python 3.13**.
+### Рекомендуемая установка на Windows
 
-### 1. Клонировать репозиторий
+```powershell
+git clone https://github.com/diablotaurus/SolePro_Finance_Assistant.git
+cd SolePro_Finance_Assistant
+setup.bat
+```
+
+Установщик автоматически:
+
+1. найдёт Python 3.13+;
+2. создаст `.venv`;
+3. установит зависимости;
+4. создаст `.env` из `.env.example`, если файла ещё нет;
+5. подготовит рабочие каталоги;
+6. применит миграции и инициализирует базу данных.
+
+Существующий `.env` **никогда не перезаписывается**.
+
+Дополнительные варианты:
+
+```powershell
+# Установить также зависимости разработчика
+setup.bat -Dev
+
+# Не инициализировать базу данных
+setup.bat -SkipDatabase
+```
+
+### Ручная установка
+
+#### 1. Клонировать репозиторий
 
 ```bash
 git clone https://github.com/diablotaurus/SolePro_Finance_Assistant.git
 cd SolePro_Finance_Assistant
 ```
 
-### 2. Создать виртуальное окружение
+#### 2. Создать виртуальное окружение
 
 ```bash
 python -m venv .venv
@@ -98,16 +141,15 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Установить зависимости
+#### 3. Установить зависимости
 
 ```bash
 pip install -r requirements.txt
+pip install --no-deps -e .
 pip install -r requirements-dev.txt   # для разработки и тестов
 ```
 
-> На Windows можно просто запустить `setup.bat`.
-
-### 4. Настроить окружение
+#### 4. Настроить окружение
 
 ```bash
 # Windows
@@ -118,7 +160,7 @@ cp .env.example .env
 
 Откройте `.env` и заполните значения (минимум — `TELEGRAM_BOT_TOKEN`, если нужен бот). См. раздел **«Конфигурация (.env)»** ниже.
 
-### 5. Инициализировать базу данных
+#### 5. Инициализировать базу данных
 
 ```bash
 python scripts/init_db.py
@@ -126,7 +168,7 @@ python scripts/init_db.py
 alembic upgrade head
 ```
 
-### 6. Запуск
+#### 6. Запуск
 
 См. раздел **«Запуск»** ниже.
 
@@ -144,6 +186,7 @@ alembic upgrade head
 | `TELEGRAM_BOT_TOKEN` | Токен Telegram-бота (от @BotFather) | `123456:ABC...` |
 | `TELEGRAM_ALLOWED_USERS` | Разрешённые user ID (через запятую) | `123456789,987654321` |
 | `TELEGRAM_ADMIN_CHAT_ID` | ID администратора | `123456789` |
+| `TELEGRAM_LOG_FILE` | Файл лога Telegram-бота | `logs/bot.log` |
 | `LOG_LEVEL` | Уровень логирования | `INFO` |
 | `LOG_FILE` | Файл лога (desktop) | `logs/app.log` |
 | `CURRENCY` | Валюта | `RUB` |

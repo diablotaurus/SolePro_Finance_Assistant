@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: solepro_finance
       POSTGRES_USER: solepro_user
-      POSTGRES_PASSWORD: solepro_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
@@ -29,8 +29,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: solepro-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@solepro.local
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@solepro.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD in .env}
     ports:
       - "5050:80"
     volumes:
@@ -48,10 +48,12 @@ services:
     container_name: solepro-app
     environment:
       - APP_ENV=production
-      - DATABASE_URL=postgresql://solepro_user:solepro_password@postgres:5432/solepro_finance
+      - DATABASE_URL=postgresql://solepro_user:${POSTGRES_PASSWORD}@postgres:5432/solepro_finance
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
-    ports:
-      - "8000:8000"  # For future web interface
+      - TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS:-}
+      - TELEGRAM_ADMIN_CHAT_ID=${TELEGRAM_ADMIN_CHAT_ID:-}
+      - TELEGRAM_ALLOW_ALL=${TELEGRAM_ALLOW_ALL:-False}
+      - TELEGRAM_LOG_FILE=/app/logs/bot.log
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs

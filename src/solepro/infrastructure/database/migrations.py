@@ -8,7 +8,35 @@ from typing import Optional
 
 from sqlalchemy import create_engine, inspect
 
+from ...shared.exceptions import MigrationException
 from ..config import get_database_config
+
+
+_INITIAL_SCHEMA_REVISION = "20260213_0001"
+_DOMAIN_TABLES = frozenset({"counterparties", "transactions"})
+
+
+def _prepare_legacy_database(config, command, database_url: str) -> None:
+    """Stamp a complete pre-Alembic schema at its real baseline revision."""
+    engine = create_engine(database_url)
+    try:
+        table_names = set(inspect(engine).get_table_names())
+    finally:
+        engine.dispose()
+
+    if "alembic_version" in table_names:
+        return
+
+    existing_domain_tables = table_names & _DOMAIN_TABLES
+    if not existing_domain_tables:
+        return
+    if existing_domain_tables != _DOMAIN_TABLES:
+        missing = ", ".join(sorted(_DOMAIN_TABLES - existing_domain_tables))
+        raise MigrationException(
+            f"Обнаружена неполная схема БД без Alembic. Отсутствуют таблицы: {missing}"
+        )
+
+    command.stamp(config, _INITIAL_SCHEMA_REVISION)
 
 
 def upgrade_database_to_head(database_url: Optional[str] = None) -> bool:
@@ -37,29 +65,10 @@ def upgrade_database_to_head(database_url: Optional[str] = None) -> bool:
     config.attributes["sqlalchemy_url_override"] = db_url
 
     try:
+        _prepare_legacy_database(config, command, db_url)
         command.upgrade(config, "head")
         return True
+    except MigrationException:
+        raise
     except Exception as exc:
-        # Legacy databases may already have tables created via create_all()
-        # without an Alembic version row. In that case, mark schema as current.
-        message = str(exc).lower()
-        table_exists_error = any(
-            token in message
-            for token in ("already exists", "duplicate table", "relation")
-        )
-        if not table_exists_error:
-            return False
-
-        try:
-            engine = create_engine(db_url)
-            inspector = inspect(engine)
-            has_counterparties = inspector.has_table("counterparties")
-            has_transactions = inspector.has_table("transactions")
-            engine.dispose()
-            if has_counterparties and has_transactions:
-                command.stamp(config, "head")
-                return True
-        except Exception:
-            return False
-
-        return False
+        raise MigrationException(f"Не удалось применить миграции БД: {exc}") from exc

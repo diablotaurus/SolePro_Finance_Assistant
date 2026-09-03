@@ -741,9 +741,9 @@ class StatisticsDialog(QDialog):
             item.setForeground(QColor(color))
         return item
 
-    def _percent_item(self, value: float) -> QTableWidgetItem:
+    def _percent_item(self, value: Optional[float]) -> QTableWidgetItem:
         """Процентная ячейка: формат :.2f%, выравнивание вправо."""
-        item = QTableWidgetItem(f"{value:.2f}%")
+        item = QTableWidgetItem(f"{value:.2f}%" if value is not None else "-")
         item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         return item
 
@@ -798,6 +798,8 @@ class StatisticsDialog(QDialog):
 
     def _tax_risk_presentation(self, risk_level: str) -> tuple[str, str]:
         """Сопоставить символический уровень риска с текстом и цветом."""
+        if risk_level == "not_applicable":
+            return "Не определён", self.neutral_color
         if risk_level == "low":
             return "Низкий", self.profit_positive_color
         if risk_level == "medium":
@@ -1047,7 +1049,9 @@ class StatisticsDialog(QDialog):
         rows = self.view_model.tax_monthly_rows()
 
         self.tax_effective_rate_label.setText(f"{kpis.effective_rate:.2f}%")
-        self.tax_burden_label.setText(f"{kpis.burden_rate:.2f}%")
+        self.tax_burden_label.setText(
+            f"{kpis.burden_rate:.2f}%" if kpis.burden_rate is not None else "-"
+        )
         self.tax_run_rate_label.setText(f"{kpis.run_rate:,.2f} руб.")
         self.tax_forecast_label.setText(f"{kpis.forecast_next:,.2f} руб.")
 

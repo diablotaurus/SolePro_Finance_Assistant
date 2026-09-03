@@ -33,6 +33,12 @@ class TestMoney:
         
         money = Money.from_string("1000,50", "RUB")
         assert money.value == Decimal("1000.50")
+
+        money = Money.from_string("1.000,50", "RUB")
+        assert money.value == Decimal("1000.50")
+
+        with pytest.raises(InvalidMoneyException):
+            Money.from_string("amount=100")
     
     def test_money_from_float(self):
         """Тест создания Money из float."""
@@ -134,6 +140,11 @@ class TestTransaction:
         
         profit = transaction.calculate_profit()
         assert profit.value == Decimal("400")
+
+    def test_large_valid_expense_is_not_rejected_as_suspicious(self):
+        transaction = Transaction(expense=Money(Decimal("1500000")))
+
+        assert transaction.calculate_profit().value == Decimal("-1500000")
     
     def test_transaction_type(self):
         """Тест определения типа транзакции."""

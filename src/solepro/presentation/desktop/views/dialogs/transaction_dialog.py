@@ -353,7 +353,7 @@ class TransactionDialog(QDialog):
                     tax=tax,
                     counterparty_id=counterparty_id if counterparty_id not in [None, "new"] else None,
                     clear_counterparty=counterparty_id is None,
-                    note=note or None,
+                    note=note,
                 )
             else:
                 # Для создания

@@ -57,8 +57,15 @@ def seed_initial_data() -> dict[str, int]:
                 continue
             repository.save(Counterparty(name=name))
             created += 1
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
     finally:
         session.close()
+        scoped_session = getattr(session_manager, "scoped_session", None)
+        if scoped_session is not None:
+            scoped_session.remove()
 
     return {"created": created, "skipped": skipped}
 

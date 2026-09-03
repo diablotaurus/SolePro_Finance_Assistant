@@ -3,7 +3,7 @@ DTO для работы с транзакциями.
 """
 from dataclasses import dataclass, field
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional, List
 from uuid import UUID
 
@@ -13,9 +13,21 @@ from ....core.domain.constants import (
     MAX_COUNTERPARTY_NAME_LENGTH,
     MAX_MONEY_AMOUNT,
     MAX_NOTE_LENGTH,
+    MONEY_QUANTUM,
 )
 from ....core.domain.enums.transaction_type import TransactionType
 from ....core.domain.value_objects.money import Money
+
+
+def _normalize_amount(value: Decimal) -> Decimal:
+    """Validate and normalize a monetary amount for storage."""
+    if not value.is_finite():
+        raise ValueError("Сумма должна быть конечным числом")
+    if value < 0:
+        raise ValueError("Сумма не может быть отрицательной")
+    if value > MAX_MONEY_AMOUNT:
+        raise ValueError("Сумма слишком большая")
+    return value.quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
 
 
 class TransactionBaseDTO(BaseModel):
@@ -30,11 +42,7 @@ class TransactionBaseDTO(BaseModel):
     @field_validator("income", "expense", "tax")
     def validate_amounts(cls, v: Decimal) -> Decimal:
         """Валидация денежных сумм."""
-        if v < 0:
-            raise ValueError("Сумма не может быть отрицательной")
-        if v > MAX_MONEY_AMOUNT:
-            raise ValueError("Сумма слишком большая")
-        return round(v, 2)
+        return _normalize_amount(v)
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -73,6 +81,12 @@ class TransactionUpdateDTO(BaseModel):
     # контрагента нужен отдельный явный флаг.
     clear_counterparty: bool = Field(False, description="Убрать контрагента у транзакции")
     note: Optional[str] = Field(None, max_length=MAX_NOTE_LENGTH, description="Примечание")
+
+    @field_validator("income", "expense", "tax")
+    @classmethod
+    def validate_amounts(cls, value: Optional[Decimal]) -> Optional[Decimal]:
+        """Применить к обновлению те же денежные правила, что и к созданию."""
+        return None if value is None else _normalize_amount(value)
 
     model_config = ConfigDict(
         from_attributes=True,

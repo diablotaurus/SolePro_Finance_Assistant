@@ -104,9 +104,24 @@ def test_clear_filters_emits_signals_and_resets_state(qtbot):
 
     dto = panel.get_current_filter()
     assert events["cleared"] == 1
-    assert events["changed"] == 1
+    assert events["changed"] == 0
     assert panel.show_all is False
     assert dto.show_all is False
     assert dto.search_query is None
     assert panel.page_size_combo.currentData() == 100
 
+
+def test_pagination_emits_adjacent_pages_and_updates_buttons(qtbot):
+    panel = FilterPanel()
+    qtbot.add_widget(panel)
+    captured = []
+    panel.filter_changed.connect(captured.append)
+
+    panel.set_page_info(page=1, total_pages=3, total_count=250)
+    panel.next_page()
+
+    assert captured[-1].page == 2
+    panel.set_page_info(page=2, total_pages=3, total_count=250)
+    panel.previous_page()
+    assert captured[-1].page == 1
+    assert panel.page_label.text() == "Страница 2 из 3"

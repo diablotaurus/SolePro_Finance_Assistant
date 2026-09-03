@@ -21,7 +21,11 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.types import CHAR, TypeDecorator
 
-from ...core.domain.constants import MAX_COUNTERPARTY_NAME_LENGTH, MAX_MONEY_AMOUNT
+from ...core.domain.constants import (
+    MAX_COUNTERPARTY_NAME_LENGTH,
+    MAX_MONEY_AMOUNT,
+    MONEY_QUANTUM,
+)
 
 Base = declarative_base()
 
@@ -150,7 +154,7 @@ class TransactionModel(Base):
             raise ValueError(f"{key} не может быть отрицательным")
         if value > MAX_MONEY_AMOUNT:
             raise ValueError(f"{key} слишком большая сумма")
-        return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return value.quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
 
     @validates("date")
     def validate_date(self, key: str, date: datetime) -> datetime:

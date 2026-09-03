@@ -156,8 +156,10 @@ async def test_stats_and_counterparties_error_paths(monkeypatch, fake_context):
     await handlers.stats_command(update, fake_context)
     await handlers.counterparties_command(update, fake_context)
 
-    assert "Ошибка получения статистики" in message.replies[0][0]
-    assert "Ошибка получения контрагентов" in message.replies[1][0]
+    assert "получение статистики" in message.replies[0][0]
+    assert "получение контрагентов" in message.replies[1][0]
+    assert "stats-failed" not in message.replies[0][0]
+    assert "cp-failed" not in message.replies[1][0]
 
 
 @pytest.mark.asyncio
@@ -338,7 +340,7 @@ async def test_transactions_command_error(monkeypatch, fake_context):
     monkeypatch.setattr(handlers, "_dependencies", _to_dependencies(dummy))
 
     await handlers.transactions_command(update, fake_context)
-    assert "Ошибка получения транзакций" in message.replies[-1][0]
+    assert "получение транзакций" in message.replies[-1][0]
 
 
 @pytest.mark.asyncio
@@ -395,7 +397,7 @@ async def test_search_command_error(monkeypatch):
     monkeypatch.setattr(handlers, "_dependencies", _to_dependencies(dummy))
 
     await handlers.search_command(update, context)
-    assert "Ошибка поиска" in message.replies[-1][0]
+    assert "поиск транзакций" in message.replies[-1][0]
 
 
 @pytest.mark.asyncio
@@ -439,4 +441,4 @@ async def test_topcounterparties_command_error(monkeypatch, fake_context):
     monkeypatch.setattr(handlers, "_dependencies", _to_dependencies(dummy))
 
     await handlers.topcounterparties_command(update, fake_context)
-    assert "Ошибка получения статистики по контрагентам" in message.replies[-1][0]
+    assert "статистика по контрагентам" in message.replies[-1][0]
