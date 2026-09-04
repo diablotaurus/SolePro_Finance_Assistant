@@ -104,6 +104,9 @@ class TelegramBot:
     def setup_logging(self) -> None:
         """Настроить логирование."""
         configure_logging(level=self.config.log_level, log_file=self.config.log_file)
+        # HTTPX includes the bot token in Telegram API request URLs at INFO level.
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+        logging.getLogger("httpcore").setLevel(logging.WARNING)
     
     async def post_init(self, application: Application) -> None:
         """
@@ -270,6 +273,7 @@ class TelegramBot:
                 allowed_updates=['message'],
                 drop_pending_updates=True,
                 timeout=30,
+                bootstrap_retries=-1,
             )
             
         except Exception as e:

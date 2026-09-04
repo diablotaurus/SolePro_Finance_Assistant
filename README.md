@@ -18,7 +18,7 @@
 - 🖥️ Десктопное приложение на PyQt6
 - 🤖 Telegram-бот для быстрого учёта
 - 🗄️ SQLite (по умолчанию) и PostgreSQL, миграции через Alembic
-- 🧪 233 автотеста, CI на GitHub Actions
+- 🧪 234 автотеста, CI на GitHub Actions
 
 ---
 

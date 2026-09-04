@@ -92,6 +92,42 @@ def test_init_requires_token(monkeypatch):
         bot_module.TelegramBot()
 
 
+def test_setup_logging_suppresses_http_client_info(monkeypatch, fake_config):
+    configured = {}
+    dependency_levels = {}
+    httpx_logger = logging.getLogger("httpx")
+    httpcore_logger = logging.getLogger("httpcore")
+
+    bot = bot_module.TelegramBot.__new__(bot_module.TelegramBot)
+    bot.config = fake_config
+    monkeypatch.setattr(
+        bot_module,
+        "configure_logging",
+        lambda **kwargs: configured.update(kwargs),
+    )
+    monkeypatch.setattr(
+        httpx_logger,
+        "setLevel",
+        lambda level: dependency_levels.__setitem__("httpx", level),
+    )
+    monkeypatch.setattr(
+        httpcore_logger,
+        "setLevel",
+        lambda level: dependency_levels.__setitem__("httpcore", level),
+    )
+
+    bot.setup_logging()
+
+    assert configured == {
+        "level": fake_config.log_level,
+        "log_file": fake_config.log_file,
+    }
+    assert dependency_levels == {
+        "httpx": logging.WARNING,
+        "httpcore": logging.WARNING,
+    }
+
+
 def test_setup_application_registers_handlers(monkeypatch, fake_config):
     fake_app = _FakeApp()
     builder = _Builder(fake_app)
@@ -261,6 +297,7 @@ def test_run_and_stop(monkeypatch, fake_config):
     assert app.polling_kwargs is not None
     assert app.polling_kwargs["drop_pending_updates"] is True
     assert app.polling_kwargs["timeout"] == 30
+    assert app.polling_kwargs["bootstrap_retries"] == -1
 
     bot.stop()
     assert app.stop_called is True
