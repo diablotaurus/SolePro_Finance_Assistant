@@ -210,16 +210,31 @@ def test_setup_application_skips_proxy_when_unreachable(monkeypatch, fake_config
 
 
 @pytest.mark.asyncio
-async def test_post_init_sends_messages(monkeypatch, fake_config):
+async def test_post_init_sends_message_only_to_admin(monkeypatch, fake_config):
     monkeypatch.setattr(bot_module, "get_telegram_config", lambda: fake_config)
     bot = bot_module.TelegramBot()
     app = _FakeApp()
 
     await bot.post_init(app)
 
-    recipients = {item["chat_id"] for item in app.sent}
-    assert recipients == {9999, 1001, 1002}
-    assert all("Бот запущен" in item["text"] for item in app.sent)
+    assert len(app.sent) == 1
+    assert app.sent[0]["chat_id"] == fake_config.admin_chat_id
+    assert "Бот запущен" in app.sent[0]["text"]
+
+
+@pytest.mark.asyncio
+async def test_post_init_without_admin_sends_no_startup_message(
+    monkeypatch,
+    fake_config,
+):
+    fake_config.admin_chat_id = None
+    monkeypatch.setattr(bot_module, "get_telegram_config", lambda: fake_config)
+    bot = bot_module.TelegramBot()
+    app = _FakeApp()
+
+    await bot.post_init(app)
+
+    assert app.sent == []
 
 
 @pytest.mark.asyncio

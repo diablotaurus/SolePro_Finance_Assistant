@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog - Адресное уведомление Telegram и восстановление CI (04.09.2026, v1.4.25)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .changelog-card { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); overflow: hidden; animation: slideIn 0.6s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .header { background: linear-gradient(135deg, #2196F3 0%, #0D47A1 100%); color: white; padding: 50px; text-align: center; position: relative; overflow: hidden; }
+        .header::before { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: moveBackground 60s linear infinite; }
+        @keyframes moveBackground { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .header h1 { font-size: 3.2rem; margin-bottom: 15px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); position: relative; z-index: 1; }
+        .header .subtitle { font-size: 1.4rem; opacity: 0.95; margin-bottom: 25px; position: relative; z-index: 1; font-weight: 300; }
+        .metadata { display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .meta-item { background: rgba(255,255,255,0.15); padding: 12px 24px; border-radius: 50px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 8px; }
+        .content { padding: 50px; }
+        .section { margin-bottom: 50px; border-left: 5px solid #2196F3; padding: 25px; background: linear-gradient(to right, rgba(33,150,243,0.05), transparent); border-radius: 0 10px 10px 0; }
+        .section h2 { color: #1565C0; font-size: 2rem; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; padding-bottom: 10px; border-bottom: 2px solid #E3F2FD; }
+        .section h2 i { font-size: 1.8rem; background: #2196F3; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .changes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 20px; }
+        .change-card { background: white; border-radius: 15px; padding: 30px; border: 2px solid #E3F2FD; position: relative; overflow: hidden; }
+        .change-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: #2196F3; }
+        .change-card h3 { color: #0D47A1; font-size: 1.35rem; margin-bottom: 16px; }
+        .status { display: inline-block; padding: 8px 16px; border-radius: 25px; font-size: 0.9rem; font-weight: 700; margin-bottom: 18px; letter-spacing: 0.5px; text-transform: uppercase; background: linear-gradient(135deg, #E8F5E9, #C8E6C9); color: #1B5E20; }
+        .status.ci { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); color: #0D47A1; }
+        .change-list { list-style: none; }
+        .change-list li { padding: 10px 0 10px 28px; position: relative; border-bottom: 1px solid #E3F2FD; }
+        .change-list li:last-child { border-bottom: none; }
+        .change-list li::before { content: "✓"; position: absolute; left: 0; color: #2196F3; font-weight: 800; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #E3F2FD; }
+        .table th, .table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #E3F2FD; vertical-align: top; }
+        .table th { background: linear-gradient(135deg, #2196F3, #1565C0); color: white; font-weight: 600; }
+        .table tr:last-child td { border-bottom: none; }
+        .table .result { color: #1B5E20; font-weight: 700; }
+        .warning { margin-top: 20px; padding: 20px; background: #FFF8E1; border-left: 4px solid #F9A825; border-radius: 0 10px 10px 0; }
+        .file-list { background: #F5F9FF; border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid #E3F2FD; }
+        .file-item { padding: 12px 15px; border-bottom: 1px solid #E3F2FD; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.95rem; color: #2D3748; }
+        .file-item:last-child { border-bottom: none; }
+        .file-item::before { content: "•"; color: #2196F3; font-weight: 800; margin-right: 10px; }
+        .footer { text-align: center; padding: 40px; background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%); color: white; }
+        .footer p { margin-bottom: 15px; font-size: 1.1rem; }
+        .tech-stack { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
+        .tech-item { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 25px; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2); }
+        code { font-family: 'Consolas', 'Monaco', monospace; color: #0D47A1; }
+        @media (max-width: 768px) { .content { padding: 25px; } .header { padding: 30px 20px; } .header h1 { font-size: 2.2rem; } .section h2 { font-size: 1.6rem; } .section h2 i { width: 40px; height: 40px; font-size: 1.4rem; } .table { display: block; overflow-x: auto; } }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="changelog-card">
+            <div class="header">
+                <h1>SolePro Finance Assistant</h1>
+                <div class="subtitle">Адресное уведомление Telegram-бота и восстановление GitHub Actions</div>
+                <div class="metadata">
+                    <div class="meta-item"><i class="fas fa-calendar"></i> Дата: 04.09.2026</div>
+                    <div class="meta-item"><i class="fas fa-code-branch"></i> Версия: 1.4.25</div>
+                    <div class="meta-item"><i class="fas fa-user"></i> Автор: Diablotaurus</div>
+                    <div class="meta-item"><i class="fas fa-screwdriver-wrench"></i> Тип: Исправление</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <h2><i class="fas fa-circle-info"></i> Причина выпуска</h2>
+                    <p>После выпуска версии 1.4.24 были уточнены правила стартовых уведомлений Telegram-бота и проанализированы письма GitHub о неуспешных тестах. Приложение работало штатно, однако служебное сообщение о запуске отправлялось всем пользователям из списка доступа, а GitHub Actions не мог импортировать модуль резервного копирования из каталога <code>scripts</code>.</p>
+                    <div class="warning"><strong>Границы изменений:</strong> бизнес-логика учёта, база данных, desktop-приложение, пользовательские настройки и боевой файл <code>.env</code> не изменялись.</div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fab fa-telegram"></i> Уведомление о запуске бота</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <span class="status">Исправлено</span>
+                            <h3>Только администратору</h3>
+                            <ul class="change-list">
+                                <li>Сообщение «Бот запущен и готов к работе» теперь отправляется исключительно в <code>ADMIN_CHAT_ID</code>.</li>
+                                <li>Список <code>TELEGRAM_ALLOWED_USERS</code> используется только для контроля доступа к командам и больше не определяет получателей служебного уведомления.</li>
+                                <li>Повторяющиеся сообщения на дополнительный пользовательский аккаунт устранены.</li>
+                            </ul>
+                        </div>
+                        <div class="change-card">
+                            <span class="status">Надёжность</span>
+                            <h3>Безопасное отсутствие администратора</h3>
+                            <ul class="change-list">
+                                <li>Если <code>ADMIN_CHAT_ID</code> не задан, стартовое сообщение не отправляется.</li>
+                                <li>Запуск и polling бота продолжаются без дополнительной сетевой операции.</li>
+                                <li>Ошибка доставки администратору по-прежнему журналируется и не останавливает приложение.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fab fa-github"></i> GitHub Actions</h2>
+                    <div class="change-card">
+                        <span class="status ci">CI исправлен</span>
+                        <ul class="change-list">
+                            <li>Установлена причина двух неуспешных запусков CI для версий 1.4.23 и 1.4.24: <code>ModuleNotFoundError: No module named 'scripts'</code>.</li>
+                            <li>В workflow команда <code>pytest</code> заменена на <code>python -m pytest</code>.</li>
+                            <li>Запуск pytest как Python-модуля гарантирует добавление корня репозитория в путь импорта.</li>
+                            <li>Тест согласованного SQLite-бэкапа получает доступ к существующему модулю <code>scripts.backup_sqlite</code> без изменения структуры проекта.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-vial-circle-check"></i> Тесты и проверки</h2>
+                    <table class="table">
+                        <thead><tr><th>Проверка</th><th>Результат</th><th>Что подтверждено</th></tr></thead>
+                        <tbody>
+                            <tr><td>Полный pytest в проектной <code>.venv</code></td><td class="result">235 тестов пройдено</td><td>Отсутствие регрессий во всех подсистемах</td></tr>
+                            <tr><td>Telegram startup notification</td><td class="result">Пройдено</td><td>Единственный получатель — администратор</td></tr>
+                            <tr><td>Запуск без <code>ADMIN_CHAT_ID</code></td><td class="result">Пройдено</td><td>Сообщение не отправляется, исключение не возникает</td></tr>
+                            <tr><td>SQLite backup import</td><td class="result">Пройдено</td><td>Импорт через корень проекта работает при <code>python -m pytest</code></td></tr>
+                            <tr><td>Проверка diff</td><td class="result">Пройдено</td><td>Ошибок пробелов и повреждённых строк не обнаружено</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-code"></i> Архитектурные решения</h2>
+                    <div class="changes-grid">
+                        <div class="change-card">
+                            <h3>Разделение ответственности</h3>
+                            <p>Список разрешённых пользователей отвечает за авторизацию, а <code>ADMIN_CHAT_ID</code> — за административные уведомления. Конфигурационные роли больше не смешиваются.</p>
+                        </div>
+                        <div class="change-card">
+                            <h3>Минимальная правка CI</h3>
+                            <p>Структура каталога <code>scripts</code> и рабочий модуль резервного копирования сохранены. Исправлен способ запуска тестов, который и создавал различие между локальной средой и Linux runner.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><i class="fas fa-folder-open"></i> Затронутые файлы</h2>
+                    <div class="file-list">
+                        <div class="file-item">src/solepro/presentation/telegram/bot.py — адресное стартовое уведомление администратору</div>
+                        <div class="file-item">src/tests/test_telegram_bot.py — регрессионные тесты получателя и отсутствующего ADMIN_CHAT_ID</div>
+                        <div class="file-item">.github/workflows/tests.yml — запуск тестов через python -m pytest</div>
+                        <div class="file-item">README.md — актуальное количество автотестов</div>
+                        <div class="file-item">pyproject.toml — версия 1.4.25</div>
+                        <div class="file-item">docs/changelog/changelog_04.09.2026_1.4.25.html — подробный отчёт о выпуске</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>© 2026 SolePro Finance Assistant | Надёжный Telegram-бот и стабильный CI | Diablotaurus</p>
+                <p style="margin-top: 10px; opacity: 0.9;">Служебные уведомления отделены от пользовательского доступа, тестовый pipeline унифицирован</p>
+                <div class="tech-stack">
+                    <div class="tech-item">Python 3.13</div>
+                    <div class="tech-item">python-telegram-bot</div>
+                    <div class="tech-item">GitHub Actions</div>
+                    <div class="tech-item">235 тестов</div>
+                </div>
+                <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8;">
+                    <i class="fas fa-code-branch"></i> Версия: 1.4.25 |
+                    <i class="fas fa-check-circle"></i> Статус: Готово |
+                    <i class="fas fa-calendar"></i> Дата отчёта: 04.09.2026
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

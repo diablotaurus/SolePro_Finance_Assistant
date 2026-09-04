@@ -127,23 +127,24 @@ class TelegramBot:
 
         self.logger.info("=" * 50)
         
-        # Отправляем сообщение администратору
-        keyboard = ReplyKeyboardMarkup([["Добавить", "Статистика"]], resize_keyboard=True)
-        recipients = []
+        # Стартовое уведомление относится к администрированию, а список
+        # разрешённых пользователей управляет только доступом к командам бота.
         if self.config.admin_chat_id:
-            recipients.append(self.config.admin_chat_id)
-        recipients.extend(self.config.allowed_users or [])
-
-        for chat_id in set(recipients):
+            keyboard = ReplyKeyboardMarkup(
+                [["Добавить", "Статистика"]],
+                resize_keyboard=True,
+            )
             try:
                 await application.bot.send_message(
-                    chat_id=chat_id,
+                    chat_id=self.config.admin_chat_id,
                     text="✅ Бот запущен и готов к работе!",
-                    reply_markup=keyboard
+                    reply_markup=keyboard,
                 )
             except Exception as e:
                 self.logger.exception(
-                    "Не удалось отправить сообщение пользователю %s: %s", chat_id, e
+                    "Не удалось отправить сообщение администратору %s: %s",
+                    self.config.admin_chat_id,
+                    e,
                 )
     
     def setup_application(self) -> None:
